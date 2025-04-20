@@ -1,0 +1,43 @@
+.cta {
+   padding: 4rem 1.5rem;
+   background-color: #6366f1;
+   color: white;
+ }
+ 
+ .ctaContent {
+   max-width: 800px;
+   margin: 0 auto;
+   text-align: center;
+ }
+ 
+ .ctaTitle {
+   font-size: 2rem;
+   font-weight: 700;
+   margin-bottom: 1rem;
+ }
+ 
+ .ctaDescription {
+   font-size: 1.125rem;
+   margin-bottom: 2rem;
+   opacity: 0.9;
+ }
+ 
+ .ctaButton {
+   background-color: white;
+   color: #6366f1;
+   font-weight: 600;
+   padding: 0.75rem 1.5rem;
+   font-size: 1rem;
+   display: inline-flex;
+   align-items: center;
+ }
+ 
+ .ctaButtonIcon {
+   margin-left: 0.5rem;
+   width: 18px;
+   height: 18px;
+ }
+
+
+
+ 
