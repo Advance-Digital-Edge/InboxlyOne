@@ -1,6 +1,6 @@
 import { JSX } from "react";
 import { Button } from "@/components/ui/button"
-import styles from "./Hero.module.css";
+import styles from "./hero.module.css";
 import Image from "next/image"
 import {
   MessageSquare,
