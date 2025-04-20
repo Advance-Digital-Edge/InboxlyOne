@@ -1,5 +1,5 @@
 
-import { Lusitana } from "next/font/google";
+import { Lusitana, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Hero from "@/components/sections/Hero/Hero";
@@ -10,6 +10,7 @@ import Testimonials from "@/components/sections/Testimonials/Testimonials";
 import CTA from "@/components/sections/CTA/Cta";
 import Footer from "@/components/layout/Footer";
 import styles from "./layout.module.css";
+import Navbar from "@/components/layout/Navbar";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -21,7 +22,7 @@ export const metadata = {
   description: "The fastest way to build apps with Next.js and Supabase",
 };
 
-const lusitanaSans = Lusitana({
+const InerSans = Inter({
   weight: ["400", "700"],
   subsets: ["latin"],
 });
@@ -32,9 +33,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={lusitanaSans.className} suppressHydrationWarning>
+    <html lang="en" className={InerSans.className} suppressHydrationWarning>
       <body >
           <div className={styles.container}>
+            <Navbar />
             <main>
               <Hero />
               <Features />
