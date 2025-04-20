@@ -1,0 +1,136 @@
+.features {
+   padding: 4rem 1.5rem;
+   background-color: #ffffff;
+ }
+ 
+ .sectionTitle {
+   text-align: center;
+   font-size: 2rem;
+   font-weight: 700;
+   margin-bottom: 3rem;
+   color: #111827;
+ }
+ 
+ .featureGrid {
+   display: grid;
+   grid-template-columns: 1fr;
+   gap: 2rem;
+   max-width: 1200px;
+   margin: 0 auto;
+ }
+ 
+ .featureCard {
+   padding: 2rem;
+   border-radius: 8px;
+   background-color: #f9fafb;
+   text-align: center;
+   transition: transform 0.3s ease, box-shadow 0.3s ease;
+ }
+ 
+ .featureCard:hover {
+   transform: translateY(-5px);
+   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+ }
+ 
+ .featureIconWrapper {
+   background-color: #eff6ff;
+   width: 64px;
+   height: 64px;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   margin: 0 auto 1.5rem;
+ }
+ 
+ .featureIcon {
+   color: #6366f1;
+   width: 32px;
+   height: 32px;
+ }
+ 
+ .featureTitle {
+   font-size: 1.25rem;
+   font-weight: 600;
+   margin-bottom: 1rem;
+   color: #111827;
+ }
+ 
+ .featureDescription {
+   color: #6b7280;
+   line-height: 1.6;
+ }
+ 
+ /* How It Works Section */
+ .howItWorks {
+   padding: 4rem 1.5rem;
+   background-color: #f9fafb;
+ }
+ 
+ .stepsContainer {
+   display: grid;
+   grid-template-columns: 1fr;
+   gap: 2rem;
+   max-width: 1200px;
+   margin: 0 auto 3rem;
+ }
+ 
+ .step {
+   text-align: center;
+   padding: 1.5rem;
+ }
+ 
+ .stepNumber {
+   background-color: #6366f1;
+   color: white;
+   width: 40px;
+   height: 40px;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-weight: 700;
+   margin: 0 auto 1rem;
+ }
+ 
+ .stepTitle {
+   font-size: 2.5rem;
+   font-weight: 800;
+   line-height: 1.2;
+   margin-bottom: 1.5rem;
+   color: #111827;
+ }
+ 
+ .stepDescription {
+   color: #6b7280;
+   line-height: 1.6;
+ }
+ 
+ .workflowImageContainer {
+   max-width: 1000px;
+   margin: 0 auto;
+   border-radius: 8px;
+   overflow: hidden;
+   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+ }
+ 
+ .workflowImage {
+   width: 100%;
+   height: auto;
+   object-fit: cover;
+ }
+
+ @media (min-width: 640px) {
+ 
+   .featureGrid {
+     grid-template-columns: repeat(2, 1fr);
+   }
+
+ }
+
+ 
+ @media (min-width: 1024px) {
+   .featureGrid {
+     grid-template-columns: repeat(3, 1fr);
+   }
+ }
