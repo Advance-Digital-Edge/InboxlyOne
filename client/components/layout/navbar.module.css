@@ -1,0 +1,74 @@
+.header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 1.5rem 2rem;
+   border-bottom: 1px solid #eaeaea;
+ }
+ 
+ .logo {
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+ }
+ 
+ .logoIcon {
+   color: #6366f1;
+   width: 28px;
+   height: 28px;
+ }
+ 
+ .logoText {
+   font-weight: 700;
+   font-size: 1.5rem;
+   color: #111827;
+ }
+ 
+ .desktopNav {
+   display: none;
+ }
+ 
+ .navLink {
+   margin: 0 1rem;
+   font-weight: 500;
+   color: #4b5563;
+   transition: color 0.2s ease;
+ }
+ 
+ .navLink:hover {
+   color: #6366f1;
+ }
+ 
+ .headerButtons {
+   display: none;
+ }
+ 
+ .loginLink {
+   margin-right: 1rem;
+   font-weight: 500;
+   color: #4b5563;
+ }
+ 
+ .ctaButton {
+   background-color: #6366f1;
+   color: white;
+ }
+
+ @media (min-width: 768px) {
+   .desktopNav {
+     display: flex;
+   }
+ 
+   .headerButtons {
+     display: flex;
+     align-items: center;
+   }
+
+ }
+ 
+ @media (min-width: 1024px) {
+   .header {
+     padding: 1.5rem 4rem;
+   }
+ }
+ 
