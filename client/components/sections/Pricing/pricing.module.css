@@ -1,0 +1,116 @@
+.pricing {
+   padding: 4rem 1.5rem;
+   background-color: #ffffff;
+ }
+
+ .sectionTitle {
+   font-size: 2.5rem;
+   font-weight: 800;
+   line-height: 1.2;
+   margin-bottom: 1.5rem;
+   color: #111827;
+   text-align: center;
+ }
+ 
+ .pricingCards {
+   display: grid;
+   grid-template-columns: 1fr;
+   gap: 2rem;
+   max-width: 1200px;
+   margin: 0 auto;
+ }
+ 
+ .pricingCard {
+   border: 1px solid #e5e7eb;
+   border-radius: 8px;
+   padding: 2rem;
+   text-align: center;
+   position: relative;
+   background-color: #ffffff;
+   transition: transform 0.3s ease, box-shadow 0.3s ease;
+ }
+ 
+ .pricingCard:hover {
+   transform: translateY(-5px);
+   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+ }
+ 
+ .popularPlan {
+   border-color: #6366f1;
+   box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1), 0 4px 6px -2px rgba(99, 102, 241, 0.05);
+ }
+ 
+ .popularBadge {
+   position: absolute;
+   top: -12px;
+   left: 50%;
+   transform: translateX(-50%);
+   background-color: #6366f1;
+   color: white;
+   padding: 0.25rem 1rem;
+   border-radius: 20px;
+   font-size: 0.875rem;
+   font-weight: 600;
+ }
+ 
+ .pricingTier {
+   font-size: 1.25rem;
+   font-weight: 600;
+   margin-bottom: 1rem;
+   color: #111827;
+ }
+ 
+ .pricingAmount {
+   font-size: 2.5rem;
+   font-weight: 700;
+   color: #111827;
+ }
+ 
+ .pricingPeriod {
+   color: #6b7280;
+   margin-bottom: 1.5rem;
+ }
+ 
+ .pricingFeatures {
+   list-style: none;
+   padding: 0;
+   margin: 0 0 2rem;
+   text-align: left;
+ }
+ 
+ .pricingFeature {
+   display: flex;
+   align-items: center;
+   margin-bottom: 0.75rem;
+   color: #4b5563;
+ }
+ 
+ .checkIcon {
+   color: #6366f1;
+   margin-right: 0.75rem;
+   width: 18px;
+   height: 18px;
+   flex-shrink: 0;
+ }
+ 
+ .pricingButton {
+   width: 100%;
+ }
+
+ @media (min-width: 640px) {
+
+   .pricingCards {
+     grid-template-columns: repeat(2, 1fr);
+   }
+
+ }
+ 
+ @media (min-width: 768px) {
+ 
+   .pricingCards {
+     grid-template-columns: repeat(3, 1fr);
+   }
+
+ }
+
+ 
