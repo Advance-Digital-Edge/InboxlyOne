@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={InerSans.className} >
-      <body className={styles.container} suppressHydrationWarning>
+      <body className={styles.container} >
         <Navbar />
         {children}
         <Footer />

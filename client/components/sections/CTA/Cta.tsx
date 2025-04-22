@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button/button";
 import { ArrowRight } from "lucide-react";
 import { JSX } from "react";
 import styles from "./cta.module.css";

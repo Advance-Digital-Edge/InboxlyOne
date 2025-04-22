@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Inbox } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button/button"
 import styles from "./navbar.module.css"
 import MobileMenu from "./NavbarMobile"
 import { JSX } from "react";
