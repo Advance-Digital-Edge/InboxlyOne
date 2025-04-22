@@ -1,51 +1,45 @@
-import { signUpAction } from "@/app/actions";
-import { FormMessage, Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { SmtpMessage } from "../smtp-message";
+import Link from "next/link"
+import { Inbox, MessageSquare } from "lucide-react"
+import SignUpForm from "@/components/ui/Forms/Auth/sign-up-form"
+import styles from "./sign-up.module.css"
 
-export default async function Signup(props: {
-  searchParams: Promise<Message>;
-}) {
-  const searchParams = await props.searchParams;
-  if ("message" in searchParams) {
-    return (
-      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
-        <FormMessage message={searchParams} />
-      </div>
-    );
-  }
-
+export default function SignUpPage() {
   return (
-    <>
-      <form className="flex flex-col min-w-64 max-w-64 mx-auto">
-        <h1 className="text-2xl font-medium">Sign up</h1>
-        <p className="text-sm text text-foreground">
-          Already have an account?{" "}
-          <Link className="text-primary font-medium underline" href="/sign-in">
-            Sign in
-          </Link>
-        </p>
-        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-          <Label htmlFor="email">Email</Label>
-          <Input name="email" placeholder="you@example.com" required />
-          <Label htmlFor="password">Password</Label>
-          <Input
-            type="password"
-            name="password"
-            placeholder="Your password"
-            minLength={6}
-            required
-          />
-          <SubmitButton formAction={signUpAction} pendingText="Signing up...">
-            Sign up
-          </SubmitButton>
-          <FormMessage message={searchParams} />
+    <div className={styles.container}>
+      <div className={styles.formContainer}>
+        <div className={styles.logoContainer}>
+          <Inbox className={styles.logoIcon} />
+          <h1 className={styles.logoText}>InBoxlyOne</h1>
         </div>
-      </form>
-      <SmtpMessage />
-    </>
-  );
+
+        <div className={styles.formHeader}>
+          <h2 className={styles.formTitle}>Create your account</h2>
+          <p className={styles.formSubtitle}>
+            Join thousands of professionals who have streamlined their messaging workflow.
+          </p>
+        </div>
+
+        <SignUpForm />
+
+        <div className={styles.formFooter}>
+          <p className={styles.formFooterText}>
+            Already have an account?{" "}
+            <Link href="/sign-in" className={styles.formFooterLink}>
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </div>
+
+      <div className={styles.imageContainer}>
+        <div className={styles.imageContent}>
+          <MessageSquare className={styles.imageIcon} />
+          <h2 className={styles.imageTitle}>Simplify your communication</h2>
+          <p className={styles.imageText}>
+            Create an account to connect all your messaging platforms in one unified inbox.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
 }

@@ -1,0 +1,156 @@
+.formWrapper {
+   width: 100%;
+ }
+ 
+ .form {
+   display: flex;
+   flex-direction: column;
+   gap: 1.5rem;
+ }
+ 
+ .formGroup {
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
+ }
+ 
+ .label {
+   font-weight: 500;
+   color: #374151;
+ }
+ 
+ .labelWrapper {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+ }
+ 
+ .forgotPassword {
+   font-size: 0.875rem;
+   color: #6366f1;
+   font-weight: 500;
+ }
+ 
+ .forgotPassword:hover {
+   text-decoration: underline;
+ }
+ 
+ .input {
+   width: 100%;
+ }
+ 
+ .passwordWrapper {
+   position: relative;
+ }
+ 
+ .passwordToggle {
+   position: absolute;
+   right: 0.75rem;
+   top: 50%;
+   transform: translateY(-50%);
+   background: none;
+   border: none;
+   cursor: pointer;
+   color: #6b7280;
+ }
+ 
+ .passwordIcon {
+   width: 1.25rem;
+   height: 1.25rem;
+ }
+ 
+ .passwordHint {
+   font-size: 0.75rem;
+   color: #6b7280;
+   margin-top: 0.25rem;
+ }
+ 
+ .termsGroup {
+   margin-top: -0.5rem;
+ }
+ 
+ .checkboxWrapper {
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+ }
+ 
+ .termsLabel {
+   font-size: 0.875rem;
+   color: #4b5563;
+ }
+ 
+ .termsLink {
+   color: #6366f1;
+   font-weight: 500;
+ }
+ 
+ .termsLink:hover {
+   text-decoration: underline;
+ }
+ 
+ .submitButton {
+   width: 100%;
+   background-color: #6366f1;
+   color: white;
+   font-weight: 500;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 0.5rem;
+ }
+ 
+ .spinnerIcon {
+   animation: spin 1s linear infinite;
+   width: 1rem;
+   height: 1rem;
+ }
+ 
+ @keyframes spin {
+   from {
+     transform: rotate(0deg);
+   }
+   to {
+     transform: rotate(360deg);
+   }
+ }
+ 
+ .divider {
+   display: flex;
+   align-items: center;
+   margin: 1.5rem 0;
+ }
+ 
+ .separator {
+   flex: 1;
+ }
+ 
+ .dividerText {
+   padding: 0 1rem;
+   color: #6b7280;
+   font-size: 0.875rem;
+ }
+ 
+ .googleButton {
+   width: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 0.5rem;
+   font-weight: 500;
+ }
+ 
+ .googleIcon {
+   width: 1.25rem;
+   height: 1.25rem;
+ }
+ 
+ .errorMessage {
+   background-color: #fee2e2;
+   color: #b91c1c;
+   padding: 0.75rem;
+   border-radius: 0.375rem;
+   margin-bottom: 1.5rem;
+   font-size: 0.875rem;
+ }
+ 
