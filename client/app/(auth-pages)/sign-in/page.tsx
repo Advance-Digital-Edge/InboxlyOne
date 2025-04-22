@@ -7,10 +7,6 @@ export default function SignInPage() {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-        <div className={styles.logoContainer}>
-          <Inbox className={styles.logoIcon} />
-          <h1 className={styles.logoText}>InBoxlyOne</h1>
-        </div>
 
         <div className={styles.formHeader}>
           <h2 className={styles.formTitle}>Sign in to your account</h2>
