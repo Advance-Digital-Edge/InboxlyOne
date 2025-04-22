@@ -1,5 +1,5 @@
 import { JSX } from "react";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button/button"
 import styles from "./hero.module.css";
 import Image from "next/image"
 import {

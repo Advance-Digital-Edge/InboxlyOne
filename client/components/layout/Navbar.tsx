@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { Inbox } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import styles from "./navbar.module.css";
-import MobileMenu from "./NavbarMobile";
+import Link from "next/link"
+import { Inbox } from "lucide-react"
+import { Button } from "@/components/ui/Button/button"
+import styles from "./navbar.module.css"
+import MobileMenu from "./NavbarMobile"
 import { JSX } from "react";
 
 export default function Navbar(): JSX.Element {
