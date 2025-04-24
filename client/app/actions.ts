@@ -4,40 +4,35 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Login } from "@/types/auth";
+import { Login, Register } from "@/types/auth";
 
-export const signUpAction = async (formData: FormData) => {
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+export const signUpAction = async (formData: Register) => {
+  const {email, password, repeatPassword} = formData;
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  // const origin = (await headers()).get("origin");
 
-  if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Email and password are required"
-    );
+  if (!email || !password || !repeatPassword) {
+    throw new Error("All fields are required");
+  }
+
+  if(password !== repeatPassword) {
+    throw new Error("Passwords do not match");
   }
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
   });
 
   if (error) {
-    console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link."
-    );
+    if (error.code === "auth_user_already_exists") {
+      throw new Error("This email is already registered. Try logging in instead.");
+    }
+    console.log(error);
+    throw new Error(error.message);
   }
+
+  return redirect("/sign-in");
 };
 
 export const signInAction = async (formData: Login) => {

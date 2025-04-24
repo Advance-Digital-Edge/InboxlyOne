@@ -35,7 +35,7 @@ export default function MobileMenu() {
               FAQ
             </Link>
             <div className={styles.mobileNavButtons}>
-              <Link href="/login" className={styles.mobileLoginLink} onClick={toggleMenu}>
+              <Link href="/sign-in" className={styles.mobileLoginLink} onClick={toggleMenu}>
                 Log in
               </Link>
               <Button className={styles.mobileCta} onClick={toggleMenu}>
