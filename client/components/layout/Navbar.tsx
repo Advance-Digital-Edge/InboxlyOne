@@ -29,7 +29,7 @@ export default function Navbar(): JSX.Element {
         </Link>
       </nav>
       <div className={styles.headerButtons}>
-        <Link href="/login" className={styles.loginLink}>
+        <Link href="/sign-in" className={styles.loginLink}>
           Log in
         </Link>
         <Button className={styles.ctaButton}>Get Started</Button>
