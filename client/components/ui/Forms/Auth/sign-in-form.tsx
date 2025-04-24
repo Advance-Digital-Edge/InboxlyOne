@@ -1,166 +1,124 @@
-"use client"
+"use client";
 
-import type React from "react"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { Button } from "../../Button/button";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { signInAction } from "@/app/actions";
+import { Login } from "@/types/auth";
 
-import { useState } from "react"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/Button/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import styles from "./auth-forms.module.css"
-import Link from "next/link"
+// 1. Validation Schema
+const signInSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
+});
 
+type SignInSchema = z.infer<typeof signInSchema>;
 
 export default function SignInForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [showPassword, setShowPassword] = React.useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignInSchema>({
+    resolver: zodResolver(signInSchema),
+  });
 
-    // Basic validation
-    if (!email || !password) {
-      setError("Please fill in all fields")
-      return
-    }
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: signInAction,
+    onSuccess: (data) => {
+      console.log("Login success", data);
+    },
+    onError: (error) => {
+      console.error("Login error", error.message);
+    },
+  });
 
-    try {
-      setIsLoading(true)
-      // Here you would implement your authentication logic
-      // For demo purposes, we're just simulating a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Redirect to dashboard or handle authentication
-      console.log("Sign in with:", { email, password })
-
-      // Simulate navigation
-      window.location.href = "/dashboard"
-    } catch (err) {
-      setError("Invalid email or password")
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleGoogleSignIn = async () => {
-    setError("")
-    try {
-      setIsLoading(true)
-      // Here you would implement Google authentication
-      // For demo purposes, we're just simulating a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      console.log("Sign in with Google")
-
-      // Simulate navigation
-      window.location.href = "/dashboard"
-    } catch (err) {
-      setError("Failed to sign in with Google")
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const onSubmit = (data: SignInSchema) => {
+    const loginData: Login = {
+      email: data.email,
+      password: data.password,
+    };
+    mutate(loginData);
+  };
 
   return (
-    <div className={styles.formWrapper}>
-      {error && <div className={styles.errorMessage}>{error}</div>}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Global Error */}
+      {error && <p className="text-red-500 text-sm">{error.message}</p>}
 
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGroup}>
-          <Label htmlFor="email" className={styles.label}>
-            Email
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="name@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            className={styles.input}
-            required
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <div className={styles.labelWrapper}>
-            <Label htmlFor="password" className={styles.label}>
-              Password
-            </Label>
-            <Link href="/forgot-password" className={styles.forgotPassword}>
-              Forgot password?
-            </Link>
-          </div>
-          <div className={styles.passwordWrapper}>
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-              className={styles.input}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className={styles.passwordToggle}
-              tabIndex={-1}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? <EyeOff className={styles.passwordIcon} /> : <Eye className={styles.passwordIcon} />}
-            </button>
-          </div>
-        </div>
-
-        <Button type="submit" className={styles.submitButton} disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className={styles.spinnerIcon} />
-              Signing in...
-            </>
-          ) : (
-            "Sign in"
-          )}
-        </Button>
-      </form>
-
-      <div className={styles.divider}>
-        <Separator className={styles.separator} />
-        <span className={styles.dividerText}>or</span>
-        <Separator className={styles.separator} />
+      {/* EMAIL */}
+      <div>
+        <label className="text-sm font-medium">Email</label>
+        <input
+          type="email"
+          placeholder="you@example.com"
+          {...register("email")}
+          className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+        />
+        {errors.email && (
+          <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+        )}
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        className={styles.googleButton}
-        onClick={handleGoogleSignIn}
-        disabled={isLoading}
-      >
-        <svg
-          className={styles.googleIcon}
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-        >
-          <path
-            fill="currentColor"
-            d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1.086-9.8l4.046-3.455A5.936 5.936 0 0 0 12 6.8a6.2 6.2 0 1 0 0 12.4 6.073 6.073 0 0 0 4.242-1.571 6.871 6.871 0 0 0 1.962-4.446h-7.29v2.017z"
-          />
-        </svg>
-        Sign in with Google
-      </Button>
-    </div>
-  )
-}
+      {/* PASSWORD */}
+      <div>
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">Password</label>
+          <Link
+            href="/forgot"
+            className="text-xs text-blue-600 hover:underline"
+          >
+            Forgot?
+          </Link>
+        </div>
 
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            {...register("password")}
+            className="mt-1 w-full rounded-md border px-3 py-2 text-sm pr-10"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-2 top-2.5"
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4 text-gray-500" />
+            ) : (
+              <Eye className="h-4 w-4 text-gray-500" />
+            )}
+          </button>
+        </div>
+
+        {errors.password && (
+          <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
+        )}
+      </div>
+
+      {/* SUBMIT */}
+      <Button type="submit" className="w-full" disabled={isPending}>
+        {isPending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Signing in...
+          </>
+        ) : (
+          "Sign In"
+        )}
+      </Button>
+    </form>
+  );
+}
