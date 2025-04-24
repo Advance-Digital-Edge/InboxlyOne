@@ -9,199 +9,175 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import styles from "./auth-forms.module.css"
 import Link from "next/link"
+import { useForm } from "react-hook-form"
+import { signUpAction } from "@/app/actions"
+import { useMutation } from "@tanstack/react-query"
+import { Register } from "@/types/auth"
 
+const signUpSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
+    repeatPassword: z
+  .string()
+  .min(6, { message: "Please confirm your password" }),
+});
+
+
+type SignUpSchema = z.infer<typeof signUpSchema>;
 
 export default function SignUpForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [acceptTerms, setAcceptTerms] = useState(false)
-  const [error, setError] = useState("")
+  const [showPasswords, setShowPasswords] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+   const {
+     register,
+     handleSubmit,
+     formState: { errors },
+   } = useForm<SignUpSchema>({
+     resolver: zodResolver(signUpSchema),
+   });
+   
+const { mutate, isPending, error } = useMutation({
+  mutationFn: signUpAction,
+  onSuccess: (data) => {
+    console.log("Register success", data);
+  },
+  onError: (error) => {
+    console.error("Register error", error.message);
+  },
+});
 
-    // Basic validation
-    if (!name || !email || !password) {
-      setError("Please fill in all fields")
-      return
-    }
+const onSubmit = (data: SignUpSchema) => {
+    const registerData: Register = {
+      email: data.email,
+      password: data.password,
+      repeatPassword: data.repeatPassword,
+    };
+    mutate(registerData);
+};
 
-    if (!acceptTerms) {
-      setError("You must accept the terms and conditions")
-      return
-    }
+  // const handleGoogleSignUp = async () => {
+  //   setError("")
+  //   try {
+  //     setIsLoading(true)
+  //     // Here you would implement Google authentication
+  //     // For demo purposes, we're just simulating a delay
+  //     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    try {
-      setIsLoading(true)
-      // Here you would implement your registration logic
-      // For demo purposes, we're just simulating a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+  //     console.log("Sign up with Google")
 
-      // Redirect to dashboard or handle registration
-      console.log("Sign up with:", { name, email, password })
-
-      // Simulate navigation
-      window.location.href = "/dashboard"
-    } catch (err) {
-      setError("Failed to create account")
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleGoogleSignUp = async () => {
-    setError("")
-    try {
-      setIsLoading(true)
-      // Here you would implement Google authentication
-      // For demo purposes, we're just simulating a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      console.log("Sign up with Google")
-
-      // Simulate navigation
-      window.location.href = "/dashboard"
-    } catch (err) {
-      setError("Failed to sign up with Google")
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  //     // Simulate navigation
+  //     window.location.href = "/dashboard"
+  //   } catch (err) {
+  //     setError("Failed to sign up with Google")
+  //     console.error(err)
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
 
   return (
-    <div className={styles.formWrapper}>
-      {error && <div className={styles.errorMessage}>{error}</div>}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Global Error */}
+      {error && <p className="text-red-500 text-sm">{error.message}</p>}
 
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGroup}>
-          <Label htmlFor="name" className={styles.label}>
-            Full Name
-          </Label>
-          <Input
-            id="name"
-            type="text"
-            placeholder="John Doe"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={isLoading}
-            className={styles.input}
-            required
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <Label htmlFor="email" className={styles.label}>
-            Email
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="name@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            className={styles.input}
-            required
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <Label htmlFor="password" className={styles.label}>
-            Password
-          </Label>
-          <div className={styles.passwordWrapper}>
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-              className={styles.input}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className={styles.passwordToggle}
-              tabIndex={-1}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? <EyeOff className={styles.passwordIcon} /> : <Eye className={styles.passwordIcon} />}
-            </button>
-          </div>
-          <p className={styles.passwordHint}>Password must be at least 8 characters long</p>
-        </div>
-
-        <div className={styles.termsGroup}>
-          <div className={styles.checkboxWrapper}>
-            <Checkbox
-              id="terms"
-              checked={acceptTerms}
-              onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
-              disabled={isLoading}
-            />
-            <label htmlFor="terms" className={styles.termsLabel}>
-              I agree to the{" "}
-              <Link href="/terms" className={styles.termsLink}>
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link href="/privacy" className={styles.termsLink}>
-                Privacy Policy
-              </Link>
-            </label>
-          </div>
-        </div>
-
-        <Button type="submit" className={styles.submitButton} disabled={isLoading || !acceptTerms}>
-          {isLoading ? (
-            <>
-              <Loader2 className={styles.spinnerIcon} />
-              Creating account...
-            </>
-          ) : (
-            "Create account"
-          )}
-        </Button>
-      </form>
-
-      <div className={styles.divider}>
-        <Separator className={styles.separator} />
-        <span className={styles.dividerText}>or</span>
-        <Separator className={styles.separator} />
+      {/* EMAIL */}
+      <div>
+        <label className="text-sm font-medium">Email</label>
+        <input
+          type="email"
+          placeholder="you@example.com"
+          {...register("email")}
+          className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+        />
+        {errors.email && (
+          <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+        )}
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        className={styles.googleButton}
-        onClick={handleGoogleSignUp}
-        disabled={isLoading}
-      >
-        <svg
-          className={styles.googleIcon}
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-        >
-          <path
-            fill="currentColor"
-            d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1.086-9.8l4.046-3.455A5.936 5.936 0 0 0 12 6.8a6.2 6.2 0 1 0 0 12.4 6.073 6.073 0 0 0 4.242-1.571 6.871 6.871 0 0 0 1.962-4.446h-7.29v2.017z"
+      {/* PASSWORD */}
+      <div>
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">Password</label>
+        </div>
+
+        <div className="relative">
+          <input
+            type={showPasswords ? "text" : "password"}
+            placeholder="••••••••"
+            {...register("password")}
+            className="mt-1 w-full rounded-md border px-3 py-2 text-sm pr-10"
           />
-        </svg>
-        Sign up with Google
+
+          <button
+            type="button"
+            onClick={() => setShowPasswords(!showPasswords)}
+            className="absolute right-2 top-2.5"
+            tabIndex={-1}
+          >
+           {showPasswords ? (
+              <Eye className="h-4 w-4 text-gray-500" />
+            ) : (
+              <EyeOff className="h-4 w-4 text-gray-500" />
+            )}
+          </button>
+        </div>
+
+        {errors.password && (
+          <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
+        )}
+      </div>
+
+      {/*REPEAT PASSWORD */}
+      <div>
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">Repeat Password</label>
+        </div>
+
+        <div className="relative">
+          <input
+            type={showPasswords ? "text" : "password"}
+            placeholder="••••••••"
+            {...register("repeatPassword")}
+            className="mt-1 w-full rounded-md border px-3 py-2 text-sm pr-10"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPasswords(!showPasswords)}
+            className="absolute right-2 top-2.5"
+            tabIndex={-1}
+          >
+            {showPasswords ? (
+              <Eye className="h-4 w-4 text-gray-500" />
+            ) : (
+              <EyeOff className="h-4 w-4 text-gray-500" />
+            )}
+          </button>
+        </div>
+
+        {errors.repeatPassword && (
+          <p className="text-xs text-red-500 mt-1">{errors.repeatPassword.message}</p>
+        )}
+      </div>
+
+      {/* SUBMIT */}
+      <Button type="submit" className="w-full" disabled={isPending}>
+        {isPending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Signing up...
+          </>
+        ) : (
+          "Sign Up"
+        )}
       </Button>
-    </div>
+    </form>
   )
 }
 
