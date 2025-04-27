@@ -4,7 +4,6 @@ import "./globals.css";
 import Footer from "@/components/layout/Footer";
 import styles from "./layout.module.css";
 import Navbar from "@/components/layout/Navbar";
-import ReactQueryProvider from "./context/QueryProvider";
 import QueryProvider from "./context/QueryProvider";
 
 const defaultUrl = process.env.VERCEL_URL
