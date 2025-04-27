@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { Login, Register } from "@/types/auth";
 
 export const signUpAction = async (formData: Register) => {
-  const {email, password, repeatPassword} = formData;
+  const { email, password, repeatPassword } = formData;
   const supabase = await createClient();
   // const origin = (await headers()).get("origin");
 
@@ -15,7 +15,7 @@ export const signUpAction = async (formData: Register) => {
     throw new Error("All fields are required");
   }
 
-  if(password !== repeatPassword) {
+  if (password !== repeatPassword) {
     throw new Error("Passwords do not match");
   }
 
@@ -26,7 +26,9 @@ export const signUpAction = async (formData: Register) => {
 
   if (error) {
     if (error.code === "auth_user_already_exists") {
-      throw new Error("This email is already registered. Try logging in instead.");
+      throw new Error(
+        "This email is already registered. Try logging in instead."
+      );
     }
     console.log(error);
     throw new Error(error.message);

@@ -1,16 +1,18 @@
-import Link from "next/link"
-import { Inbox, Mail } from "lucide-react"
-import SignInForm from "@/components/ui/Forms/Auth/sign-in-form"
-import styles from "./sign-in.module.css"
+import Link from "next/link";
+import { Inbox, Mail } from "lucide-react";
+import SignInForm from "@/components/ui/Forms/Auth/sign-in-form";
+import styles from "./sign-in.module.css";
+import GoogleButton from "@/components/ui/Button/GoogleButton";
 
 export default function SignInPage() {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-
         <div className={styles.formHeader}>
           <h2 className={styles.formTitle}>Sign in to your account</h2>
-          <p className={styles.formSubtitle}>Welcome back! Please enter your details.</p>
+          <p className={styles.formSubtitle}>
+            Welcome back! Please enter your details.
+          </p>
         </div>
 
         <SignInForm />
@@ -23,6 +25,7 @@ export default function SignInPage() {
             </Link>
           </p>
         </div>
+        <GoogleButton />
       </div>
 
       <div className={styles.imageContainer}>
@@ -30,10 +33,11 @@ export default function SignInPage() {
           <Mail className={styles.imageIcon} />
           <h2 className={styles.imageTitle}>All your messages in one place</h2>
           <p className={styles.imageText}>
-            Sign in to access your unified inbox and never miss an important message again.
+            Sign in to access your unified inbox and never miss an important
+            message again.
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
