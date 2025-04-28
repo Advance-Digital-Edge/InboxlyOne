@@ -1,10 +1,13 @@
 "use client";
-import Script from "next/script";
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthProvider";
 
 export default function GoogleButton() {
   const [error, setError] = useState("");
+  const { setUser } = useAuth();
+  const router = useRouter();
 
   const handleSignInWithGoogle = async (response: any) => {
     const supabase = await createClient();
@@ -18,9 +21,10 @@ export default function GoogleButton() {
         throw error;
       }
 
-      console.log("Google Sign-In Success:", data);
-      // redirect user here if needed
+      setUser(data.user);
+      router.push("/");
     } catch (err: any) {
+      // TODO: Show errors in ui
       setError("Authentication failed. Please try again.");
       console.error("Google Sign-In Error:", err.message);
     }
