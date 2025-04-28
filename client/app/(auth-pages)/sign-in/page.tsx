@@ -16,6 +16,10 @@ export default function SignInPage() {
         </div>
 
         <SignInForm />
+          <div className={styles.orSeparator}>
+            <span className={styles.orText}>OR</span>
+          </div>
+        <GoogleButton />
 
         <div className={styles.formFooter}>
           <p className={styles.formFooterText}>
@@ -25,7 +29,6 @@ export default function SignInPage() {
             </Link>
           </p>
         </div>
-        <GoogleButton />
       </div>
 
       <div className={styles.imageContainer}>

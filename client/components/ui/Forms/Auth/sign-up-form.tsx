@@ -49,6 +49,9 @@ const { mutate, isPending, error } = useMutation({
   },
   onError: (error) => {
     console.error("Register error", error.message);
+    if (error.message === "User already registered") {
+      error.message = "Email is already taken"
+    }
   },
 });
 
@@ -60,26 +63,6 @@ const onSubmit = (data: SignUpSchema) => {
     };
     mutate(registerData);
 };
-
-  // const handleGoogleSignUp = async () => {
-  //   setError("")
-  //   try {
-  //     setIsLoading(true)
-  //     // Here you would implement Google authentication
-  //     // For demo purposes, we're just simulating a delay
-  //     await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  //     console.log("Sign up with Google")
-
-  //     // Simulate navigation
-  //     window.location.href = "/dashboard"
-  //   } catch (err) {
-  //     setError("Failed to sign up with Google")
-  //     console.error(err)
-  //   } finally {
-  //     setIsLoading(false)
-  //   }
-  // }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -47,6 +47,7 @@ export default function GoogleButton() {
           size: "large",
           text: "continue_with",
           shape: "rectangular",
+          locale: "en-US"
         }
       );
     }
@@ -57,7 +58,7 @@ export default function GoogleButton() {
     // Ensure the Google API is available before attempting initialization
     if (typeof window !== "undefined") {
       const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
+      script.src = "https://accounts.google.com/gsi/client?hl=en";
       script.onload = () => {
         console.log("Google API script loaded successfully");
         initializeGoogleSignIn();
@@ -73,7 +74,7 @@ export default function GoogleButton() {
 
   return (
     <>
-      <div id="googleSignInDiv" />
+      <div id="googleSignInDiv" data-locale/>
       {error && <p className="text-red-500">{error}</p>}
     </>
   );

@@ -1,40 +1,19 @@
 .container {
-   display: flex;
-   min-height: 100vh;
-   width: 100%;
-   flex-direction: column;
-   padding:0 0.5rem;
- }
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  flex-direction: column;
+}
  
- .formContainer {
-   flex: 1;
-   display: flex;
-   flex-direction: column;
-   justify-content: center;
-   padding: 2rem;
-   max-width: 28rem;
-   margin: 0 auto;
-   width: 100%;
- }
- 
- .logoContainer {
-   display: flex;
-   align-items: center;
-   gap: 0.5rem;
-   margin-bottom: 2.5rem;
- }
- 
- .logoIcon {
-   color: #6366f1;
-   width: 28px;
-   height: 28px;
- }
- 
- .logoText {
-   font-weight: 700;
-   font-size: 1.5rem;
-   color: #111827;
- }
+.formContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+  max-width: 32rem;
+  margin: 0 auto;
+}
  
  .formHeader {
    margin-bottom: 2rem;
@@ -51,7 +30,45 @@
    color: #6b7280;
    font-size: 1rem;
  }
- 
+
+ .orSeparator{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: .5rem 0;
+  position: relative;
+}
+
+.orText{
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0 1rem;
+}
+
+.orText::before{
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  width: 45%;
+  background-color: #d1d5db;
+  z-index: -1;
+}
+
+.orText::after{
+  content: '';
+  position: absolute;
+  left: 55%;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  width: 45%;
+  background-color: #d1d5db;
+  z-index: -1;
+}
+
  .formFooter {
    margin-top: 2rem;
    text-align: center;
@@ -73,6 +90,7 @@
  }
  
  .imageContainer {
+   flex: 1;
    display: none;
    background-color: #6366f1;
    color: white;
@@ -114,13 +132,38 @@
    }
  
    .formContainer {
-     width: 50%;
-     max-width: none;
-   }
- 
-   .imageContainer {
-     display: flex;
-     width: 50%;
-   }
+    max-width: 28rem;
+  }
+  
+  .imageContainer {
+    display: flex;
+    border-radius: 2rem 0 0 2rem;
+  }
  }
+
+ @media (max-width: 740px) {
+  .orText::before{
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    width: 42%;
+    background-color: #d1d5db;
+    z-index: -1;
+  }
+  
+  .orText::after{
+    content: '';
+    position: absolute;
+    left: 58%;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    width: 42%;
+    background-color: #d1d5db;
+    z-index: -1;
+  }
+}
  
