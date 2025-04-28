@@ -2,15 +2,12 @@ import Link from "next/link"
 import { Inbox, MessageSquare } from "lucide-react"
 import SignUpForm from "@/components/ui/Forms/Auth/sign-up-form"
 import styles from "./sign-up.module.css"
+import GoogleButton from "@/components/ui/Button/GoogleButton"
 
 export default function SignUpPage() {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-        <div className={styles.logoContainer}>
-          <Inbox className={styles.logoIcon} />
-          <h1 className={styles.logoText}>InBoxlyOne</h1>
-        </div>
 
         <div className={styles.formHeader}>
           <h2 className={styles.formTitle}>Create your account</h2>
@@ -20,6 +17,10 @@ export default function SignUpPage() {
         </div>
 
         <SignUpForm />
+        <div className={styles.orSeparator}>
+            <span className={styles.orText}>OR</span>
+          </div>
+        <GoogleButton />
 
         <div className={styles.formFooter}>
           <p className={styles.formFooterText}>
