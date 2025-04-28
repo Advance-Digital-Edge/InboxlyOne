@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import styles from "./layout.module.css";
 import Navbar from "@/components/layout/Navbar";
 import QueryProvider from "./context/QueryProvider";
+import { AuthProvider } from "./context/AuthProvider";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -29,9 +30,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={InerSans.className}>
       <body className={styles.container}>
-        <Navbar />
-        <QueryProvider children={children} />
-        <Footer />
+        <AuthProvider>
+          <QueryProvider>
+            <Navbar />
+            {children}
+            <Footer />
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );
