@@ -19,7 +19,7 @@ export const signUpAction = async (formData: Register) => {
     throw new Error("Passwords do not match");
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { error, data: user } = await supabase.auth.signUp({
     email,
     password,
   });
@@ -34,14 +34,14 @@ export const signUpAction = async (formData: Register) => {
     throw new Error(error.message);
   }
 
-  return redirect("/sign-in");
+  return user;
 };
 
 export const signInAction = async (formData: Login) => {
   const { email, password } = formData;
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error, data: user } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -51,7 +51,7 @@ export const signInAction = async (formData: Login) => {
     throw new Error(error.message);
   }
 
-  return redirect("/protected");
+  return user;
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {

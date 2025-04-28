@@ -17,6 +17,8 @@ import { useForm } from "react-hook-form"
 import { signUpAction } from "@/app/actions"
 import { useMutation } from "@tanstack/react-query"
 import { Register } from "@/types/auth"
+import { useAuth } from "@/app/context/AuthProvider"
+import { useRouter } from "next/navigation"
 
 const signUpSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email" }),
@@ -32,7 +34,9 @@ const signUpSchema = z.object({
 type SignUpSchema = z.infer<typeof signUpSchema>;
 
 export default function SignUpForm() {
-  const [showPasswords, setShowPasswords] = useState(false)
+  const [showPasswords, setShowPasswords] = useState(false);
+  const {user, setUser} = useAuth();
+  const router = useRouter()
 
    const {
      register,
@@ -45,7 +49,9 @@ export default function SignUpForm() {
 const { mutate, isPending, error } = useMutation({
   mutationFn: signUpAction,
   onSuccess: (data) => {
-    console.log("Register success", data);
+    // console.log("Register success", data);
+    setUser(data.user);
+    router.push("/protected")
   },
   onError: (error) => {
     console.error("Register error", error.message);

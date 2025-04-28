@@ -10,7 +10,8 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { signInAction } from "@/app/actions";
 import { Login } from "@/types/auth";
-import GoogleButton from "../../Button/GoogleButton";
+import { useAuth } from "@/app/context/AuthProvider";
+import { useRouter } from "next/navigation";
 
 // 1. Validation Schema
 const signInSchema = z.object({
@@ -24,6 +25,8 @@ type SignInSchema = z.infer<typeof signInSchema>;
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = React.useState(false);
+  const router = useRouter();
+  const { user, setUser } = useAuth();
 
   const {
     register,
@@ -36,10 +39,12 @@ export default function SignInForm() {
   const { mutate, isPending, error } = useMutation({
     mutationFn: signInAction,
     onSuccess: (data) => {
-      console.log("Login success", data);
+      // console.log("Login success", data);
+      setUser(data.user);
+      router.push("/protected")
     },
     onError: (error) => {
-      console.error("Login error", error.message);
+      console.error("Login error", error);
     },
   });
 
