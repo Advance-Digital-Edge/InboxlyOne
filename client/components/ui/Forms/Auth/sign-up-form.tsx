@@ -49,8 +49,15 @@ export default function SignUpForm() {
 const { mutate, isPending, error } = useMutation({
   mutationFn: signUpAction,
   onSuccess: (data) => {
+    console.log("Register success", data);
     // console.log("Register success", data);
     setUser(data.user);
+    if (data.user) {
+      localStorage.setItem("user", JSON.stringify({
+        "email": data.user['user_metadata'].email,
+        "id": data.user["id"],
+      }));
+    }
     router.push("/protected")
   },
   onError: (error) => {

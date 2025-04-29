@@ -39,8 +39,13 @@ export default function SignInForm() {
   const { mutate, isPending, error } = useMutation({
     mutationFn: signInAction,
     onSuccess: (data) => {
+      console.log("Login success", data);
       // console.log("Login success", data);
       setUser(data.user);
+      localStorage.setItem("user", JSON.stringify({
+        "email": data.user['user_metadata'].email,
+        "id": data.user["id"],
+      }));
       router.push("/protected")
     },
     onError: (error) => {
