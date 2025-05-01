@@ -1,28 +1,22 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Inbox } from "lucide-react"
-import { Button } from "@/components/ui/Button/button"
-import styles from "./navbar.module.css"
-import MobileMenu from "./NavbarMobile"
+import Link from "next/link";
+import { Inbox } from "lucide-react";
+import { Button } from "@/components/ui/Button/button";
+import styles from "./navbar.module.css";
+import MobileMenu from "./NavbarMobile";
 import { JSX } from "react";
-import {useState, useEffect} from "react";
-import { useAuth } from "@/app/context/AuthProvider"
-import { signOutAction } from "@/app/actions"
+import { useState, useEffect } from "react";
+import { useAuth } from "@/app/context/AuthProvider";
+import { signOutAction } from "@/app/actions";
 
 export default function Navbar(): JSX.Element {
-  const [hasUser, setHasUser] = useState<boolean | null>(false);
-  const { user, setUser } = useAuth();
+  const { user, setUser, loading } = useAuth();
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    setHasUser(!!user);
-  }, [user]);
+  console.log("Navbar user", user);
 
   const signOutHandler = async (): Promise<void> => {
-    localStorage.removeItem("user");
     setUser(null);
-    setHasUser(false);
     await signOutAction();
   };
 
@@ -49,21 +43,25 @@ export default function Navbar(): JSX.Element {
         </Link>
       </nav>
       <div className={styles.headerButtons}>
-      {!hasUser ? (
-          <>
-            <Link href="/sign-in" className={styles.loginLink}>
-              Log in
-            </Link>
-          </>
+        {loading ? (
+          <Button
+            style={{ backgroundColor: "gray", opacity: "80" }}
+            className={`w-full mr-2 animate-pulse`}
+          ></Button>
+        ) : !user ? (
+          <Link href="/sign-in" className={styles.loginLink}>
+            Log in
+          </Link>
         ) : (
-          <Button 
-            className={styles.loginLink} 
-            style={{backgroundColor: "red"}}
+          <Button
+            className={styles.loginLink}
+            style={{ backgroundColor: "red", color: "white" }}
             onClick={signOutHandler}
-            >
+          >
             Logout
           </Button>
         )}
+
         <Button className={styles.ctaButton}>Get Started</Button>
       </div>
       <MobileMenu />
