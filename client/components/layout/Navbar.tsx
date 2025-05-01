@@ -1,61 +1,23 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Inbox } from "lucide-react"
-import { Button } from "@/components/ui/Button/button"
-import styles from "./navbar.module.css"
-import MobileMenu from "./NavbarMobile"
+import Link from "next/link";
+import { Inbox } from "lucide-react";
+import { Button } from "@/components/ui/Button/button";
+import styles from "./navbar.module.css";
+import MobileMenu from "./NavbarMobile";
 import { JSX } from "react";
-import {useState, useEffect} from "react";
-import { useAuth } from "@/app/context/AuthProvider"
-import { signOutAction } from "@/app/actions"
+import { useAuth } from "@/app/context/AuthProvider";
+import { signOutAction } from "@/app/actions";
 
 export default function Navbar(): JSX.Element {
-  const [hasUser, setHasUser] = useState<boolean | null>(false);
-  const [hydrated, setHydrated] = useState<boolean>(false);
-  const { user, setUser } = useAuth();
+  const { user, setUser, loading } = useAuth();
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    setHasUser(!!user);
-    setHydrated(true);
-  }, [user]);
+  console.log("Navbar user", user);
 
   const signOutHandler = async (): Promise<void> => {
-    localStorage.removeItem("user");
     setUser(null);
-    setHasUser(false);
     await signOutAction();
   };
-
-  // if (!hydrated) return (
-  //   <header className={styles.header}>
-  //     <Link href={"/"}>
-  //       <div className={styles.logo}>
-  //         <Inbox className={styles.logoIcon} />
-  //         <span className={styles.logoText}>InBoxlyOne</span>
-  //       </div>
-  //     </Link>
-  //     <nav className={styles.desktopNav}>
-  //       <Link href="#features" className={styles.navLink}>
-  //         Features
-  //       </Link>
-  //       <Link href="#how-it-works" className={styles.navLink}>
-  //         How It Works
-  //       </Link>
-  //       <Link href="#pricing" className={styles.navLink}>
-  //         Pricing
-  //       </Link>
-  //       <Link href="#faq" className={styles.navLink}>
-  //         FAQ
-  //       </Link>
-  //     </nav>
-  //     <div className={styles.headerButtons}>
-  //       <Button className={styles.ctaButton}>Get Started</Button>
-  //     </div>
-  //     <MobileMenu />
-  //   </header>
-  // );
 
   return (
     <header className={styles.header}>
@@ -80,24 +42,24 @@ export default function Navbar(): JSX.Element {
         </Link>
       </nav>
       <div className={styles.headerButtons}>
-      {hydrated ? (
-    !hasUser ? (
-      <Link href="/sign-in" className={styles.loginLink}>
-        Log in
-      </Link>
-    ) : (
-      <Button
-        className={styles.loginLink}
-        style={{ backgroundColor: "red" }}
-        onClick={signOutHandler}
-      >
-        Logout
-      </Button>
-    )
-  ) : (
-    // Skeleton placeholder
-    <Button className={styles.loginLink} style={{ width: "60px", height: "30px", backgroundColor: "#eee", borderRadius: "4px" }} />
-  )}
+        {loading ? (
+          <Button
+            style={{ backgroundColor: "gray", opacity: "80" }}
+            className={`w-full mr-2 animate-pulse`}
+          ></Button>
+        ) : !user ? (
+          <Link href="/sign-in" className={styles.loginLink}>
+            Log in
+          </Link>
+        ) : (
+          <Button
+            className={styles.loginLink}
+            style={{ backgroundColor: "red", color: "white" }}
+            onClick={signOutHandler}
+          >
+            Logout
+          </Button>
+        )}
         <Button className={styles.ctaButton}>Get Started</Button>
       </div>
       <MobileMenu />
