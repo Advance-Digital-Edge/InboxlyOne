@@ -8,6 +8,7 @@ import MobileMenu from "./NavbarMobile";
 import { JSX } from "react";
 import { useAuth } from "@/app/context/AuthProvider";
 import { signOutAction } from "@/app/actions";
+import ProfileNavbar from "../ui/Profile/ProfileNavbar";
 
 export default function Navbar(): JSX.Element {
   const { user, setUser, loading } = useAuth();
@@ -41,6 +42,7 @@ export default function Navbar(): JSX.Element {
           FAQ
         </Link>
       </nav>
+      <ProfileNavbar />
       <div className={styles.headerButtons}>
         {loading ? (
           <Button
