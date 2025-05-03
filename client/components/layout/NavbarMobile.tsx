@@ -6,6 +6,8 @@ import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/Button/button"
 import styles from "./navbarMobile.module.css"
 import { useAuth } from "@/app/context/AuthProvider"
+import LogoutButton from "../ui/Button/LogoutButton"
+import LoginButton from "../ui/Button/LoginButton"
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
@@ -42,15 +44,11 @@ export default function MobileMenu() {
                     style={{ backgroundColor: "gray", opacity: "80" }}
                     className={`w-full mr-2 animate-pulse`}
                   ></Button>
-              ) : !user ? (
-                  <div>
-                    <Link href="/sign-in" onClick={toggleMenu}>
-                        Sign-up
-                    </Link>
-                  </div>
-              ) : (
-                null
-              )}
+                ) : !user ? (
+                    <LoginButton onClick={toggleMenu}/>
+                ) : (
+                  <LogoutButton onClick={toggleMenu}/>
+                )}
               <Button className={styles.mobileCta} onClick={toggleMenu}>
                 Get Started
               </Button>
