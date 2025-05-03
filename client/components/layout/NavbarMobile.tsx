@@ -1,31 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/Button/button"
 import styles from "./navbarMobile.module.css"
 import { useAuth } from "@/app/context/AuthProvider"
-import { signOutAction } from "@/app/actions"
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
-  const [hasUser, setHasUser] = useState<boolean | null>(false);
-  const [hydrated, setHydrated] = useState<boolean>(false);
-  const { user, setUser } = useAuth();
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    setHydrated(true);
-    setHasUser(!!user);
-  }, [user]);
-
-  const signOutHandler = async (): Promise<void> => {
-    localStorage.removeItem("user");
-    setUser(null);
-    setHasUser(false);
-    await signOutAction();
-  };
+  const { user, loading } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
@@ -53,24 +37,19 @@ export default function MobileMenu() {
               FAQ
             </Link>
             <div className={styles.mobileNavButtons}>
-             
-              {hydrated ? (
-                !hasUser ? (
-                  <Link href="/sign-in" className={styles.loginLink}>
-                    Log in
-                  </Link>
-                ) : (
+              {loading ? (
                   <Button
-                    className={styles.loginLink}
-                    style={{ backgroundColor: "red" }}
-                    onClick={signOutHandler}
-                  >
-                    Logout
-                  </Button>
-                )
+                    style={{ backgroundColor: "gray", opacity: "80" }}
+                    className={`w-full mr-2 animate-pulse`}
+                  ></Button>
+              ) : !user ? (
+                  <div>
+                    <Link href="/sign-in" onClick={toggleMenu}>
+                        Sign-up
+                    </Link>
+                  </div>
               ) : (
-                // Skeleton placeholder
-                <Button className={styles.loginLink} style={{ width: "60px", height: "30px", backgroundColor: "#eee", borderRadius: "4px" }} />
+                null
               )}
               <Button className={styles.mobileCta} onClick={toggleMenu}>
                 Get Started
