@@ -6,20 +6,15 @@ import DefaultAvatar from "@/public/assets/default-avatar.webp";
 import styles from "./profileNavbar.module.css";
 import Link from "next/link";
 import { Button } from "../Button/button";
-import { signOutAction } from "@/app/actions";
 import { useAuth } from "@/app/context/AuthProvider";
-import { LogIn, LogOut } from "lucide-react";
+import LogoutButton from "../Button/LogoutButton";
+import LoginButton from "../Button/LoginButton";
 
 export default function ProfileNavbar(): JSX.Element {
-   const { user, setUser, loading } = useAuth();
+   const { user, loading } = useAuth();
    
      console.log("Navbar user", user);
    
-     const signOutHandler = async (): Promise<void> => {
-       setUser(null);
-       await signOutAction();
-     };
-
    return(
       <div className={styles.container}>
          <div className={styles.avatarWrapper}>
@@ -42,21 +37,9 @@ export default function ProfileNavbar(): JSX.Element {
                   className={`w-full mr-2 animate-pulse`}
                ></Button>
             ) : !user ? (
-               <div className={styles.authAction}>
-                  <Link href="/sign-in">
-                     Log in
-                  </Link>
-                  <LogIn />
-               </div>
+               <LoginButton />
             ) : (
-               <div className={styles.authAction}>
-                  <button
-                     onClick={signOutHandler}
-                  >
-                     Logout
-                  </button>
-                  <LogOut />
-               </div>
+               <LogoutButton />
             )}
          </div>
       </div>
