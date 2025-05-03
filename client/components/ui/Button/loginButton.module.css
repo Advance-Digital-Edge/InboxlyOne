@@ -1,0 +1,20 @@
+.buttonContainer{
+   display: flex;
+   width: 100%;
+   align-items: center;
+   justify-content: center;
+   gap: 0.5rem;
+   border-top: 1px solid #ccc;
+   padding: 0.5rem 0;
+   color: rgb(20, 163, 20);
+   transition: all 0.3s ease-in-out;
+}
+
+.loginIcon{
+   transition: all 0.3s ease-in-out;
+}
+
+.buttonContainer:hover .loginIcon{
+   transform: translateX(0.5rem);
+   color: rgb(16, 154, 16);
+}
