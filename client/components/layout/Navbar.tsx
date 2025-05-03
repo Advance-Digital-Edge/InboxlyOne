@@ -6,19 +6,13 @@ import { Button } from "@/components/ui/Button/button";
 import styles from "./navbar.module.css";
 import MobileMenu from "./NavbarMobile";
 import { JSX } from "react";
-import { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthProvider";
-import { signOutAction } from "@/app/actions";
+import ProfileNavbar from "../ui/Profile/ProfileNavbar";
 
 export default function Navbar(): JSX.Element {
-  const { user, setUser, loading } = useAuth();
+  const { user } = useAuth();
 
   console.log("Navbar user", user);
-
-  const signOutHandler = async (): Promise<void> => {
-    setUser(null);
-    await signOutAction();
-  };
 
   return (
     <header className={styles.header}>
@@ -43,25 +37,7 @@ export default function Navbar(): JSX.Element {
         </Link>
       </nav>
       <div className={styles.headerButtons}>
-        {loading ? (
-          <Button
-            style={{ backgroundColor: "gray", opacity: "80" }}
-            className={`w-full mr-2 animate-pulse`}
-          ></Button>
-        ) : !user ? (
-          <Link href="/sign-in" className={styles.loginLink}>
-            Log in
-          </Link>
-        ) : (
-          <Button
-            className={styles.loginLink}
-            style={{ backgroundColor: "red", color: "white" }}
-            onClick={signOutHandler}
-          >
-            Logout
-          </Button>
-        )}
-
+        <ProfileNavbar />
         <Button className={styles.ctaButton}>Get Started</Button>
       </div>
       <MobileMenu />

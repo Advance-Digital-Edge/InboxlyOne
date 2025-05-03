@@ -41,6 +41,8 @@
  
  .headerButtons {
    display: none;
+   padding: 0 1rem;
+   gap: 2rem;
  }
  
  .loginLink {
