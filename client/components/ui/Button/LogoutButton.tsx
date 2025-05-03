@@ -5,8 +5,12 @@ import { useAuth } from '@/app/context/AuthProvider';
 import { signOutAction } from '@/app/actions';
 import { LogOut } from 'lucide-react';
 
-export default function LogoutButton(): JSX.Element {
-   const { user, setUser, loading } = useAuth();
+export default function LogoutButton({
+   onClick,
+}: {
+   onClick?: () => void;
+}): JSX.Element {
+   const { setUser } = useAuth();
       
    const signOutHandler = async (): Promise<void> => {
       setUser(null);
@@ -14,7 +18,7 @@ export default function LogoutButton(): JSX.Element {
    };
 
    return(
-      <div className={styles.buttonContainer}>
+      <div className={styles.buttonContainer} onClick={onClick}>
          <button
             onClick={signOutHandler}
          >
