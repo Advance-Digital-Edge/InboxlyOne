@@ -25,7 +25,8 @@
 
 .dropdown {
    display: none;
-   width: fit-content;
+   width: 160px;
+   overflow: hidden;
    flex-direction: column;
    position: absolute;
    padding: 1rem;
@@ -44,8 +45,14 @@
 }
 
 .profileEmail{
+   display: block;              
+   max-width: 100%;            
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
    font-weight: bold;
    color: rgb(6, 145, 145);
+
 }
 
 .dropdownLinks{

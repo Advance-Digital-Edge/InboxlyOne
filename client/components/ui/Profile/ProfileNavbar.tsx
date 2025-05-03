@@ -26,7 +26,7 @@ export default function ProfileNavbar(): JSX.Element {
             />
          </div>
          <div className={styles.dropdown}>
-            <span className={styles.profileEmail}>john1doe@gmail.com</span>
+            <span className={styles.profileEmail}>{user ? user.email : null}</span>
             <ul className={styles.dropdownLinks}>
                <li><Link href={"/protected"}>Profile</Link></li>
                <li><Link href={"/dashboard"}>Dashboard</Link></li>
