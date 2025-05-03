@@ -37,8 +37,8 @@ export default function Navbar(): JSX.Element {
         </Link>
       </nav>
       <div className={styles.headerButtons}>
-        <Button className={styles.ctaButton}>Get Started</Button>
         <ProfileNavbar />
+        <Button className={styles.ctaButton}>Get Started</Button>
       </div>
       <MobileMenu />
     </header>
