@@ -26,16 +26,16 @@ export default function MobileMenu() {
       {isOpen && (
         <div className={styles.mobileMenuOverlay}>
           <nav className={styles.mobileNav}>
-            <Link href="#features" className={styles.mobileNavLink} onClick={toggleMenu}>
+            <Link href="/#features" className={styles.mobileNavLink} onClick={toggleMenu}>
               Features
             </Link>
-            <Link href="#how-it-works" className={styles.mobileNavLink} onClick={toggleMenu}>
+            <Link href="/#how-it-works" className={styles.mobileNavLink} onClick={toggleMenu}>
               How It Works
             </Link>
-            <Link href="#pricing" className={styles.mobileNavLink} onClick={toggleMenu}>
+            <Link href="/#pricing" className={styles.mobileNavLink} onClick={toggleMenu}>
               Pricing
             </Link>
-            <Link href="#faq" className={styles.mobileNavLink} onClick={toggleMenu}>
+            <Link href="/#faq" className={styles.mobileNavLink} onClick={toggleMenu}>
               FAQ
             </Link>
             <div className={styles.mobileNavButtons}>

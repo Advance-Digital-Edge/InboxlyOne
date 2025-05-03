@@ -23,16 +23,16 @@ export default function Navbar(): JSX.Element {
         </div>
       </Link>
       <nav className={styles.desktopNav}>
-        <Link href="#features" className={styles.navLink}>
+        <Link href="/#features" className={styles.navLink}>
           Features
         </Link>
-        <Link href="#how-it-works" className={styles.navLink}>
+        <Link href="/#how-it-works" className={styles.navLink}>
           How It Works
         </Link>
-        <Link href="#pricing" className={styles.navLink}>
+        <Link href="/#pricing" className={styles.navLink}>
           Pricing
         </Link>
-        <Link href="#faq" className={styles.navLink}>
+        <Link href="/#faq" className={styles.navLink}>
           FAQ
         </Link>
       </nav>
