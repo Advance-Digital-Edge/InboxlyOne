@@ -1,5 +1,8 @@
 // app/api/slack-events/route.ts
 
+// Currently, working with Slack Bot token and not the user token
+//TODO: Add support for user token as well
+
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
