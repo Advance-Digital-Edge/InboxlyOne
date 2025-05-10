@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ChevronDown,
   Facebook,
@@ -24,242 +24,93 @@ import {
   Slack,
   PhoneIcon as WhatsApp,
   X,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { platforms, messages } from "@/lib/constants";
+import Sidebar from "@/components/ui/Sidebar/Sidebar";
 
-// Mock data for messages
-const messages = [
-  {
-    id: 1,
-    sender: "Sarah Miller",
-    avatar: "/placeholder.svg?height=40&width=40",
-    preview:
-      "Hi Alex, I've reviewed the website mockups you sent over yesterday. I think they look great overall! Could we schedule a call to discuss a few minor adjustments?",
-    timestamp: "10:30 AM",
-    platform: "Gmail",
-    unread: true,
-    tags: ["Client", "Needs Follow-up"],
-    conversation: [
-      {
-        id: 101,
-        sender: "Sarah Miller",
-        content:
-          "Hi Alex, I've reviewed the website mockups you sent over yesterday. I think they look great overall! Could we schedule a call to discuss a few minor adjustments?",
-        timestamp: "10:30 AM",
-        isIncoming: true,
-      },
-      {
-        id: 102,
-        sender: "You",
-        content:
-          "Hi Sarah, I'm glad you like the mockups! I'm available for a call tomorrow between 10 AM and 2 PM. Let me know what time works best for you.",
-        timestamp: "10:45 AM",
-        isIncoming: false,
-      },
-    ],
-  },
-  {
-    id: 2,
-    sender: "David Chen",
-    avatar: "/placeholder.svg?height=40&width=40",
-    preview:
-      "The latest designs look fantastic! Just one question about the color palette - are we sticking with the blues or exploring other options?",
-    timestamp: "Yesterday",
-    platform: "Messenger",
-    unread: false,
-    tags: ["Client"],
-    conversation: [
-      {
-        id: 201,
-        sender: "David Chen",
-        content:
-          "The latest designs look fantastic! Just one question about the color palette - are we sticking with the blues or exploring other options?",
-        timestamp: "Yesterday",
-        isIncoming: true,
-      },
-    ],
-  },
-  {
-    id: 3,
-    sender: "Emma Wilson",
-    avatar: "/placeholder.svg?height=40&width=40",
-    preview:
-      "Invoice #1234 has been paid. Thank you for your work on the logo design project! Looking forward to working with you again.",
-    timestamp: "2 days ago",
-    platform: "Gmail",
-    unread: false,
-    tags: ["Client"],
-    conversation: [
-      {
-        id: 301,
-        sender: "Emma Wilson",
-        content:
-          "Invoice #1234 has been paid. Thank you for your work on the logo design project! Looking forward to working with you again.",
-        timestamp: "2 days ago",
-        isIncoming: true,
-      },
-    ],
-  },
-  {
-    id: 4,
-    sender: "Michael Rodriguez",
-    avatar: "/placeholder.svg?height=40&width=40",
-    preview:
-      "I saw your portfolio and I'm interested in working with you on a new project for my startup. Do you have availability in the next month?",
-    timestamp: "3 days ago",
-    platform: "Instagram",
-    unread: true,
-    tags: ["Lead"],
-    conversation: [
-      {
-        id: 401,
-        sender: "Michael Rodriguez",
-        content:
-          "I saw your portfolio and I'm interested in working with you on a new project for my startup. Do you have availability in the next month?",
-        timestamp: "3 days ago",
-        isIncoming: true,
-      },
-    ],
-  },
-  {
-    id: 5,
-    sender: "Jessica Taylor",
-    avatar: "/placeholder.svg?height=40&width=40",
-    preview:
-      "Just checking in on the progress of the social media graphics. Our campaign launches next week and we'd love to review the final versions.",
-    timestamp: "4 days ago",
-    platform: "WhatsApp",
-    unread: false,
-    tags: ["Client", "Needs Follow-up"],
-    conversation: [
-      {
-        id: 501,
-        sender: "Jessica Taylor",
-        content:
-          "Just checking in on the progress of the social media graphics. Our campaign launches next week and we'd love to review the final versions.",
-        timestamp: "4 days ago",
-        isIncoming: true,
-      },
-    ],
-  },
-]
-
-// Platform data
-const platforms = [
-  { id: "all", name: "All Platforms", icon: <MessageCircle className="h-5 w-5" /> },
-  { id: "gmail", name: "Gmail", icon: <Mail className="h-5 w-5" /> },
-  { id: "messenger", name: "Messenger", icon: <Facebook className="h-5 w-5" /> },
-  { id: "instagram", name: "Instagram", icon: <Instagram className="h-5 w-5" /> },
-  { id: "slack", name: "Slack", icon: <Slack className="h-5 w-5" /> },
-]
-
-// Tag colors
-const tagColors: Record<string, string> = {
-  Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
-  Lead: "bg-purple-100 text-purple-800 hover:bg-purple-200",
-  "Needs Follow-up": "bg-amber-100 text-amber-800 hover:bg-amber-200",
-}
-
-export default function UnifiedMessaging() {
-  const [selectedMessage, setSelectedMessage] = useState(messages[0])
-  const [activePlatform, setActivePlatform] = useState("all")
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [rightPanelOpen, setRightPanelOpen] = useState(true)
+export default function Dashboard() {
+  const [selectedMessage, setSelectedMessage] = useState(messages[0]);
+  const [activePlatform, setActivePlatform] = useState("all");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   // Filter messages based on active platform
   const filteredMessages =
     activePlatform === "all"
       ? messages
-      : messages.filter((message) => message.platform.toLowerCase() === activePlatform)
+      : messages.filter(
+          (message) => message.platform.toLowerCase() === activePlatform
+        );
+
+  const tagColors: Record<string, string> = {
+    Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+    Lead: "bg-purple-100 text-purple-800 hover:bg-purple-200",
+    "Needs Follow-up": "bg-amber-100 text-amber-800 hover:bg-amber-200",
+  };
 
   // Function to get platform icon
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case "Gmail":
-        return <Mail className="h-4 w-4" />
+        return <Mail className="h-4 w-4" />;
       case "Messenger":
-        return <Facebook className="h-4 w-4" />
+        return <Facebook className="h-4 w-4" />;
       case "Instagram":
-        return <Instagram className="h-4 w-4" />
+        return <Instagram className="h-4 w-4" />;
       case "WhatsApp":
-        return <WhatsApp className="h-4 w-4" />
+        return <WhatsApp className="h-4 w-4" />;
       case "Slack":
-        return <Slack className="h-4 w-4" />
+        return <Slack className="h-4 w-4" />;
       default:
-        return <Mail className="h-4 w-4" />
+        return <Mail className="h-4 w-4" />;
     }
-  }
+  };
 
-  // Function to get platform color
   const getPlatformColor = (platform: string) => {
     switch (platform) {
       case "Gmail":
-        return "bg-red-50 text-red-600 border-red-100"
+        return "text-red-700 border-red-100";
       case "Messenger":
-        return "bg-blue-50 text-blue-600 border-blue-100"
+        return "text-blue-600 border-blue-100";
       case "Instagram":
-        return "bg-pink-50 text-pink-600 border-pink-100"
-      case "WhatsApp":
-        return "bg-green-50 text-green-600 border-green-100"
-      default:
-        return "bg-gray-50 text-gray-600 border-gray-100"
+        return "text-pink-600 border-pink-100";
+      case "Slack":
+        return "text-purple-600 border-purple-100";
     }
-  }
+  };
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 bg-black/20 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-20 bg-black/20 backdrop-blur-sm md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Left sidebar - Platform navigation */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-30 w-16 transform border-r border-gray-100 bg-white transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        )}
-      >
-        <div className="flex h-full flex-col items-center py-4">
-
-          {/* Platform icons */}
-          <nav className="flex flex-1 flex-col items-center space-y-4">
-            {platforms.map((platform) => (
-              <button
-                key={platform.id}
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
-                  activePlatform === platform.id
-                    ? "bg-blue-100 text-blue-600"
-                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900",
-                )}
-                onClick={() => setActivePlatform(platform.id)}
-                title={platform.name}
-              >
-                {platform.icon}
-              </button>
-            ))}
-          </nav>
-
-          {/* Settings */}
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
-            title="Settings"
-          >
-            <Settings className="h-5 w-5" />
-          </button>
-        </div>
-      </aside>
+      {/* Sidebar */}
+      <Sidebar
+        platforms={platforms}
+        activePlatform={activePlatform}
+        setActivePlatform={setActivePlatform}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        getPlatformColor={getPlatformColor}
+      />
 
       {/* Central inbox */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
         <header className="flex h-16 items-center justify-between border-b border-gray-100 bg-white px-4">
           <div className="flex items-center">
-            <Button variant="ghost" size="icon" className="mr-2 lg:hidden" onClick={() => setSidebarOpen(true)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mr-2 lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </div>
@@ -292,10 +143,17 @@ export default function UnifiedMessaging() {
               className="lg:hidden"
               onClick={() => setRightPanelOpen(!rightPanelOpen)}
             >
-              {rightPanelOpen ? <X className="h-5 w-5" /> : <MoreHorizontal className="h-5 w-5" />}
+              {rightPanelOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <MoreHorizontal className="h-5 w-5" />
+              )}
             </Button>
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
+              <AvatarImage
+                src="/placeholder.svg?height=32&width=32"
+                alt="User"
+              />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
           </div>
@@ -306,15 +164,19 @@ export default function UnifiedMessaging() {
           <div
             className={cn(
               "flex-1 overflow-y-auto border-r border-gray-100 bg-white",
-              rightPanelOpen ? "hidden md:block md:w-1/2 lg:w-2/5" : "w-full",
+              rightPanelOpen ? "hidden md:block md:w-1/2 lg:w-2/5" : "w-full"
             )}
           >
             <div className="p-4">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-medium">
-                  {activePlatform === "all" ? "All Messages" : platforms.find((p) => p.id === activePlatform)?.name}
+                  {activePlatform === "all"
+                    ? "All Messages"
+                    : platforms.find((p) => p.id === activePlatform)?.name}
                 </h2>
-                <span className="text-sm text-gray-500">{filteredMessages.length} messages</span>
+                <span className="text-sm text-gray-500">
+                  {filteredMessages.length} messages
+                </span>
               </div>
 
               <div className="space-y-3">
@@ -323,41 +185,63 @@ export default function UnifiedMessaging() {
                     key={message.id}
                     className={cn(
                       "cursor-pointer overflow-hidden border transition-all hover:shadow-md",
-                      selectedMessage.id === message.id ? "border-blue-200 bg-blue-50/50 ring-1 ring-blue-200" : "",
-                      message.unread ? "border-l-4 border-l-blue-500" : "",
+                      selectedMessage.id === message.id
+                        ? "border-blue-200 bg-blue-50/50 ring-1 ring-blue-200"
+                        : "",
+                      message.unread ? "border-l-4 border-l-blue-500" : ""
                     )}
                     onClick={() => {
-                      setSelectedMessage(message)
-                      if (!rightPanelOpen) setRightPanelOpen(true)
+                      setSelectedMessage(message);
+                      if (!rightPanelOpen) setRightPanelOpen(true);
                     }}
                   >
                     <div className="p-4">
                       <div className="flex items-start gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={message.avatar || "/placeholder.svg"} alt={message.sender} />
-                          <AvatarFallback>{message.sender.charAt(0)}</AvatarFallback>
+                          <AvatarImage
+                            src={message.avatar || "/placeholder.svg"}
+                            alt={message.sender}
+                          />
+                          <AvatarFallback>
+                            {message.sender.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h3 className={cn("font-medium", message.unread && "font-semibold")}>{message.sender}</h3>
-                            <span className="text-xs text-gray-500">{message.timestamp}</span>
+                            <h3
+                              className={cn(
+                                "font-medium",
+                                message.unread && "font-semibold"
+                              )}
+                            >
+                              {message.sender}
+                            </h3>
+                            <span className="text-xs text-gray-500">
+                              {message.timestamp}
+                            </span>
                           </div>
                           <div className="mt-1 flex items-center gap-2">
                             <Badge
                               variant="outline"
                               className={cn(
                                 "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                                getPlatformColor(message.platform),
+                                getPlatformColor(message.platform)
                               )}
                             >
                               {getPlatformIcon(message.platform)}
                               <span className="ml-0.5">{message.platform}</span>
                             </Badge>
                           </div>
-                          <p className="mt-2 text-sm text-gray-600 line-clamp-2">{message.preview}</p>
+                          <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                            {message.preview}
+                          </p>
                           <div className="mt-2 flex flex-wrap gap-1">
                             {message.tags.map((tag) => (
-                              <Badge key={tag} variant="secondary" className={cn("text-xs", tagColors[tag])}>
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className={cn("text-xs", tagColors[tag])}
+                              >
                                 {tag}
                               </Badge>
                             ))}
@@ -385,20 +269,26 @@ export default function UnifiedMessaging() {
                             src={selectedMessage.avatar || "/placeholder.svg"}
                             alt={selectedMessage.sender}
                           />
-                          <AvatarFallback>{selectedMessage.sender.charAt(0)}</AvatarFallback>
+                          <AvatarFallback>
+                            {selectedMessage.sender.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="font-medium">{selectedMessage.sender}</h3>
+                          <h3 className="font-medium">
+                            {selectedMessage.sender}
+                          </h3>
                           <div className="flex items-center gap-2">
                             <Badge
                               variant="outline"
                               className={cn(
                                 "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                                getPlatformColor(selectedMessage.platform),
+                                getPlatformColor(selectedMessage.platform)
                               )}
                             >
                               {getPlatformIcon(selectedMessage.platform)}
-                              <span className="ml-0.5">{selectedMessage.platform}</span>
+                              <span className="ml-0.5">
+                                {selectedMessage.platform}
+                              </span>
                             </Badge>
                           </div>
                         </div>
@@ -415,7 +305,11 @@ export default function UnifiedMessaging() {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {selectedMessage.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className={cn("text-xs", tagColors[tag])}>
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className={cn("text-xs", tagColors[tag])}
+                        >
                           {tag}
                         </Badge>
                       ))}
@@ -428,17 +322,31 @@ export default function UnifiedMessaging() {
                       {selectedMessage.conversation.map((message) => (
                         <div
                           key={message.id}
-                          className={cn("flex", message.isIncoming ? "justify-start" : "justify-end")}
+                          className={cn(
+                            "flex",
+                            message.isIncoming ? "justify-start" : "justify-end"
+                          )}
                         >
                           <div
                             className={cn(
                               "max-w-[80%] rounded-lg px-4 py-3 shadow-sm",
-                              message.isIncoming ? "bg-white" : "bg-blue-500 text-white",
+                              message.isIncoming
+                                ? "bg-white"
+                                : "bg-blue-500 text-white"
                             )}
                           >
                             <div className="mb-1 flex items-center justify-between gap-4">
-                              <span className="font-medium">{message.sender}</span>
-                              <span className={cn("text-xs", message.isIncoming ? "text-gray-500" : "text-blue-100")}>
+                              <span className="font-medium">
+                                {message.sender}
+                              </span>
+                              <span
+                                className={cn(
+                                  "text-xs",
+                                  message.isIncoming
+                                    ? "text-gray-500"
+                                    : "text-blue-100"
+                                )}
+                              >
                                 {message.timestamp}
                               </span>
                             </div>
@@ -478,5 +386,5 @@ export default function UnifiedMessaging() {
         </div>
       </div>
     </div>
-  )
+  );
 }
