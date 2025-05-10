@@ -1,4 +1,11 @@
-import { MessageCircle, Mail, Facebook, Instagram, Slack } from "lucide-react";
+import {
+  MessageCircle,
+  Mail,
+  Facebook,
+  Instagram,
+  Slack,
+  UserCog,
+} from "lucide-react";
 
 // Mock data for messages
 export const messages = [
@@ -135,4 +142,12 @@ export const platforms = [
     icon: <Instagram className="h-5 w-5" />,
   },
   { id: "slack", name: "Slack", icon: <Slack className="h-5 w-5" /> },
+];
+
+export const settings = [
+  {
+    id: "integrations",
+    name: "Integrations",
+    icon: <UserCog className="h-5 w-5" />,
+  },
 ];
