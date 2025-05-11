@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ChevronDown,
@@ -29,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { platforms, messages } from "@/lib/constants";
 import Sidebar from "@/components/ui/Sidebar/Sidebar";
 import Integrations from "@/components/sections/Integrations/Integrations";
+import Searchbar from "@/components/ui/Searchbar/Searchbar";
+import PlatformFilter from "@/components/ui/Filter/PlatformFilter";
 
 export default function Dashboard() {
   const [selectedMessage, setSelectedMessage] = useState(messages[0]);
@@ -121,19 +122,8 @@ export default function Dashboard() {
 
             {/* Search and filters */}
             <div className="flex flex-1 items-center justify-end gap-2 md:justify-center md:gap-4">
-              <div className="relative hidden md:block md:w-96">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
-                <Input
-                  type="search"
-                  placeholder="Search across all messages..."
-                  className="w-full border-none bg-gray-50 pl-9 focus-visible:ring-1 focus-visible:ring-gray-200 focus-visible:ring-offset-0"
-                />
-              </div>
-              <Button variant="outline" size="sm" className="gap-1">
-                <Filter className="h-4 w-4" />
-                <span className="hidden md:inline">Filter</span>
-                <ChevronDown className="h-3 w-3" />
-              </Button>
+              <Searchbar />
+              <PlatformFilter />
             </div>
 
             {/* User profile */}
