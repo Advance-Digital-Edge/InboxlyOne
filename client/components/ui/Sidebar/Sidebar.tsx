@@ -6,18 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ReactElement } from "react";
 import { cn } from "@/lib/utils";
 import { settings } from "@/lib/constants";
-
-export interface Platform {
-  id: string;
-  name: string;
-  icon: ReactElement;
-}
+import { getPlatformColor } from "@/lib/platformUtils";
 
 interface SidebarProps {
   platforms: Platform[];
   activePlatform: string;
   setActivePlatform: (platform: string) => void;
-  getPlatformColor: (platform: string) => void;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
 }
@@ -28,7 +22,6 @@ export default function Sidebar({
   setActivePlatform,
   sidebarOpen,
   setSidebarOpen,
-  getPlatformColor,
 }: SidebarProps) {
   return (
     <aside
@@ -61,11 +54,10 @@ export default function Sidebar({
               {platforms.map((platform, index) => (
                 <li key={index}>
                   <button
-                    key={platform.id}
                     className={cn(
-                      "flex gap-2 w-full items-center rounded-md px-3 py-2 text-sm font-medium  transition-colors",
+                      "flex gap-2 w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                       activePlatform === platform.id
-                        ? `bg-slate-200  ${getPlatformColor(platform.name)}`
+                        ? `bg-slate-200 ${getPlatformColor(platform.name)}`
                         : "text-gray-800 hover:bg-gray-100 hover:text-gray-900"
                     )}
                     onClick={() => setActivePlatform(platform.id)}
