@@ -46,7 +46,7 @@ export default function SignInForm() {
         "email": data.user['user_metadata'].email,
         "id": data.user["id"],
       }));
-      router.push("/protected")
+      router.push("/dashboard")
     },
     onError: (error) => {
       console.error("Login error", error);
