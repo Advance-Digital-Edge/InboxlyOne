@@ -12,9 +12,9 @@ export default async function SlackAuthPage() {
     
     const authToken = session?.access_token;
     const userId = session?.user.id;
-   console.log("Slack Client ID:", SLACK_CLIENT_ID);
-  console.log("Temporary URL:", TEMP_URL);
-  const redirectUrl = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read&user_scope=channels:history,groups:history,im:history,mpim:history,users:read&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&auth_token=${authToken}&state=${userId}`;
+    console.log("Slack Client ID:", SLACK_CLIENT_ID);
+    console.log("Temporary URL:", TEMP_URL);
+    const redirectUrl = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read&user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,users:read&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}&force_scope=1&force_reinstall=1`;
 
   return (
     <a href={redirectUrl}>
