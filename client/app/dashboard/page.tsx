@@ -6,20 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ChevronDown,
-  Facebook,
-  Filter,
-  Instagram,
-  Mail,
   Menu,
   MoreHorizontal,
-  Paperclip,
   Search,
-  Send,
-  Settings,
-  Tag,
-  MessageCircle,
-  Slack,
   PhoneIcon as WhatsApp,
   X,
 } from "lucide-react";
