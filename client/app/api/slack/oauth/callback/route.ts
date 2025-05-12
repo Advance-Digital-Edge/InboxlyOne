@@ -9,8 +9,10 @@ const supabase = createClient(
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
+  console.log("Redirect URI:", process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL);
   const authUserId = req.nextUrl.searchParams.get('state'); // Sent from frontend
   const redirectUri = `${process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL}/api/slack/oauth/callback`;
+  console.log("Generated Redirect URI:", redirectUri);
 
   if (!code) {
     return NextResponse.json({ error: 'No code provided' }, { status: 400 });
@@ -36,6 +38,7 @@ export async function GET(req: NextRequest) {
   if (!data.ok) {
     return NextResponse.json({ error: 'OAuth failed', details: data }, { status: 400 });
   }
+  console.log("OAuth Data Returned:", data);
 
   const accessToken = data.authed_user.access_token;
   const slackUserId = data.authed_user.id;
@@ -55,8 +58,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to save token', details: error }, { status: 500 });
   }
  
-  const url = new URL(req.url);
-  url.pathname = '/slack-connected';
+  const url = new URL(`${process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL}/slack-channels`);
 
   return NextResponse.redirect(url); //Or success page
 }
