@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,12 +21,31 @@ import PlatformFilter from "@/components/ui/Filter/PlatformFilter";
 import MessageList from "@/components/ui/Messages/MessageList";
 import { getPlatformColor, getPlatformIcon } from "@/lib/platformUtils";
 import MessageDetailsWrapper from "@/components/ui/Messages/MessageDetails/MessageDetailsWrapper";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Dashboard() {
   const [selectedMessage, setSelectedMessage] = useState(messages[0]);
+  const [slackMessages, setSlackMessages] = useState<any[]>([]);
   const [activePlatform, setActivePlatform] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+      const fetchMessages = async () => {
+        if (!user?.id) return;
+        const res = await fetch('/api/slack/messages', {
+          headers: { 'x-user-id': user.id },
+        });
+        const data = await res.json();
+        if (data.ok) {
+          setSlackMessages(data.messages);
+          console.log(data.messages);
+        }
+      };
+      fetchMessages();
+    }, [user?.id]);
+
 
   const tagColors: Record<string, string> = {
     Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
@@ -113,7 +132,7 @@ export default function Dashboard() {
           <div className="flex flex-1 overflow-hidden">
             {/* Message list */}
             <MessageList
-              messages={messages}
+              messages={activePlatform === "slack" ? slackMessages : messages}
               platforms={platforms}
               activePlatform={activePlatform}
               rightPanelOpen={rightPanelOpen}
