@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
   const { data: tokenRow, error } = await supabase
     .from('slack_tokens')
-    .select('access_token')
+    .select('access_token, slack_user_id')
     .eq('auth_user_id', authUserId)
     .single();
 
@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
   }
 
   const token = tokenRow.access_token;
+  const currentUserSlackId = tokenRow.slack_user_id;
 
   // Step 1: Get all IM channels
   const imRes = await fetch('https://slack.com/api/conversations.list?types=im', {
@@ -32,31 +33,36 @@ export async function GET(req: NextRequest) {
 
   const { channels } = await imRes.json();
 
-  const dms = await Promise.all(
-    channels.map(async (channel: any) => {
-      // Get the DM partner’s name
+  const messages = await Promise.all(
+    channels.map(async (channel: any, index: number) => {
+      // Get conversation partner's user info
       const userRes = await fetch(`https://slack.com/api/users.info?user=${channel.user}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const userInfo = await userRes.json();
-      const displayName =
+
+      const partnerName =
         userInfo.user?.profile?.display_name ||
         userInfo.user?.real_name ||
         userInfo.user?.name ||
         'Unknown User';
 
-      // Get message history
+      const avatar = userInfo.user?.profile?.image_72 || '';
+
+      // Fetch message history
       const historyRes = await fetch(`https://slack.com/api/conversations.history?channel=${channel.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const history = await historyRes.json();
 
-      // Get unique user IDs from messages
-      const uniqueUserIds: string[] = [
-        ...Array.from(new Set((history.messages || []).map((msg: any) => msg.user).filter(Boolean))) as string[]
+      const allMessages = history.messages || [];
+
+      // Get all unique user IDs from messages
+      const uniqueUserIds = [
+        ...Array.from(new Set(allMessages.map((msg: any) => msg.user).filter(Boolean))) as string[]
       ];
 
-      // Fetch user names for all users in the message list
+      // Fetch all user names
       const userMap: Record<string, string> = {};
       await Promise.all(
         uniqueUserIds.map(async (userId: string) => {
@@ -72,20 +78,44 @@ export async function GET(req: NextRequest) {
         })
       );
 
-      // Enrich each message with userId and userName
-      const enrichedMessages = (history.messages || []).map((msg: any) => ({
-        ...msg,
-        userId: msg.user,
-        userName: userMap[msg.user] || 'Unknown User'
-      }));
+      // Sort messages by timestamp in ascending order
+      const conversation = allMessages
+        .sort((a: any, b: any) => parseFloat(a.ts) - parseFloat(b.ts)) // Sort by timestamp
+        .map((msg: any, i: number) => ({
+          id: i,
+          senderId: msg.user || 'system',
+          sender: userMap[msg.user] || 'Unknown User',
+          content: msg.text,
+          timestamp: new Date(parseFloat(msg.ts) * 1000).toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false, // Use 24-hour format; set to `true` for 12-hour format
+          }),
+          isIncoming: msg.user !== currentUserSlackId,
+        }));
+
+      const lastMessage = allMessages[allMessages.length - 1];
 
       return {
-        channelId: channel.id,
-        channelName: displayName,
-        messages: enrichedMessages
+        id: index,
+        sender: partnerName,         // The name of the person you're chatting with
+        senderId: channel.user,      // Their Slack ID
+        avatar,
+        preview: lastMessage?.text || "No messages yet",
+        timestamp: lastMessage
+          ? new Date(parseFloat(lastMessage.ts) * 1000).toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false, // Use 24-hour format; set to `true` for 12-hour format
+            })
+          : '',
+        platform: 'slack',
+        unread: false,
+        tags: [],
+        conversation,
       };
     })
   );
 
-  return NextResponse.json({ ok: true, dms });
+  return NextResponse.json({ ok: true, messages });
 }
