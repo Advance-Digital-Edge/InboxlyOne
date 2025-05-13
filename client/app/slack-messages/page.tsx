@@ -1,25 +1,27 @@
 'use client';
 import { useEffect, useState } from 'react';
 import {createClient} from "@/utils/supabase/client";
+import { useAuth } from '../context/AuthProvider';
 
 export default function SlackMessages() {
   const [dms, setDms] = useState<any[]>([]);
   const [authUserId, setAuthUserId] = useState<string | null>(null);
   const supabase = createClient();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setAuthUserId(user?.id || null);
-    };
-    fetchUser();
-  }, []);
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     const { data: { user } } = await supabase.auth.getUser();
+  //     setAuthUserId(user?.id || null);
+  //   };
+  //   fetchUser();
+  // }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!authUserId) return;
+      if (!user.id) return;
       const res = await fetch('/api/slack/messages', {
-        headers: { 'x-user-id': authUserId },
+        headers: { 'x-user-id': user.id },
       });
       const data = await res.json();
       if (data.ok) {
@@ -27,7 +29,7 @@ export default function SlackMessages() {
       }
     };
     fetchMessages();
-  }, [authUserId]);
+  }, [user?.id]);
 
   return (
     <div>
