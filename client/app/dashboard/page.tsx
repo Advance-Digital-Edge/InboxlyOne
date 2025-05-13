@@ -40,8 +40,7 @@ export default function Dashboard() {
         const data = await res.json();
         if (data.ok) {
           setSlackMessages(data.messages);
-          console.log(data.messages);
-        }
+      }
       };
       fetchMessages();
     }, [user?.id]);

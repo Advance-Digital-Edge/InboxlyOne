@@ -12,8 +12,6 @@ import ProfileNavbar from "../ui/Profile/ProfileNavbar";
 export default function Navbar(): JSX.Element {
   const { user } = useAuth();
 
-  console.log("Navbar user", user);
-
   return (
     <header className={styles.header}>
       <Link href={"/"}>
