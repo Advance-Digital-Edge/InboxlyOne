@@ -21,6 +21,7 @@ declare global {
   type Message = {
     id: number;
     sender: string;
+    senderId?: string;
     avatar: string;
     preview: string;
     timestamp: string;
