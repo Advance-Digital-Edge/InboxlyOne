@@ -13,7 +13,6 @@ import LoginButton from "../Button/LoginButton";
 export default function ProfileNavbar(): JSX.Element {
    const { user, loading } = useAuth();
    
-     console.log("Navbar user", user);
    
    return(
       <div className={styles.container}>
