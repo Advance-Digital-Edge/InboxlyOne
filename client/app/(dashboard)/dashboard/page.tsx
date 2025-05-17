@@ -77,6 +77,7 @@ export default function Dashboard() {
 
       {/* Sidebar */}
       <Sidebar
+        user={user}
         platforms={platforms}
         activePlatform={activePlatform}
         setActivePlatform={setActivePlatformHandler}
