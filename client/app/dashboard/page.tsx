@@ -32,20 +32,19 @@ export default function Dashboard() {
   const { user } = useAuth();
 
   useEffect(() => {
-      const fetchMessages = async () => {
-        if (!user?.id) return;
-        const res = await fetch('/api/slack/messages', {
-          headers: { 'x-user-id': user.id },
-        });
-        const data = await res.json();
-        if (data.ok) {
-          setSlackMessages(data.messages);
-          console.log(data.messages);
-        }
-      };
-      fetchMessages();
-    }, [user?.id]);
-
+    const fetchMessages = async () => {
+      if (!user?.id) return;
+      const res = await fetch("/api/slack/messages", {
+        headers: { "x-user-id": user.id },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setSlackMessages(data.messages);
+        console.log(data.messages);
+      }
+    };
+    fetchMessages();
+  }, [user?.id]);
 
   const tagColors: Record<string, string> = {
     Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
@@ -86,6 +85,20 @@ export default function Dashboard() {
         setSidebarOpen={toggleSidebarHandler}
       />
 
+      {/* Menu button for mobile - always visible */}
+      <div className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 lg:hidden">
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-2"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+
       {/* Central inbox */}
       {activePlatform === "integrations" ? (
         <Integrations />
@@ -93,17 +106,6 @@ export default function Dashboard() {
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Top bar */}
           <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4">
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="mr-2 lg:hidden"
-                onClick={() => setSidebarOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
-
             {/* Search and filters */}
             <div className="flex flex-1 items-center justify-end gap-2 md:justify-center md:gap-4">
               <Searchbar />
