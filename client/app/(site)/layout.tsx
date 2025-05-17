@@ -1,6 +1,8 @@
+// app/(site)/layout.tsx
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-export default async function Layout({
+
+export default function SiteLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -8,9 +10,7 @@ export default async function Layout({
   return (
     <>
       <Navbar />
-      <div className="w-full flex justify-center flex-col gap-12 items-center">
-        {children}
-      </div>
+      {children}
       <Footer />
     </>
   );

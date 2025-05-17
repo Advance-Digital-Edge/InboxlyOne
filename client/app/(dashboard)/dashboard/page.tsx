@@ -12,7 +12,6 @@ import {
   PhoneIcon as WhatsApp,
   X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { platforms, messages } from "@/lib/constants";
 import Sidebar from "@/components/ui/Sidebar/Sidebar";
 import Integrations from "@/components/sections/Integrations/Integrations";
@@ -21,7 +20,7 @@ import PlatformFilter from "@/components/ui/Filter/PlatformFilter";
 import MessageList from "@/components/ui/Messages/MessageList";
 import { getPlatformColor, getPlatformIcon } from "@/lib/platformUtils";
 import MessageDetailsWrapper from "@/components/ui/Messages/MessageDetails/MessageDetailsWrapper";
-import { useAuth } from "../context/AuthProvider";
+import { useAuth } from "../../context/AuthProvider";
 
 export default function Dashboard() {
   const [selectedMessage, setSelectedMessage] = useState(messages[0]);
@@ -78,6 +77,7 @@ export default function Dashboard() {
 
       {/* Sidebar */}
       <Sidebar
+        user={user}
         platforms={platforms}
         activePlatform={activePlatform}
         setActivePlatform={setActivePlatformHandler}

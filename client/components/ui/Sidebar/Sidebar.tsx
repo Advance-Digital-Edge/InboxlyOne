@@ -9,6 +9,7 @@ import { settings } from "@/lib/constants";
 import { getPlatformColor } from "@/lib/platformUtils";
 
 interface SidebarProps {
+  user: any;
   platforms: Platform[];
   activePlatform: string;
   setActivePlatform: (platform: string) => void;
@@ -17,6 +18,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({
+  user,
   platforms,
   activePlatform,
   setActivePlatform,
@@ -102,15 +104,14 @@ export default function Sidebar({
         <div className="border-t border-gray-300 p-4">
           <div className="flex items-center">
             <Avatar className="h-8 w-8">
-              <AvatarImage
-                src="/placeholder.svg?height=32&width=32"
-                alt="User"
-              />
+              <AvatarImage src={user?.user_metadata?.avatar_url} alt="User" />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <div className="ml-3">
-              <p className="text-sm font-medium">Alex Johnson</p>
-              <p className="text-xs text-gray-500">alex@example.com</p>
+              <p className="text-sm font-medium">{user?.user_metadata?.name}</p>
+              <p className="text-xs text-gray-500 truncate overflow-hidden whitespace-nowrap max-w-[150px]">
+                {user?.user_metadata?.email}
+              </p>
             </div>
             <Button variant="ghost" size="icon" className="ml-auto">
               <Settings className="h-4 w-4" />
