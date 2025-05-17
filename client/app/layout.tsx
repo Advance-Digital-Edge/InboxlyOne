@@ -6,6 +6,7 @@ import styles from "./layout.module.css";
 import Navbar from "@/components/layout/Navbar";
 import QueryProvider from "./context/QueryProvider";
 import { AuthProvider } from "./context/AuthProvider";
+import LayoutVisibilityWrapper from "@/components/wrappers/LayoutVisibilityWrapper";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -32,9 +33,7 @@ export default function RootLayout({
       <body className={styles.container}>
         <AuthProvider>
           <QueryProvider>
-            <Navbar />
-            {children}
-            <Footer />
+            <LayoutVisibilityWrapper>{children}</LayoutVisibilityWrapper>
           </QueryProvider>
         </AuthProvider>
       </body>

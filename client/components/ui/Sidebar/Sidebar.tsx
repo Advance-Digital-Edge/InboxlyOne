@@ -33,7 +33,7 @@ export default function Sidebar({
       <div className="flex h-full flex-col">
         {/* Sidebar header */}
         <div className="flex h-14 items-center border-b border-gray-200 px-4">
-          <h1 className="text-lg font-semibold">Inbox Hub</h1>
+          <h1 className="text-lg font-semibold">Inboxlyone</h1>
           <Button
             variant="ghost"
             size="icon"

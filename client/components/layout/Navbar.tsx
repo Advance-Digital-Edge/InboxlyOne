@@ -6,13 +6,9 @@ import { Button } from "@/components/ui/Button/button";
 import styles from "./navbar.module.css";
 import MobileMenu from "./NavbarMobile";
 import { JSX } from "react";
-import { useAuth } from "@/app/context/AuthProvider";
 import ProfileNavbar from "../ui/Profile/ProfileNavbar";
 
 export default function Navbar(): JSX.Element {
-  const { user } = useAuth();
-
-  console.log("Navbar user", user);
 
   return (
     <header className={styles.header}>
