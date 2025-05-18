@@ -18,22 +18,22 @@ export default function Conversation({ selectedMessage }: ConversationProps) {
           >
             <div
               className={cn(
-                "max-w-[80%] rounded-lg px-4 py-3 shadow-sm",
-                message.isIncoming ? "bg-white" : "bg-blue-500 text-white"
+              "max-w-[80%] rounded-lg px-4 py-3 shadow-sm break-words whitespace-pre-line",
+              message.isIncoming ? "bg-white" : "bg-blue-500 text-white"
               )}
             >
               <div className="mb-1 flex items-center justify-between gap-4">
-                <span className="font-medium">{message.sender}</span>
-                <span
-                  className={cn(
-                    "text-xs",
-                    message.isIncoming ? "text-gray-500" : "text-blue-100"
-                  )}
-                >
-                  {message.timestamp}
-                </span>
+              <span className="font-medium">{message.sender}</span>
+              <span
+                className={cn(
+                "text-xs",
+                message.isIncoming ? "text-gray-500" : "text-blue-100"
+                )}
+              >
+                {message.timestamp}
+              </span>
               </div>
-              <p className="text-sm">{message.content}</p>
+              <p className="text-sm break-words whitespace-pre-line">{message.content}</p>
             </div>
           </div>
         ))}
