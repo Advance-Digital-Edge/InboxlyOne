@@ -7,7 +7,7 @@ import { ReactElement } from "react";
 import { cn } from "@/lib/utils";
 import { settings } from "@/lib/constants";
 import { getPlatformColor } from "@/lib/platformUtils";
-
+import { useRouter } from "next/navigation";
 interface SidebarProps {
   user: any;
   platforms: Platform[];
@@ -25,6 +25,12 @@ export default function Sidebar({
   sidebarOpen,
   setSidebarOpen,
 }: SidebarProps) {
+  const router = useRouter();
+
+  const handlePlatformClick = (platformId: string) => {
+    setActivePlatform(platformId);
+    router.push(`/dashboard/${platformId}`);
+  };
   return (
     <aside
       className={cn(
@@ -50,7 +56,7 @@ export default function Sidebar({
         <nav className="flex-1 overflow-y-auto p-2">
           <div className="mb-4 px-3 py-2">
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-              Main
+              Platforms
             </h2>
             <ul className="space-y-1">
               {platforms.map((platform, index) => (
@@ -62,7 +68,7 @@ export default function Sidebar({
                         ? `bg-slate-200 ${getPlatformColor(platform.name)}`
                         : "text-gray-800 hover:bg-gray-100 hover:text-gray-900"
                     )}
-                    onClick={() => setActivePlatform(platform.id)}
+                    onClick={() => handlePlatformClick(platform.id)}
                     title={platform.name}
                   >
                     {platform.icon}
@@ -88,7 +94,7 @@ export default function Sidebar({
                         ? "bg-slate-200 text-gray-900"
                         : "text-gray-800 hover:bg-gray-100 hover:text-gray-900"
                     )}
-                    onClick={() => setActivePlatform(setting.id)}
+                    onClick={() => handlePlatformClick(setting.id)}
                     title={setting.name}
                   >
                     {setting.icon}

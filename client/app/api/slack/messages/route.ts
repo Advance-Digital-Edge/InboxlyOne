@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
               hour12: false, // Use 24-hour format; set to `true` for 12-hour format
             })
           : '',
-        platform: 'slack',
+        platform: 'Slack',
         unread: false,
         tags: [],
         conversation,
