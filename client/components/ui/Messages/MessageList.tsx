@@ -6,18 +6,16 @@ import { getPlatformIcon, getPlatformColor } from "@/lib/platformUtils";
 
 interface MessageListProps {
   messages: Message[];
-  platforms: Platform[];
   activePlatform: string;
   rightPanelOpen: boolean;
   sidebarOpen: boolean;
   tagColors: Record<string, string>;
-  selectedMessage: Message;
+  selectedMessage: Message | null;
   selectMessageHandler: (message: Message) => void;
 }
 
 export default function MessageList({
   messages,
-  platforms,
   activePlatform,
   rightPanelOpen,
   sidebarOpen,
@@ -25,13 +23,8 @@ export default function MessageList({
   selectedMessage,
   selectMessageHandler,
 }: MessageListProps) {
-  // Filter messages based on active platform
-  const filteredMessages =
-    activePlatform === "all"
-      ? messages
-      : messages.filter(
-          (message) => message.platform.toLowerCase() === activePlatform
-        );
+ 
+  
   return (
     <div
       className={cn(
@@ -42,22 +35,19 @@ export default function MessageList({
       <div className="p-4">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-medium">
-            {activePlatform === "all"
-              ? "All Messages"
-              : platforms.find((p) => p.id === activePlatform)?.name}
           </h2>
           <span className="text-sm text-gray-500">
-            {filteredMessages.length} messages
+           {messages.length} messages
           </span>
         </div>
 
         <div className="space-y-3">
-          {filteredMessages.map((message) => (
+          {messages.map((message) => (
             <Card
               key={message.id}
               className={cn(
                 "cursor-pointer overflow-hidden border transition-all hover:shadow-md",
-                selectedMessage.id === message.id
+                selectedMessage?.id === message.id
                   ? "border-blue-200 bg-blue-50/50 ring-1 ring-blue-200"
                   : "",
                 message.unread ? "border-l-4 border-l-purple-900" : ""
