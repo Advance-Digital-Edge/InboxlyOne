@@ -9,6 +9,7 @@ import { JSX } from "react";
 import ProfileNavbar from "../ui/Profile/ProfileNavbar";
 
 export default function Navbar(): JSX.Element {
+  const { user } = useAuth();
 
   return (
     <header className={styles.header}>

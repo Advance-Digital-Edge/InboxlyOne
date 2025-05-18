@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Facebook, Mail, Slack, Instagram, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/app/context/AuthProvider";
+
 
 // Integration data with only the requested platforms
 const integrations = [
@@ -87,7 +89,19 @@ const getContrastColor = (platformColor: string, index: number) => {
   return colors[index % colors.length];
 };
 
+const SLACK_CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
+const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL; 
+
 export default function Integrations() {
+  const { userIntegrations } = useAuth();
+
+  integrations[1].connected = userIntegrations?.slack_connected || false;
+
+  const handleConnectClick = (integrationId: string) => {
+    if (integrationId === "slack") {
+      window.location.href = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read&user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,users:read&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}&force_scope=1&force_reinstall=1`;
+    }
+  };
   // This would be a state function in a real app
   const removeAccount = (integrationId: string, accountId: string) => {
     console.log(`Remove account ${accountId} from ${integrationId}`);
@@ -230,6 +244,7 @@ export default function Integrations() {
                     color: "white",
                     borderColor: integration.color,
                   }}
+                  onClick={() => handleConnectClick(integration.id)}
                 >
                   Connect
                 </Button>
