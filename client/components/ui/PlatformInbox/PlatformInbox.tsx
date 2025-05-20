@@ -13,10 +13,14 @@ export default function PlatformInbox({
   platform,
   fetchUrl,
   fetchedMessages,
+  onSend, 
+  sending, 
 }: {
   platform: string;
   fetchUrl?: string;
   fetchedMessages?: Message[] | null;
+  onSend?: (text: string, selectedMessage: Message | null) => void;
+  sending?: boolean;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -42,7 +46,6 @@ export default function PlatformInbox({
     };
     fetchMessages();
   }, [fetchUrl, fetchedMessages]);
-
 
   const tagColors = {
     Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
@@ -93,6 +96,8 @@ export default function PlatformInbox({
               <MessageDetailsWrapper
                 selectedMessage={selectedMessage}
                 tagColors={tagColors}
+                onSend={(text: string) => onSend?.(text, selectedMessage)}
+                sending={sending}
               />
             ) : (
               <div className="flex h-full items-center justify-center">
