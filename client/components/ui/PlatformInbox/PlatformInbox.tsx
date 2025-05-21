@@ -15,22 +15,25 @@ export default function PlatformInbox({
   fetchedMessages,
   onSend, 
   sending, 
+  selectedMessage,
+   setSelectedMessage: setSelectedMessageProp,
 }: {
   platform: string;
   fetchUrl?: string;
   fetchedMessages?: Message[] | null;
   onSend?: (text: string, selectedMessage: Message | null) => void;
   sending?: boolean;
+ selectedMessage?: Message | null;
+  setSelectedMessage?: (msg: Message | null) => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   const { sidebarOpen } = useSidebar();
 
-  const selectMessageHandler = (message: Message) => {
-    setSelectedMessage(message);
-    if (!rightPanelOpen) setRightPanelOpen(true);
-  };
+ const selectMessageHandler = (message: Message) => {
+  setSelectedMessageProp?.(message);
+  if (!rightPanelOpen) setRightPanelOpen(true);
+};
 
   useEffect(() => {
     const fetchMessages = async () => {
