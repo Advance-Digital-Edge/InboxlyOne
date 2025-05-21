@@ -7,6 +7,7 @@ import styles from "./navbar.module.css";
 import MobileMenu from "./NavbarMobile";
 import { JSX } from "react";
 import ProfileNavbar from "../ui/Profile/ProfileNavbar";
+import { useAuth } from "@/app/context/AuthProvider";
 
 export default function Navbar(): JSX.Element {
   const { user } = useAuth();
