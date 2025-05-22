@@ -1,6 +1,7 @@
 import MessageHeader from "./MessageHeader";
 import Conversation from "./Conversation";
 import ReplyBox from "./ReplyBox";
+import { Button } from "../../Button/button";
 
 interface MessageDetailsWrapperProps {
   selectedMessage: Message;
@@ -8,6 +9,12 @@ interface MessageDetailsWrapperProps {
   onSend: (text: string) => void;
   sending?: boolean;
 }
+
+const openGmailMessage = (messageId: number) => {
+  const url = `https://mail.google.com/mail/u/0/#inbox/${messageId}`;
+  window.open(url, "_blank");
+};
+
 
 export default function MessageDetailsWrapper({
   selectedMessage,
@@ -19,11 +26,17 @@ export default function MessageDetailsWrapper({
     <div className="flex h-full flex-col">
       <MessageHeader selectedMessage={selectedMessage} tagColors={tagColors} />
       <Conversation selectedMessage={selectedMessage} />
-      <ReplyBox
-        selectedMessage={selectedMessage}
-        onSend={onSend}
-        sending={sending}
-      />
+      {selectedMessage.platform === "Gmail" ? (
+          <Button onClick={() => openGmailMessage(selectedMessage.id)} className="mx-auto mb-1 w-5/6" size={"sm"} >
+            REPLY IN GMAIL
+          </Button>
+      ) : (
+        <ReplyBox
+          selectedMessage={selectedMessage}
+          onSend={onSend}
+          sending={sending}
+        />
+      )}
     </div>
   );
 }

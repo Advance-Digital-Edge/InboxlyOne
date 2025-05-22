@@ -13,8 +13,8 @@ export default function PlatformInbox({
   platform,
   fetchUrl,
   fetchedMessages,
-  onSend, 
-  sending, 
+  onSend,
+  sending,
 }: {
   platform: string;
   fetchUrl?: string;
@@ -22,7 +22,6 @@ export default function PlatformInbox({
   onSend?: (text: string, selectedMessage: Message | null) => void;
   sending?: boolean;
 }) {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   const { sidebarOpen } = useSidebar();
@@ -31,21 +30,6 @@ export default function PlatformInbox({
     setSelectedMessage(message);
     if (!rightPanelOpen) setRightPanelOpen(true);
   };
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (fetchUrl) {
-        const res = await fetch(fetchUrl);
-        const data = await res.json();
-        if (data.ok) {
-          setMessages(data.messages);
-        }
-      } else if (fetchedMessages) {
-        setMessages(fetchedMessages);
-      }
-    };
-    fetchMessages();
-  }, [fetchUrl, fetchedMessages]);
 
   const tagColors = {
     Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
@@ -82,7 +66,7 @@ export default function PlatformInbox({
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         <MessageList
-          messages={messages}
+          messages={fetchedMessages || []}
           activePlatform={platform}
           rightPanelOpen={rightPanelOpen}
           sidebarOpen={sidebarOpen}
