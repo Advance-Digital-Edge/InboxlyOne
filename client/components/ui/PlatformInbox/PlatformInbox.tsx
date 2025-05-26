@@ -75,7 +75,7 @@ export default function PlatformInbox({
           selectMessageHandler={selectMessageHandler}
         />
         {rightPanelOpen && (
-          <div className="w-full overflow-y-auto bg-white md:w-1/2 lg:w-3/5">
+          <div className="w-full md:w-4/6  overflow-y-auto bg-white  ">
             {selectedMessage ? (
               <MessageDetailsWrapper
                 selectedMessage={selectedMessage}

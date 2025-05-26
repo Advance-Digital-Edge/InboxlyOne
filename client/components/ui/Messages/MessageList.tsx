@@ -42,7 +42,7 @@ export default function MessageList({
         </div>
 
         <div className="space-y-3">
-          {messages.map((message) => (
+          {messages?.map((message) => (
             <Card
               key={message.id}
               className={cn(

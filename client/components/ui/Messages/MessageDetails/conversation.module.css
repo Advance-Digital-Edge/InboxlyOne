@@ -1,13 +1,25 @@
 /* Conversation.module.css */
 .messageHtml {
-  all: unset;
-  display: block;
-  max-width: 100%;
+  width: 100%;
   overflow-wrap: break-word;
-  overflow-x: auto;
-  font-family: inherit;
+  word-break: break-word;
   white-space: normal;
+  display: block;
+  font-family: inherit;
+  box-sizing: border-box;
 }
+
+.messageHtml * {
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+.messageHtml img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
 
 .messageHtml a {
   color: #3b82f6;
