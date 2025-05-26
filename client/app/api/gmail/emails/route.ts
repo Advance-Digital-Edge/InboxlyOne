@@ -29,8 +29,15 @@ export async function GET(req: NextRequest) {
       status: 400,
     });
   }
+  
+  //  Initialize Google OAuth2 client with tokens
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+  );
 
-  const oauth2Client = new google.auth.OAuth2();
+  // Set credentials using the stored access and refresh tokens
   oauth2Client.setCredentials({
     access_token: tokenData.access_token,
     refresh_token: tokenData.refresh_token,
@@ -38,33 +45,39 @@ export async function GET(req: NextRequest) {
 
   const gmail = google.gmail({ version: "v1", auth: oauth2Client });
 
-  // 📥 List messages
-  const messagesRes = await gmail.users.messages.list({
-    userId: "me",
-    labelIds: ["INBOX"],
-    maxResults: 20,
-    q: "category:primary newer_than:7d",
-  });
-
-  const messageIds = messagesRes.data.messages || [];
-
-  // 🔁 Fetch message details
-  const messagePromises = messageIds.map((msg) =>
-    gmail.users.messages.get({
+  // List messages
+  try {
+    const messagesRes = await gmail.users.messages.list({
       userId: "me",
-      id: msg.id!,
-      format: "full", // or "full" if you need full body
-      metadataHeaders: ["Subject", "From", "Date"],
-    })
-  );
+      labelIds: ["INBOX"],
+      maxResults: 20,
+      q: "category:primary newer_than:7d",
+    });
 
-  const messages = await Promise.all(messagePromises);
+    const messageIds = messagesRes.data.messages || [];
 
-  const formatedMessages = messages.map((message) =>
-    formatGmailData(message.data)
-  );
+    // 🔁 Fetch message details
+    const messagePromises = messageIds.map((msg) =>
+      gmail.users.messages.get({
+        userId: "me",
+        id: msg.id!,
+        format: "full", // or "full" if you need full body
+        metadataHeaders: ["Subject", "From", "Date"],
+      })
+    );
 
-  return new Response(JSON.stringify(formatedMessages), {
-    status: 200,
-  });
+    const messages = await Promise.all(messagePromises);
+
+    const formatedMessages = messages.map((message) =>
+      formatGmailData(message.data)
+    );
+
+    return new Response(JSON.stringify(formatedMessages), {
+      status: 200,
+    });
+  } catch (error: any) {
+    console.log(error.response?.status); // e.g. 401, 400, 403, 500
+    console.log(error.response?.data); // More details from Google API
+    console.log(error.message); // General error message
+  }
 }

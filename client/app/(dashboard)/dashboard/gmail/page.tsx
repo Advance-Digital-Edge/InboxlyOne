@@ -1,6 +1,5 @@
 "use client";
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
-import { gmailMessages } from "@/lib/constants";
 import { useEffect, useState } from "react";
 
 export default function GmailPage() {
