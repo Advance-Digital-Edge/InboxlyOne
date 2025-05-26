@@ -19,7 +19,6 @@ import { Facebook, Mail, Slack, Instagram, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
 
-
 // Integration data with only the requested platforms
 const integrations = [
   {
@@ -90,18 +89,55 @@ const getContrastColor = (platformColor: string, index: number) => {
 };
 
 const SLACK_CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
-const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL; 
+const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL;
 
 export default function Integrations() {
   const { userIntegrations } = useAuth();
 
   integrations[1].connected = userIntegrations?.slack_connected || false;
 
+  const openPopup = (
+    url: string,
+    name = "oauthPopup",
+    width = 600,
+    height = 700
+  ) => {
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    return window.open(
+      url,
+      name,
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
+  };
+
   const handleConnectClick = (integrationId: string) => {
+    let url = "";
+
     if (integrationId === "slack") {
-      window.location.href = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read&user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,users:read&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}&force_scope=1&force_reinstall=1`;
+      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=...&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}`;
+    } else if (integrationId === "gmail") {
+      url = "/api/oauth/login"; // this should redirect to Google login
+    }
+
+    if (url) {
+      const popup = openPopup(url);
+
+      const receiveMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data === "gmail-connected") {
+          console.log("✅ Gmail connected!");
+          // e.g., refetch integrations or update UI
+          // showToast("Gmail connected");
+          window.removeEventListener("message", receiveMessage);
+        }
+      };
+
+      window.addEventListener("message", receiveMessage);
     }
   };
+
   // This would be a state function in a real app
   const removeAccount = (integrationId: string, accountId: string) => {
     console.log(`Remove account ${accountId} from ${integrationId}`);
@@ -111,7 +147,7 @@ export default function Integrations() {
   // This would be a state function in a real app
   const addAccount = (integrationId: string) => {
     console.log(`Add new account to ${integrationId}`);
-    // In a real app, this would open a modal or redirect to auth flow
+    handleConnectClick(integrationId);
   };
 
   return (
@@ -134,14 +170,17 @@ export default function Integrations() {
               integration.connected && "shadow-md"
             )}
           >
-        <CardHeader className="pb-3">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-full"
                     style={{ backgroundColor: `${integration.color}20` }}
                   >
-                    <div className="text-foreground" style={{ color: integration.color }}>
+                    <div
+                      className="text-foreground"
+                      style={{ color: integration.color }}
+                    >
                       {integration.icon}
                     </div>
                   </div>
@@ -149,7 +188,11 @@ export default function Integrations() {
                 </div>
                 <Badge
                   variant={integration.connected ? "default" : "outline"}
-                  className={integration.connected ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}
+                  className={
+                    integration.connected
+                      ? "bg-green-100 text-green-800 hover:bg-green-100"
+                      : ""
+                  }
                 >
                   {integration.connected ? "Connected" : "Not connected"}
                 </Badge>
@@ -193,7 +236,10 @@ export default function Integrations() {
                                     }
                                     className="ml-1.5 rounded-full bg-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
-                                    <X className="h-3 w-3 text-gray-500" />
+                                    <X
+                                      color="red"
+                                      className="h-3 w-3 text-gray-500"
+                                    />
                                   </button>
                                 </div>
                               </div>
@@ -215,7 +261,7 @@ export default function Integrations() {
                               onClick={() => addAccount(integration.id)}
                               className="flex items-center rounded-full bg-gray-100 py-1 px-2 text-sm text-gray-600 hover:bg-gray-200 transition-colors"
                             >
-                              <Plus className="h-3 w-3 mr-0.5" />
+                              <Plus color="green" className="h-3 w-3 mr-0.5" />
                               <span>Add</span>
                             </button>
                           </TooltipTrigger>
@@ -247,17 +293,6 @@ export default function Integrations() {
                   onClick={() => handleConnectClick(integration.id)}
                 >
                   Connect
-                </Button>
-              )}
-
-              {/* Show disconnect all button if accounts are connected */}
-              {integration.accounts.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  Disconnect All
                 </Button>
               )}
             </CardFooter>

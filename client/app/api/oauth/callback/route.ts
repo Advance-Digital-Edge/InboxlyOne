@@ -38,5 +38,25 @@ export async function GET(req: NextRequest) {
   });
 
   // ✅ Redirect user back to your frontend (must be full URL or relative path)
-  return Response.redirect(new URL("/dashboard", req.url), 302);
+  return new Response(
+    `
+  <html>
+    <body>
+      <script>
+        if (window.opener) {
+          window.opener.postMessage("gmail-connected", window.origin);
+          window.close();
+        } else {
+          document.body.innerText = "Connected. Please close this window.";
+        }
+      </script>
+    </body>
+  </html>
+`,
+    {
+      headers: {
+        "Content-Type": "text/html",
+      },
+    }
+  );
 }
