@@ -23,13 +23,18 @@ export default function PlatformInbox({
   sending?: boolean;
 }) {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
-  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const { sidebarOpen } = useSidebar();
 
   const selectMessageHandler = (message: Message) => {
     setSelectedMessage(message);
     if (!rightPanelOpen) setRightPanelOpen(true);
   };
+
+const closeRightPanel = () => {
+  setRightPanelOpen(false);
+}
+
 
   const tagColors = {
     Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
@@ -48,17 +53,6 @@ export default function PlatformInbox({
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="md:hidden">
             <Search className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setRightPanelOpen(!rightPanelOpen)}
-          >
-            {rightPanelOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <MoreHorizontal className="h-5 w-5" />
-            )}
           </Button>
         </div>
       </header>
@@ -82,6 +76,7 @@ export default function PlatformInbox({
                 tagColors={tagColors}
                 onSend={(text: string) => onSend?.(text, selectedMessage)}
                 sending={sending}
+                closeRightPanel={closeRightPanel}
               />
             ) : (
               <div className="flex h-full items-center justify-center">
