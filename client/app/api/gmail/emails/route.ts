@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       status: 400,
     });
   }
-  
+
   //  Initialize Google OAuth2 client with tokens
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -76,8 +76,20 @@ export async function GET(req: NextRequest) {
       status: 200,
     });
   } catch (error: any) {
-    console.log(error.response?.status); // e.g. 401, 400, 403, 500
-    console.log(error.response?.data); // More details from Google API
-    console.log(error.message); // General error message
+    const statusCode = error?.response?.status || 500;
+    const errorMessage =
+      error?.response?.data?.error?.message || error.message || "Unknown error";
+
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: {
+          code: statusCode,
+          message: errorMessage,
+          details: error?.response?.data || null,
+        },
+      }),
+      { status: statusCode }
+    );
   }
 }
