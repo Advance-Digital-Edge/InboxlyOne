@@ -13,8 +13,8 @@ export default function PlatformInbox({
   platform,
   fetchUrl,
   fetchedMessages,
-  onSend, 
-  sending, 
+  onSend,
+  sending,
   selectedMessage,
    setSelectedMessage: setSelectedMessageProp,
 }: {
@@ -26,8 +26,7 @@ export default function PlatformInbox({
  selectedMessage?: Message | null;
   setSelectedMessage?: (msg: Message | null) => void;
 }) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const { sidebarOpen } = useSidebar();
 
  const selectMessageHandler = (message: Message) => {
@@ -35,20 +34,10 @@ export default function PlatformInbox({
   if (!rightPanelOpen) setRightPanelOpen(true);
 };
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (fetchUrl) {
-        const res = await fetch(fetchUrl);
-        const data = await res.json();
-        if (data.ok) {
-          setMessages(data.messages);
-        }
-      } else if (fetchedMessages) {
-        setMessages(fetchedMessages);
-      }
-    };
-    fetchMessages();
-  }, [fetchUrl, fetchedMessages]);
+const closeRightPanel = () => {
+  setRightPanelOpen(false);
+}
+
 
   const tagColors = {
     Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
@@ -68,24 +57,13 @@ export default function PlatformInbox({
           <Button variant="ghost" size="icon" className="md:hidden">
             <Search className="h-5 w-5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setRightPanelOpen(!rightPanelOpen)}
-          >
-            {rightPanelOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <MoreHorizontal className="h-5 w-5" />
-            )}
-          </Button>
         </div>
       </header>
 
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         <MessageList
-          messages={messages}
+          messages={fetchedMessages || []}
           activePlatform={platform}
           rightPanelOpen={rightPanelOpen}
           sidebarOpen={sidebarOpen}
@@ -94,13 +72,14 @@ export default function PlatformInbox({
           selectMessageHandler={selectMessageHandler}
         />
         {rightPanelOpen && (
-          <div className="w-full overflow-y-auto bg-white md:w-1/2 lg:w-3/5">
+          <div className="w-full md:w-4/6  overflow-y-auto bg-white  ">
             {selectedMessage ? (
               <MessageDetailsWrapper
                 selectedMessage={selectedMessage}
                 tagColors={tagColors}
                 onSend={(text: string) => onSend?.(text, selectedMessage)}
                 sending={sending}
+                closeRightPanel={closeRightPanel}
               />
             ) : (
               <div className="flex h-full items-center justify-center">

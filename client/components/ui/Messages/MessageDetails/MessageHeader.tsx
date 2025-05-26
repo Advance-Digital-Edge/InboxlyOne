@@ -1,15 +1,20 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tag, MoreHorizontal } from "lucide-react";
+import { Tag, MoreHorizontal, X } from "lucide-react";
 import { getPlatformColor, getPlatformIcon } from "@/lib/platformUtils";
 import { cn } from "@/lib/utils";
 
 interface MessageHeaderProps {
   selectedMessage: Message;
   tagColors: Record<string, string>;
+  closeRightPanel: () => void;
 }
-export default function MessageHeader ({ selectedMessage, tagColors } : MessageHeaderProps)   {
+export default function MessageHeader({
+  selectedMessage,
+  tagColors,
+  closeRightPanel
+}: MessageHeaderProps) {
   return (
     <div className="border-b border-gray-200 p-4">
       <div className="flex items-center justify-between">
@@ -26,7 +31,10 @@ export default function MessageHeader ({ selectedMessage, tagColors } : MessageH
             <div className="flex items-center gap-2">
               <Badge
                 variant="outline"
-                className={cn("flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", getPlatformColor(selectedMessage.platform))}
+                className={cn(
+                  "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                  getPlatformColor(selectedMessage.platform)
+                )}
               >
                 {getPlatformIcon(selectedMessage.platform)}
                 <span className="ml-0.5">{selectedMessage.platform}</span>
@@ -35,24 +43,26 @@ export default function MessageHeader ({ selectedMessage, tagColors } : MessageH
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="gap-1">
+          <Button variant="outline" size="sm" className="gap-1">
             <Tag className="h-4 w-4" />
             <span className="hidden md:inline">Manage Tags</span>
           </Button>
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="h-5 w-5" />
+          <Button onClick={() => closeRightPanel()} variant="ghost" size="icon">
+            <X color="red" className="h-5 w-5" />
           </Button>
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-1">
         {selectedMessage.tags.map((tag) => (
-          <Badge key={tag} variant="secondary" className={cn("text-xs", tagColors[tag])}>
+          <Badge
+            key={tag}
+            variant="secondary"
+            className={cn("text-xs", tagColors[tag])}
+          >
             {tag}
           </Badge>
         ))}
       </div>
     </div>
   );
-};
-
-
+}
