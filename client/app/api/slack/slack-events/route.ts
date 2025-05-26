@@ -10,14 +10,19 @@ export async function POST(req: NextRequest) {
 
   // Handle Slack URL verification challenge
   if (body.type === 'url_verification' && body.challenge) {
-    console.log('Slack challenge received:', body.challenge);
     return NextResponse.json({ challenge: body.challenge });
   }
 
   // Handle normal Slack event callbacks
   if (body.type === 'event_callback') {
-    console.log('Slack event received:', body.event);
-    // You can do something with body.event here (save to Supabase, etc.)
+    // Broadcast the event to your WebSocket server
+    console.log("Slack event received, broadcasting:", body.event);
+    await fetch("http://localhost:4000/broadcast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body.event),
+    });
+
     return new NextResponse('Event received');
   }
 
