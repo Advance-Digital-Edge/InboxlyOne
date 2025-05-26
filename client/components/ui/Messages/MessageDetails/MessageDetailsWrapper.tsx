@@ -9,6 +9,7 @@ interface MessageDetailsWrapperProps {
   tagColors: Record<string, string>;
   onSend: (text: string) => void;
   sending?: boolean;
+  closeRightPanel: () => void;
 }
 
 const openGmailMessage = (messageId: number) => {
@@ -21,10 +22,15 @@ export default function MessageDetailsWrapper({
   tagColors,
   onSend,
   sending,
+  closeRightPanel,
 }: MessageDetailsWrapperProps) {
   return (
     <div className="flex w-full h-full flex-col ">
-      <MessageHeader selectedMessage={selectedMessage} tagColors={tagColors} />
+      <MessageHeader
+        selectedMessage={selectedMessage}
+        tagColors={tagColors}
+        closeRightPanel={closeRightPanel}
+      />
       <Conversation selectedMessage={selectedMessage} />
       {selectedMessage.platform === "Gmail" ? (
         <Button
