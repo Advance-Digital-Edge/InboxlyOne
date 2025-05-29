@@ -18,34 +18,27 @@ import {
 import { Facebook, Mail, Slack, Instagram, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
+import { useMemo } from "react";
 
 // Integration data with only the requested platforms
-const integrations = [
+const BASE_INTEGRATIONS = [
   {
     id: "gmail",
     name: "Gmail",
     icon: <Mail className="h-6 w-6" />,
-    connected: true,
-    accounts: [
-      { id: "gmail1", name: "alex@designstudio.com", type: "Email" },
-      { id: "gmail2", name: "projects@designstudio.com", type: "Email" },
-    ],
-    accountType: "Email",
+    connected: false,
+    accounts: [],
     color: "#D44638",
-    maxAccounts: 3,
+    maxAccounts: 2,
   },
   {
     id: "slack",
     name: "Slack",
     icon: <Slack className="h-6 w-6" />,
-    connected: true,
-    accounts: [
-      { id: "slack1", name: "Design Team", type: "Workspace" },
-      { id: "slack2", name: "Client Projects", type: "Workspace" },
-    ],
-    accountType: "Workspace",
+    connected: false,
+    accounts: [],
     color: "#4A154B",
-    maxAccounts: 5,
+    maxAccounts: 2,
   },
   {
     id: "messenger",
@@ -53,23 +46,15 @@ const integrations = [
     icon: <Facebook className="h-6 w-6" />,
     connected: false,
     accounts: [],
-    accountType: "Page",
     color: "#0084FF",
-    maxAccounts: 5,
+    maxAccounts: 2,
   },
   {
     id: "instagram",
     name: "Instagram",
     icon: <Instagram className="h-6 w-6" />,
-    connected: true,
-    accounts: [
-      {
-        id: "insta1",
-        name: "@designstudio.creative",
-        type: "Business Account",
-      },
-    ],
-    accountType: "Business Account",
+    connected: false,
+    accounts: [],
     color: "#E1306C",
     maxAccounts: 2,
   },
@@ -92,9 +77,25 @@ const SLACK_CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
 const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL;
 
 export default function Integrations() {
-  const { userIntegrations } = useAuth();
+  const { userIntegrations, user } = useAuth();
+  console.log(userIntegrations);
 
-  integrations[1].connected = userIntegrations?.slack_connected || false;
+  const integrations = useMemo(() => {
+    return BASE_INTEGRATIONS.map((base) => {
+      const matches =
+        userIntegrations?.filter((u) => u.provider === base.id) || [];
+
+      return {
+        ...base,
+        connected: matches.length > 0,
+        accounts: matches.map((match, index) => ({
+          id: `${base.id}-account-${index + 1}`,
+          name: match.metadata.email,
+          picture: match.metadata.picture,
+        })),
+      };
+    });
+  }, [userIntegrations]);
 
   const openPopup = (
     url: string,
@@ -115,7 +116,7 @@ export default function Integrations() {
     let url = "";
 
     if (integrationId === "slack") {
-      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=...&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}`;
+      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=...&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${user?.id}`;
     } else if (integrationId === "gmail") {
       url = "/api/oauth/login"; // this should redirect to Google login
     }
@@ -166,7 +167,7 @@ export default function Integrations() {
           <Card
             key={integration.id}
             className={cn(
-              "overflow-hidden transition-all hover:shadow-md border-0 shadow-sm",
+              "overflow-hidden transition-all hover:shadow-md border-gray-200 border shadow-sm",
               integration.connected && "shadow-md"
             )}
           >
@@ -203,12 +204,6 @@ export default function Integrations() {
               {/* Connected accounts as bubbles */}
               {integration.accounts.length > 0 && (
                 <div className="space-y-3">
-                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                    Connected{" "}
-                    {integration.accounts.length > 1
-                      ? integration.accountType + "s"
-                      : integration.accountType}
-                  </div>
                   <div className="flex flex-wrap gap-2">
                     {integration.accounts.map((account, index) => {
                       const contrastColor = getContrastColor(
@@ -266,10 +261,7 @@ export default function Integrations() {
                             </button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>
-                              Add another{" "}
-                              {integration.accountType.toLowerCase()}
-                            </p>
+                            <p>Add another account</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -283,13 +275,7 @@ export default function Integrations() {
               {/* Show connect button if no accounts are connected */}
               {integration.accounts.length === 0 && (
                 <Button
-                  variant="default"
-                  className="w-full"
-                  style={{
-                    backgroundColor: integration.color,
-                    color: "white",
-                    borderColor: integration.color,
-                  }}
+                  className="w-full bg-blue-400 hover:bg-blue-900 text-white"
                   onClick={() => handleConnectClick(integration.id)}
                 >
                   Connect
