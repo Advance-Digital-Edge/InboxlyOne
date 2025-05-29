@@ -15,19 +15,26 @@ type AuthContextType = {
   user: any;
   setUser: (user: any) => void;
   loading: boolean;
-  userIntegrations: Integrations | null;
+  userIntegrations: Integrations[] | null;
 };
 
 type Integrations = {
-  id: string;
-  slack_connected: boolean;
-}
+  provider: string;
+  metadata: {
+    email?: string;
+    name?: string;
+    picture?: string;
+  };
+};
+
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any>(null);
-  const [userIntegrations, setUserIntegrations] = useState<Integrations | null>(null);
+  const [userIntegrations, setUserIntegrations] =
+    useState<Integrations[]| null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (userData) {
         setUser(userData);
         setLoading(false);
-      }else{
+      } else {
         setUser(null);
         setLoading(false);
       }
@@ -49,7 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!user) return;
 
       try {
-        const res = await getUserIntegrations();
+        const res: Integrations[] = await getUserIntegrations();
+
         setUserIntegrations(res);
         console.log("User Integrations:", res);
       } catch (error) {

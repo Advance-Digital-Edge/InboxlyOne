@@ -11,6 +11,7 @@ export default function GmailPage() {
       const response = await fetch("/api/gmail/emails");
       const data = await response.json();
       setMessages(data);
+      console.log(data);
     };
 
     fetchMessages();
