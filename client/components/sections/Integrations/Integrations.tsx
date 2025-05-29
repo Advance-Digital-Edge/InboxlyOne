@@ -18,35 +18,27 @@ import {
 import { Facebook, Mail, Slack, Instagram, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
-
+import { useMemo } from "react";
 
 // Integration data with only the requested platforms
-const integrations = [
+const BASE_INTEGRATIONS = [
   {
     id: "gmail",
     name: "Gmail",
     icon: <Mail className="h-6 w-6" />,
-    connected: true,
-    accounts: [
-      { id: "gmail1", name: "alex@designstudio.com", type: "Email" },
-      { id: "gmail2", name: "projects@designstudio.com", type: "Email" },
-    ],
-    accountType: "Email",
+    connected: false,
+    accounts: [],
     color: "#D44638",
-    maxAccounts: 3,
+    maxAccounts: 2,
   },
   {
     id: "slack",
     name: "Slack",
     icon: <Slack className="h-6 w-6" />,
-    connected: true,
-    accounts: [
-      { id: "slack1", name: "Design Team", type: "Workspace" },
-      { id: "slack2", name: "Client Projects", type: "Workspace" },
-    ],
-    accountType: "Workspace",
+    connected: false,
+    accounts: [],
     color: "#4A154B",
-    maxAccounts: 5,
+    maxAccounts: 2,
   },
   {
     id: "messenger",
@@ -54,23 +46,15 @@ const integrations = [
     icon: <Facebook className="h-6 w-6" />,
     connected: false,
     accounts: [],
-    accountType: "Page",
     color: "#0084FF",
-    maxAccounts: 5,
+    maxAccounts: 2,
   },
   {
     id: "instagram",
     name: "Instagram",
     icon: <Instagram className="h-6 w-6" />,
-    connected: true,
-    accounts: [
-      {
-        id: "insta1",
-        name: "@designstudio.creative",
-        type: "Business Account",
-      },
-    ],
-    accountType: "Business Account",
+    connected: false,
+    accounts: [],
     color: "#E1306C",
     maxAccounts: 2,
   },
@@ -90,18 +74,71 @@ const getContrastColor = (platformColor: string, index: number) => {
 };
 
 const SLACK_CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
-const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL; 
+const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL;
 
 export default function Integrations() {
-  const { userIntegrations } = useAuth();
+  const { userIntegrations, user } = useAuth();
+  console.log(userIntegrations);
 
-  integrations[1].connected = userIntegrations?.slack_connected || false;
+  const integrations = useMemo(() => {
+    return BASE_INTEGRATIONS.map((base) => {
+      const matches =
+        userIntegrations?.filter((u) => u.provider === base.id) || [];
+
+      return {
+        ...base,
+        connected: matches.length > 0,
+        accounts: matches.map((match, index) => ({
+          id: `${base.id}-account-${index + 1}`,
+          name: match.metadata.email,
+          picture: match.metadata.picture,
+        })),
+      };
+    });
+  }, [userIntegrations]);
+
+  const openPopup = (
+    url: string,
+    name = "oauthPopup",
+    width = 600,
+    height = 700
+  ) => {
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    return window.open(
+      url,
+      name,
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
+  };
 
   const handleConnectClick = (integrationId: string) => {
+    let url = "";
+
     if (integrationId === "slack") {
-      window.location.href = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read&user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,users:read&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}&force_scope=1&force_reinstall=1`;
+      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=...&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${user?.id}`;
+    } else if (integrationId === "gmail") {
+      url = "/api/oauth/login"; // this should redirect to Google login
+    }
+
+    if (url) {
+      const popup = openPopup(url);
+
+      const receiveMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data === "gmail-connected") {
+          console.log("✅ Gmail connected!");
+          // e.g., refetch integrations or update UI
+          // showToast("Gmail connected");
+          window.removeEventListener("message", receiveMessage);
+        }
+      };
+
+      window.addEventListener("message", receiveMessage);
     }
   };
+
   // This would be a state function in a real app
   const removeAccount = (integrationId: string, accountId: string) => {
     console.log(`Remove account ${accountId} from ${integrationId}`);
@@ -111,7 +148,7 @@ export default function Integrations() {
   // This would be a state function in a real app
   const addAccount = (integrationId: string) => {
     console.log(`Add new account to ${integrationId}`);
-    // In a real app, this would open a modal or redirect to auth flow
+    handleConnectClick(integrationId);
   };
 
   return (
@@ -130,18 +167,21 @@ export default function Integrations() {
           <Card
             key={integration.id}
             className={cn(
-              "overflow-hidden transition-all hover:shadow-md border-0 shadow-sm",
+              "overflow-hidden transition-all hover:shadow-md border-gray-200 border shadow-sm",
               integration.connected && "shadow-md"
             )}
           >
-        <CardHeader className="pb-3">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-full"
                     style={{ backgroundColor: `${integration.color}20` }}
                   >
-                    <div className="text-foreground" style={{ color: integration.color }}>
+                    <div
+                      className="text-foreground"
+                      style={{ color: integration.color }}
+                    >
                       {integration.icon}
                     </div>
                   </div>
@@ -149,7 +189,11 @@ export default function Integrations() {
                 </div>
                 <Badge
                   variant={integration.connected ? "default" : "outline"}
-                  className={integration.connected ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}
+                  className={
+                    integration.connected
+                      ? "bg-green-100 text-green-800 hover:bg-green-100"
+                      : ""
+                  }
                 >
                   {integration.connected ? "Connected" : "Not connected"}
                 </Badge>
@@ -160,12 +204,6 @@ export default function Integrations() {
               {/* Connected accounts as bubbles */}
               {integration.accounts.length > 0 && (
                 <div className="space-y-3">
-                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                    Connected{" "}
-                    {integration.accounts.length > 1
-                      ? integration.accountType + "s"
-                      : integration.accountType}
-                  </div>
                   <div className="flex flex-wrap gap-2">
                     {integration.accounts.map((account, index) => {
                       const contrastColor = getContrastColor(
@@ -193,7 +231,10 @@ export default function Integrations() {
                                     }
                                     className="ml-1.5 rounded-full bg-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
-                                    <X className="h-3 w-3 text-gray-500" />
+                                    <X
+                                      color="red"
+                                      className="h-3 w-3 text-gray-500"
+                                    />
                                   </button>
                                 </div>
                               </div>
@@ -215,15 +256,12 @@ export default function Integrations() {
                               onClick={() => addAccount(integration.id)}
                               className="flex items-center rounded-full bg-gray-100 py-1 px-2 text-sm text-gray-600 hover:bg-gray-200 transition-colors"
                             >
-                              <Plus className="h-3 w-3 mr-0.5" />
+                              <Plus color="green" className="h-3 w-3 mr-0.5" />
                               <span>Add</span>
                             </button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>
-                              Add another{" "}
-                              {integration.accountType.toLowerCase()}
-                            </p>
+                            <p>Add another account</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -237,27 +275,10 @@ export default function Integrations() {
               {/* Show connect button if no accounts are connected */}
               {integration.accounts.length === 0 && (
                 <Button
-                  variant="default"
-                  className="w-full"
-                  style={{
-                    backgroundColor: integration.color,
-                    color: "white",
-                    borderColor: integration.color,
-                  }}
+                  className="w-full bg-blue-400 hover:bg-blue-900 text-white"
                   onClick={() => handleConnectClick(integration.id)}
                 >
                   Connect
-                </Button>
-              )}
-
-              {/* Show disconnect all button if accounts are connected */}
-              {integration.accounts.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  Disconnect All
                 </Button>
               )}
             </CardFooter>

@@ -156,22 +156,19 @@ export const getUserIntegrations = async () => {
     }
 
     const { data, error } = await supabase
-      .from('user_integrations')
-      .select('*')
-      .eq('auth_user_id', user.id)
-      .single();
+      .from("user_integrations")
+      .select("provider,metadata")
+      .eq("user_id", user.id);
 
     if (error) {
-      console.error('Error fetching integrations:', error);
-      throw new Error('Failed to fetch user integrations');
+      console.error("Error fetching integrations:", error);
+      throw new Error("Failed to fetch user integrations");
     }
 
-    console.log('Integration status:', data);
+    console.log("Integration status:", data);
     return data;
   } catch (error) {
-    console.error('An error occurred in getUserIntegrations:', error);
+    console.error("An error occurred in getUserIntegrations:", error);
     throw error; // Re-throw the error to propagate it if needed
   }
 };
-
-

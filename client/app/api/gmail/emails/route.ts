@@ -19,9 +19,10 @@ export async function GET(req: NextRequest) {
 
   // 🧠 Get tokens from your DB
   const { data: tokenData, error } = await supabase
-    .from("gmail_tokens")
+    .from("user_integrations")
     .select("*")
     .eq("user_id", user.id)
+    .eq("provider", "gmail")
     .single();
 
   if (error || !tokenData) {
