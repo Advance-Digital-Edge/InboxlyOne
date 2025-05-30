@@ -1,12 +1,10 @@
 import { Lusitana, Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import Footer from "@/components/layout/Footer";
 import styles from "./layout.module.css";
-import Navbar from "@/components/layout/Navbar";
 import QueryProvider from "./context/QueryProvider";
 import { AuthProvider } from "./context/AuthProvider";
 import { SidebarProvider } from "./context/SidebarContext";
+import { Toaster } from "react-hot-toast";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -33,7 +31,10 @@ export default function RootLayout({
       <body className={styles.container}>
         <AuthProvider>
           <QueryProvider>
-            <SidebarProvider>{children}</SidebarProvider>
+            <SidebarProvider>
+              <Toaster position="bottom-center" />
+              {children}
+            </SidebarProvider>
           </QueryProvider>
         </AuthProvider>
       </body>
