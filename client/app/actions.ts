@@ -157,7 +157,7 @@ export const getUserIntegrations = async () => {
 
     const { data, error } = await supabase
       .from("user_integrations")
-      .select("provider,metadata")
+      .select("id,provider,metadata")
       .eq("user_id", user.id);
 
     if (error) {
@@ -171,4 +171,19 @@ export const getUserIntegrations = async () => {
     console.error("An error occurred in getUserIntegrations:", error);
     throw error; // Re-throw the error to propagate it if needed
   }
+};
+
+export const removeIntegration = async (integrationId: string) => {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("user_integrations")
+    .delete()
+    .eq("id", integrationId);
+
+  if (error) {
+    console.error("Error removing integration:", error);
+    throw new Error("Failed to remove integration");
+  }
+
+  return true;
 };
