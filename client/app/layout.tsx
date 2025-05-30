@@ -32,7 +32,7 @@ export default function RootLayout({
         <AuthProvider>
           <QueryProvider>
             <SidebarProvider>
-              <Toaster position="bottom-center" />
+              <Toaster position="top-right" />
               {children}
             </SidebarProvider>
           </QueryProvider>

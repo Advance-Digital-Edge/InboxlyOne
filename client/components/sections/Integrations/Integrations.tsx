@@ -19,6 +19,7 @@ import { Facebook, Mail, Slack, Instagram, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
 import { useMemo } from "react";
+import {toast} from "react-hot-toast";
 
 // Integration data with only the requested platforms
 const BASE_INTEGRATIONS = [
@@ -128,7 +129,7 @@ export default function Integrations() {
 
         if (event.data === "gmail-connected") {
           fetchUserIntegrations?.(); // Refresh integrations after adding
-          // showToast("Gmail connected");
+          toast.success("Account connected successfully!")
           window.removeEventListener("message", receiveMessage);
         }
       };
