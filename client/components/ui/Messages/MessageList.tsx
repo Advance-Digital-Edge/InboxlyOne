@@ -55,8 +55,8 @@ export default function MessageList({
               onClick={() => selectMessageHandler(message)}
             >
               <div className="p-4">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10">
+                <div className="flex items-start gap-3 ">
+                  <Avatar className="h-10 w-10 border">
                     <AvatarImage
                       src={message.avatar || "/placeholder.svg"}
                       alt={message.sender}
