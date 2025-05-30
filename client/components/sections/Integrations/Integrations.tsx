@@ -19,6 +19,7 @@ import { Facebook, Mail, Slack, Instagram, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
 import { useMemo } from "react";
+import {toast} from "react-hot-toast";
 
 // Integration data with only the requested platforms
 const BASE_INTEGRATIONS = [
@@ -77,8 +78,7 @@ const SLACK_CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
 const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL;
 
 export default function Integrations() {
-  const { userIntegrations, user } = useAuth();
-  console.log(userIntegrations);
+  const { userIntegrations, fetchUserIntegrations, user } = useAuth();
 
   const integrations = useMemo(() => {
     return BASE_INTEGRATIONS.map((base) => {
@@ -122,15 +122,14 @@ export default function Integrations() {
     }
 
     if (url) {
-      const popup = openPopup(url);
+      openPopup(url);
 
       const receiveMessage = (event: MessageEvent) => {
         if (event.origin !== window.location.origin) return;
 
         if (event.data === "gmail-connected") {
-          console.log("✅ Gmail connected!");
-          // e.g., refetch integrations or update UI
-          // showToast("Gmail connected");
+          fetchUserIntegrations?.(); // Refresh integrations after adding
+          toast.success("Account connected successfully!")
           window.removeEventListener("message", receiveMessage);
         }
       };
