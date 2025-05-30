@@ -16,6 +16,7 @@ type AuthContextType = {
   setUser: (user: any) => void;
   loading: boolean;
   userIntegrations: Integrations[] | null;
+  fetchUserIntegrations?: () => Promise<void>;
 };
 
 type Integrations = {
@@ -27,14 +28,13 @@ type Integrations = {
   };
 };
 
-
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any>(null);
-  const [userIntegrations, setUserIntegrations] =
-    useState<Integrations[]| null>(null);
+  const [userIntegrations, setUserIntegrations] = useState<
+    Integrations[] | null
+  >(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,26 +51,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser();
   }, []);
 
+  // Function to fetch user integrations
+  const fetchUserIntegrations = async () => {
+    if (!user) return;
+
+    try {
+      const res: Integrations[] = await getUserIntegrations();
+
+      setUserIntegrations(res);
+      console.log("User Integrations:", res);
+    } catch (error) {
+      console.error("Failed to fetch user integrations:", error);
+      setUserIntegrations(null); // Reset or handle the state gracefully
+    }
+  };
+
+  // Fetch user integrations when the user state changes
   useEffect(() => {
-    const fetchUserIntegrations = async () => {
-      if (!user) return;
-
-      try {
-        const res: Integrations[] = await getUserIntegrations();
-
-        setUserIntegrations(res);
-        console.log("User Integrations:", res);
-      } catch (error) {
-        console.error("Failed to fetch user integrations:", error);
-        setUserIntegrations(null); // Reset or handle the state gracefully
-      }
-    };
-
     fetchUserIntegrations();
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, userIntegrations }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        loading,
+        userIntegrations,
+        fetchUserIntegrations,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
