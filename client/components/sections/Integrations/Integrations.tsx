@@ -19,7 +19,8 @@ import { Facebook, Mail, Slack, Instagram, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
 import { useMemo } from "react";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import { removeIntegration } from "@/app/actions";
 
 // Integration data with only the requested platforms
 const BASE_INTEGRATIONS = [
@@ -89,7 +90,7 @@ export default function Integrations() {
         ...base,
         connected: matches.length > 0,
         accounts: matches.map((match, index) => ({
-          id: `${base.id}-account-${index + 1}`,
+          id: match.id,
           name: match.metadata.email,
           picture: match.metadata.picture,
         })),
@@ -129,7 +130,7 @@ export default function Integrations() {
 
         if (event.data === "gmail-connected") {
           fetchUserIntegrations?.(); // Refresh integrations after adding
-          toast.success("Account connected successfully!")
+          toast.success("Account connected successfully!");
           window.removeEventListener("message", receiveMessage);
         }
       };
@@ -138,15 +139,26 @@ export default function Integrations() {
     }
   };
 
+  const handleRemoveAccount = async (accountId: string) => {
+    try {
+      await toast.promise(removeIntegration(accountId), {
+        loading: "Removing account...",
+        success: <p>Account removed successfully</p>,
+        error: (err) => <p>{err.message || "Could not save."}</p>,
+      });
+      fetchUserIntegrations?.();
+    } catch (error) {
+      console.error("Error removing integration:", error);
+    }
+  };
+
   // This would be a state function in a real app
-  const removeAccount = (integrationId: string, accountId: string) => {
-    console.log(`Remove account ${accountId} from ${integrationId}`);
-    // In a real app, this would update state and call an API
+  const removeAccount = (accountId: string) => {
+    handleRemoveAccount(accountId);
   };
 
   // This would be a state function in a real app
   const addAccount = (integrationId: string) => {
-    console.log(`Add new account to ${integrationId}`);
     handleConnectClick(integrationId);
   };
 
@@ -225,9 +237,7 @@ export default function Integrations() {
                                     {account.name}
                                   </span>
                                   <button
-                                    onClick={() =>
-                                      removeAccount(integration.id, account.id)
-                                    }
+                                    onClick={() => removeAccount(account.id)}
                                     className="ml-1.5 rounded-full bg-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
                                     <X

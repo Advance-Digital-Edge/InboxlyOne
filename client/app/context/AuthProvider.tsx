@@ -20,6 +20,7 @@ type AuthContextType = {
 };
 
 type Integrations = {
+  id: string;
   provider: string;
   metadata: {
     email?: string;
@@ -59,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res: Integrations[] = await getUserIntegrations();
 
       setUserIntegrations(res);
-      console.log("User Integrations:", res);
     } catch (error) {
       console.error("Failed to fetch user integrations:", error);
       setUserIntegrations(null); // Reset or handle the state gracefully
