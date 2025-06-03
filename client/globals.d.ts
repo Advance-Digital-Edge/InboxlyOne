@@ -19,7 +19,7 @@ declare global {
   };
 
   type Message = {
-    id: number;
+    id: string;
     sender: string;
     senderId?: string;
     avatar: string;
