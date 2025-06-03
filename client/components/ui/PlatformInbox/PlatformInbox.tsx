@@ -8,6 +8,8 @@ import PlatformFilter from "@/components/ui/Filter/PlatformFilter";
 import { Button } from "@/components/ui/button";
 import { X, MoreHorizontal, Search } from "lucide-react";
 import { useSidebar } from "@/app/context/SidebarContext";
+import { useRouter, useSearchParams } from "next/navigation";
+import { set } from "react-hook-form";
 
 export default function PlatformInbox({
   platform,
@@ -28,13 +30,35 @@ export default function PlatformInbox({
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const { sidebarOpen } = useSidebar();
 
+  // Handle initial message selection from query params
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const messageIdFromQuery = searchParams.get("msg");
+
+  // Set selected message based on query param if it exists
+  useEffect(() => {
+    if (!selectedMessage && messageIdFromQuery && fetchedMessages?.length) {
+      const msg = fetchedMessages.find((m) => m.id === messageIdFromQuery);
+      if (msg) {
+        setSelectedMessage(msg);
+        setRightPanelOpen(true);
+      }
+    }
+  }, [fetchedMessages, messageIdFromQuery]);
+
+  
+  // Select message handler to update state and URL
   const selectMessageHandler = (message: Message) => {
     setSelectedMessage(message);
+    router.push(`?msg=${message.id}`, { scroll: false });
     if (!rightPanelOpen) setRightPanelOpen(true);
   };
 
+  // Close the right panel and reset selected message 
   const closeRightPanel = () => {
     setRightPanelOpen(false);
+    setSelectedMessage(null);
+    router.push("/dashboard/gmail", { scroll: false });
   };
 
   const tagColors = {

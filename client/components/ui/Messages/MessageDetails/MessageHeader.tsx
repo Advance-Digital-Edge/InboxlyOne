@@ -19,7 +19,7 @@ export default function MessageHeader({
     <div className="border-b border-gray-200 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-10 w-10 border">
             <AvatarImage
               src={selectedMessage.avatar || "/placeholder.svg"}
               alt={selectedMessage.sender}

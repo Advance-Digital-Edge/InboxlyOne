@@ -23,6 +23,7 @@ export default function GmailPage() {
     fetchMessages();
   }, []);
 
+
   if (isLoading) {
     return <MessageListSkeleton />;
   }
