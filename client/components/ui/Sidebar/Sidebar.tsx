@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Home, Settings, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ReactElement } from "react";
+import { ReactElement, use, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { settings } from "@/lib/constants";
 import { getPlatformColor } from "@/lib/platformUtils";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 interface SidebarProps {
   user: any;
   platforms: Platform[];
@@ -26,6 +26,15 @@ export default function Sidebar({
   setSidebarOpen,
 }: SidebarProps) {
   const router = useRouter();
+
+  const pathname = usePathname(); 
+
+  useEffect(() => {
+    const parts = pathname.split("/")
+    if (parts.length > 2) {
+      setActivePlatform(parts[2]); 
+    }
+  }, [pathname, setActivePlatform]);
 
   const handlePlatformClick = (platformId: string) => {
     setActivePlatform(platformId);
