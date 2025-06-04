@@ -76,10 +76,11 @@ const getContrastColor = (platformColor: string, index: number) => {
 };
 
 const SLACK_CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
-const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL;
+const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL; 
 
 export default function Integrations() {
   const { userIntegrations, fetchUserIntegrations, user } = useAuth();
+  const userId = user?.id;
 
   const integrations = useMemo(() => {
     return BASE_INTEGRATIONS.map((base) => {
@@ -117,9 +118,9 @@ export default function Integrations() {
     let url = "";
 
     if (integrationId === "slack") {
-      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=...&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${user?.id}`;
+      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read&user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,chat:write,im:write,users:read&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}&force_scope=1&force_reinstall=1`;
     } else if (integrationId === "gmail") {
-      url = "/api/oauth/login"; // this should redirect to Google login
+      url = "/api/oauth/login"; 
     }
 
     if (url) {
