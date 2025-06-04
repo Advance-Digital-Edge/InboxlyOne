@@ -58,7 +58,7 @@ export default function PlatformInbox({
   const closeRightPanel = () => {
     setRightPanelOpen(false);
     setSelectedMessage(null);
-    router.push("/dashboard", { scroll: false });
+    // router.push("/dashboard", { scroll: false });
   };
 
   const tagColors = {
