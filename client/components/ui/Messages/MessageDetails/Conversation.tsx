@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import DOMPurify from "dompurify";
 import styles from "./Conversation.module.css";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface ConversationProps {
   selectedMessage: Message;
@@ -18,14 +19,32 @@ export default function Conversation({ selectedMessage }: ConversationProps) {
               message.isIncoming ? "justify-center" : "justify-end"
             )}
           >
+            {/* Message bubble  */}
             <div
               className={cn(
                 "w-full md:max-w-[80%] rounded-lg px-4 py-3 shadow-sm break-words whitespace-pre-line",
-                message.isIncoming ? "bg-white" : "bg-blue-500 text-white"
+                message.isIncoming
+                  ? selectedMessage.platform === "Gmail"
+                    ? ""
+                    : "bg-yellow-50"
+                  : "bg-blue-500 text-white"
               )}
             >
               <div className="mb-1 flex items-center justify-between gap-4">
-                <span className="font-medium">{message.sender}</span>
+                <div className="flex items-center gap-2">
+                  {message.isIncoming && (
+                    <Avatar className="h-10 w-10 border border-blue-900">
+                      <AvatarImage
+                        src={selectedMessage.avatar || "/placeholder.svg"}
+                        alt={message.sender}
+                      />
+                      <AvatarFallback>
+                        {message.sender.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                  <span className="font-medium">{message.sender}</span>
+                </div>
                 <span
                   className={cn(
                     "text-xs",
@@ -36,7 +55,8 @@ export default function Conversation({ selectedMessage }: ConversationProps) {
                 </span>
               </div>
 
-              {selectedMessage.platform === "Gmail" && (
+              {/* Render HTML content for Gmail messages */}
+              {selectedMessage.platform === "Gmail" ? (
                 <div
                   className={styles.messageHtml}
                   dangerouslySetInnerHTML={{
@@ -55,6 +75,8 @@ export default function Conversation({ selectedMessage }: ConversationProps) {
                     }),
                   }}
                 />
+              ) : (
+                <span className="text-sm">{message.content}</span>
               )}
             </div>
           </div>

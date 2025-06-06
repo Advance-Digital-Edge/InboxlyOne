@@ -3,22 +3,31 @@ import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/app/context/AuthProvider";
 import { useSlackSocket } from "@/hooks/useSlackSocket"; // <-- import the hook
+import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 
 export default function SlackPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [sending, setSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const { user } = useAuth();
 
   // Fetch messages function
   const fetchMessages = useCallback(async () => {
     if (!user?.id) return;
-    const res = await fetch("/api/slack/messages", {
-      headers: { "x-user-id": user.id },
-    });
-    const data = await res.json();
-    if (data.ok) {
-      setMessages(data.messages);
+    try {
+      const res = await fetch("/api/slack/messages", {
+        headers: { "x-user-id": user.id },
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        setMessages(data.messages);
+      }
+    } catch (error) {
+      console.error("Error fetching Slack messages:", error);
+    } finally {
+      setIsLoading(false);
     }
   }, [user?.id]);
 
@@ -26,9 +35,11 @@ export default function SlackPage() {
     fetchMessages();
   }, [fetchMessages]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (selectedMessage && messages.length > 0) {
-      const updated = messages.find((msg: any) => msg.id === selectedMessage.id);
+      const updated = messages.find(
+        (msg: any) => msg.id === selectedMessage.id
+      );
       if (updated) setSelectedMessage(updated);
     }
   }, [messages]);
@@ -63,7 +74,9 @@ export default function SlackPage() {
     }
   };
 
-
+  if (isLoading) {
+    return <MessageListSkeleton />;
+  }
 
   return (
     <PlatformInbox
