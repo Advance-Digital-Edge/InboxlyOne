@@ -30,6 +30,7 @@ export default function PlatformInbox({
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const { sidebarOpen } = useSidebar();
 
+
   // Handle initial message selection from query params
   const router = useRouter();
   const searchParams = useSearchParams();
