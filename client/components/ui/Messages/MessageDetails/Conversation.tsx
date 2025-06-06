@@ -19,16 +19,21 @@ export default function Conversation({ selectedMessage }: ConversationProps) {
               message.isIncoming ? "justify-center" : "justify-end"
             )}
           >
+            {/* Message bubble  */}
             <div
               className={cn(
                 "w-full md:max-w-[80%] rounded-lg px-4 py-3 shadow-sm break-words whitespace-pre-line",
-                message.isIncoming ? "bg-yellow-50" : "bg-blue-500 text-white"
+                message.isIncoming
+                  ? selectedMessage.platform === "Gmail"
+                    ? ""
+                    : "bg-yellow-50"
+                  : "bg-blue-500 text-white"
               )}
             >
               <div className="mb-1 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                   {message.isIncoming && (
-                    <Avatar className="h-10 w-10 border">
+                    <Avatar className="h-10 w-10 border border-blue-900">
                       <AvatarImage
                         src={selectedMessage.avatar || "/placeholder.svg"}
                         alt={message.sender}
