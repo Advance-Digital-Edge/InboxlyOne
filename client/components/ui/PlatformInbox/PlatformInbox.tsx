@@ -86,7 +86,7 @@ export default function PlatformInbox({
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         <MessageList
-          messages={fetchedMessages || []}
+          messages={Array.isArray(fetchedMessages) ? fetchedMessages : []}
           activePlatform={platform}
           rightPanelOpen={rightPanelOpen}
           sidebarOpen={sidebarOpen}
