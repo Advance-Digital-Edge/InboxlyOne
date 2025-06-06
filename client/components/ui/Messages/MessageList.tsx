@@ -25,6 +25,7 @@ export default function MessageList({
 }: MessageListProps) {
  
   
+  
   return (
     <div
       className={cn(
@@ -42,7 +43,7 @@ export default function MessageList({
         </div>
 
         <div className="space-y-3">
-          {messages?.map((message) => (
+          {messages.length > 0 ? messages.map((message) => (
             <Card
               key={message.id}
               className={cn(
@@ -107,7 +108,11 @@ export default function MessageList({
                 </div>
               </div>
             </Card>
-          ))}
+          )) : (
+            <div className="flex items-center justify-center h-full p-6">
+              <p className="text-gray-500">No messages found</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

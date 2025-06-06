@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 
 export default function GmailPage() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
