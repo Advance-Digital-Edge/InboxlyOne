@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Home, Settings, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ReactElement, use, useEffect } from "react";
+import { ReactElement, use, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { settings } from "@/lib/constants";
 import { getPlatformColor } from "@/lib/platformUtils";
@@ -30,16 +30,17 @@ export default function Sidebar({
   const pathname = usePathname(); 
 
   useEffect(() => {
-    const parts = pathname.split("/")
-    if (parts.length > 2) {
-      setActivePlatform(parts[2]); 
+    const parts = pathname.split("/");
+    if (parts.length > 2 && parts[2] !== activePlatform) {
+      setActivePlatform(parts[2]);
     }
-  }, [pathname, setActivePlatform]);
+  }, [pathname, setActivePlatform, activePlatform]);
 
-  const handlePlatformClick = (platformId: string) => {
+  const handlePlatformClick = useCallback((platformId: string) => {
     setActivePlatform(platformId);
     router.push(`/dashboard/${platformId}`);
-  };
+  }, [router, setActivePlatform]);
+
   return (
     <aside
       className={cn(
@@ -69,7 +70,7 @@ export default function Sidebar({
             </h2>
             <ul className="space-y-1">
               {platforms.map((platform, index) => (
-                <li key={index}>
+                <li key={platform.id}>
                   <button
                     className={cn(
                       "flex gap-2 w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
