@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/app/context/AuthProvider";
 import { useSlackSocket } from "@/hooks/useSlackSocket"; // <-- import the hook
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
+import { toast } from "react-hot-toast";
 
 export default function SlackPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -23,9 +24,12 @@ export default function SlackPage() {
       const data = await res.json();
       if (data.ok) {
         setMessages(data.messages);
+      } else {
+        toast.error(data.error || "Failed to fetch Slack messages.");
       }
     } catch (error) {
       console.error("Error fetching Slack messages:", error);
+      toast.error("Failed to fetch Slack messages.");
     } finally {
       setIsLoading(false);
     }
@@ -54,25 +58,35 @@ export default function SlackPage() {
   const handleSend = async (text: string, selectedMessage: any) => {
     if (!selectedMessage || !user?.id) return;
     setSending(true);
-    const res = await fetch("/api/slack/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-user-id": user.id,
-      },
-      body: JSON.stringify({
-        toUserId: selectedMessage.senderId,
-        text,
-      }),
-    });
-    setSending(false);
-    const data = await res.json();
-    if (data.ok) {
-      // No need to fetch here, real-time will handle it
-    } else {
-      alert(data.error || "Failed to send message");
+    try {
+      const res = await fetch("/api/slack/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user.id,
+        },
+        body: JSON.stringify({
+          toUserId: selectedMessage.senderId,
+          text,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        // No need to fetch here, real-time will handle it
+      } else {
+        toast.error(data.error || "Failed to send message");
+      }
+    } catch (error) {
+      toast.error("Server error: Failed to send message.");
+      console.error("Send message error:", error);
+    } finally {
+      setSending(false);
     }
   };
+
+  useEffect(() => {
+    toast.success("Toaster works!");
+  }, []);
 
   if (isLoading) {
     return <MessageListSkeleton />;
