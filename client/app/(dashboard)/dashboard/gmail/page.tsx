@@ -2,6 +2,7 @@
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { useEffect, useState } from "react";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
+import { toast } from "react-hot-toast";
 
 export default function GmailPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -15,6 +16,7 @@ export default function GmailPage() {
         setMessages(data);
       } catch (error) {
         console.error("Error fetching emails:", error);
+        toast.error("Failed to fetch Gmail messages.");
       } finally {
         setIsLoading(false);
       }
@@ -22,7 +24,6 @@ export default function GmailPage() {
 
     fetchMessages();
   }, []);
-
 
   if (isLoading) {
     return <MessageListSkeleton />;
