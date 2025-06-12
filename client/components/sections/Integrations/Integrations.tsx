@@ -137,7 +137,8 @@ export default function Integrations() {
         if (event.origin !== window.location.origin) return;
 
         if (event.data === "gmail-connected") {
-          fetchUserIntegrations?.(); // Refresh integrations after adding
+          fetchUserIntegrations?.()
+            .catch(() => toast.error("Failed to refresh integrations."));
           toast.success("Account connected successfully!");
           window.removeEventListener("message", receiveMessage);
         }
