@@ -120,12 +120,12 @@ export default function Integrations() {
 
     if (integrationId === "slack") {
       url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}
-&scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read,team:read
-&user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,chat:write,im:write,users:read,team:read
-&redirect_uri=${TEMP_URL}/api/slack/oauth/callback
-&state=${userId}
-&force_scope=1
-&force_reinstall=1`;
+        &scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read,team:read
+        &user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,chat:write,im:write,users:read,team:read
+        &redirect_uri=${TEMP_URL}/api/slack/oauth/callback
+        &state=${userId}
+        &force_scope=1
+        &force_reinstall=1`;
     } else if (integrationId === "gmail") {
       url = "/api/oauth/login"; 
     }
@@ -139,7 +139,14 @@ export default function Integrations() {
         if (event.data === "gmail-connected") {
           fetchUserIntegrations?.()
             .catch(() => toast.error("Failed to refresh integrations."));
-          toast.success("Account connected successfully!");
+          toast.success("Gmail connected successfully!");
+          window.removeEventListener("message", receiveMessage);
+        }
+
+        if (event.data === "slack-connected") {
+          fetchUserIntegrations?.()
+            .catch(() => toast.error("Failed to refresh integrations."));
+          toast.success("Slack connected successfully!");
           window.removeEventListener("message", receiveMessage);
         }
       };

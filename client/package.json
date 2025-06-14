@@ -2,6 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "tunnel": "npx localtunnel --port 3000 --subdomain=myinboxlydev",
     "build": "next build",
     "start": "next start",
     "server": "nodemon server.js"

@@ -11,8 +11,6 @@ export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
   console.log("Redirect URI:", process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL);
   const authUserId = req.nextUrl.searchParams.get('state'); // Sent from frontend
-  const redirectUri = `${process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL}/api/slack/oauth/callback`;
-  console.log("Generated Redirect URI:", redirectUri);
 
   if (!code) {
     return NextResponse.json({ error: 'No code provided' }, { status: 400 });
@@ -21,6 +19,10 @@ export async function GET(req: NextRequest) {
   if (!authUserId) {
     return NextResponse.json({ error: 'Missing auth user ID in state param' }, { status: 400 });
   }
+
+  const trimmedUserId = authUserId.trim();
+  const redirectUri = `${process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL}/api/slack/oauth/callback`;
+  console.log("Generated Redirect URI:", redirectUri);
 
   const res = await fetch('https://slack.com/api/oauth.v2.access', {
     method: 'POST',
@@ -44,7 +46,7 @@ export async function GET(req: NextRequest) {
   const slackUserId = data.authed_user.id;
 
   const insertPayload = {
-    auth_user_id: authUserId,
+    auth_user_id: trimmedUserId,
     slack_user_id: slackUserId,
     access_token: accessToken,
   };
@@ -72,7 +74,7 @@ export async function GET(req: NextRequest) {
   const { error: integrationError } = await supabase
     .from("user_integrations")
     .upsert({
-      user_id: authUserId,
+      user_id: trimmedUserId,
       provider: "slack",
       external_account_id: slackUserId,
       access_token: accessToken,
@@ -87,7 +89,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save integration", details: integrationError }, { status: 500 });
   }
 
-  const url = new URL(`${process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL}/slack-channels`);
-
-  return NextResponse.redirect(url); //Or success page
+  return new Response(
+    `
+    <html>
+      <body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage("slack-connected", window.origin);
+            window.close();
+          } else {
+            document.body.innerText = "Connected. Please close this window.";
+          }
+        </script>
+      </body>
+    </html>
+    `,
+    {
+      headers: {
+        "Content-Type": "text/html",
+      },
+    }
+  );
 }
