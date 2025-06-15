@@ -17,6 +17,8 @@ export default function PlatformInbox({
   fetchedMessages,
   onSend,
   sending,
+  selectedMessage,
+  setSelectedMessage,
 }: {
   platform: string;
   fetchUrl?: string;
@@ -27,21 +29,20 @@ export default function PlatformInbox({
   setSelectedMessage?: (msg: Message | null) => void;
 }) {
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const { sidebarOpen } = useSidebar();
 
 
   // Handle initial message selection from query params
   const router = useRouter();
   const searchParams = useSearchParams();
-  const messageIdFromQuery = searchParams.get("msg");
+  const messageIdFromQuery = searchParams?.get("msg");
 
   // Set selected message based on query param if it exists
   useEffect(() => {
     if (!selectedMessage && messageIdFromQuery && fetchedMessages?.length) {
       const msg = fetchedMessages.find((m) => m.id === messageIdFromQuery);
       if (msg) {
-        setSelectedMessage(msg);
+        if (setSelectedMessage) setSelectedMessage(msg);
         setRightPanelOpen(true);
       }
     }
@@ -50,7 +51,7 @@ export default function PlatformInbox({
   
   // Select message handler to update state and URL
   const selectMessageHandler = (message: Message) => {
-    setSelectedMessage(message);
+    if (setSelectedMessage) setSelectedMessage(message);
     router.push(`?msg=${message.id}`, { scroll: false });
     if (!rightPanelOpen) setRightPanelOpen(true);
   };
@@ -91,7 +92,7 @@ export default function PlatformInbox({
           rightPanelOpen={rightPanelOpen}
           sidebarOpen={sidebarOpen}
           tagColors={tagColors}
-          selectedMessage={selectedMessage}
+          selectedMessage={selectedMessage ?? null}
           selectMessageHandler={selectMessageHandler}
         />
         {rightPanelOpen && (
