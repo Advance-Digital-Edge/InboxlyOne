@@ -58,6 +58,13 @@ export async function GET(req: NextRequest) {
 
         const avatar = userInfo.user?.profile?.image_72 || '';
 
+        // Fetch last_read for this channel
+        const infoRes = await fetch(`https://slack.com/api/conversations.info?channel=${channel.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const infoData = await infoRes.json();
+        const lastRead = infoData.ok && infoData.channel?.last_read ? infoData.channel.last_read : "0";
+
         // Fetch message history
         const historyRes = await fetch(`https://slack.com/api/conversations.history?channel=${channel.id}`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -89,7 +96,7 @@ export async function GET(req: NextRequest) {
 
         // Sort messages by timestamp in ascending order
         const conversation = allMessages
-          .sort((a: any, b: any) => parseFloat(a.ts) - parseFloat(b.ts)) // Sort by timestamp
+          .sort((a: any, b: any) => parseFloat(a.ts) - parseFloat(b.ts))
           .map((msg: any, i: number) => ({
             id: i,
             senderId: msg.user || 'system',
@@ -98,12 +105,17 @@ export async function GET(req: NextRequest) {
             timestamp: new Date(parseFloat(msg.ts) * 1000).toLocaleTimeString('en-US', {
               hour: '2-digit',
               minute: '2-digit',
-              hour12: false, // Use 24-hour format; set to `true` for 12-hour format
+              hour12: false,
             }),
+            ts: msg.ts, // <-- add this line
             isIncoming: msg.user !== currentUserSlackId,
+            unread: parseFloat(msg.ts) > parseFloat(lastRead),
           }));
 
         const lastMessage = allMessages[allMessages.length - 1];
+
+        // Mark the whole conversation as unread if any message is unread
+        const hasUnread = conversation.some((msg: any) => msg.unread);
 
         return {
           id: index,
@@ -118,15 +130,21 @@ export async function GET(req: NextRequest) {
                 hour12: false, // Use 24-hour format; set to `true` for 12-hour format
               })
             : '',
+          ts: lastMessage ? lastMessage.ts : "0", // <-- add this
           platform: 'Slack',
-          unread: false,
+          unread: hasUnread,
           tags: [],
           conversation,
         };
       })
     );
 
-    return NextResponse.json({ ok: true, messages });
+    // Order conversations by latest message ts (descending)
+    const orderedMessages = messages.sort(
+      (a, b) => parseFloat(b.ts) - parseFloat(a.ts)
+    );
+
+    return NextResponse.json({ ok: true, messages: orderedMessages });
   } catch (error: any) {
     return NextResponse.json(
       { ok: false, messages: [], error: error.message || "Unknown error" },
