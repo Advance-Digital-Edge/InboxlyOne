@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { X, MoreHorizontal, Search } from "lucide-react";
 import { useSidebar } from "@/app/context/SidebarContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import { set } from "react-hook-form";
 
 export default function PlatformInbox({
   platform,
@@ -59,7 +58,7 @@ export default function PlatformInbox({
   // Close the right panel and reset selected message 
   const closeRightPanel = () => {
     setRightPanelOpen(false);
-    setSelectedMessage(null);
+    if (setSelectedMessage) setSelectedMessage(null);
     // router.push("/dashboard", { scroll: false });
   };
 
