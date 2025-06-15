@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
           headers: { Authorization: `Bearer ${token}` }
         });
         const infoData = await infoRes.json();
-        const lastRead = infoData.channel?.last_read || "0";
+        const lastRead = infoData.ok && infoData.channel?.last_read ? infoData.channel.last_read : "0";
 
         // Fetch message history
         const historyRes = await fetch(`https://slack.com/api/conversations.history?channel=${channel.id}`, {
