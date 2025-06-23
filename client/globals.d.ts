@@ -8,6 +8,7 @@ declare global {
     id: string;
     name: string;
     icon: ReactElement;
+    unreadCount?: number; // optional, defaults to 0 or undefined
   };
 
   type ConversationMessage = {

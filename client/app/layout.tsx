@@ -5,6 +5,8 @@ import QueryProvider from "./context/QueryProvider";
 import { AuthProvider } from "./context/AuthProvider";
 import { SidebarProvider } from "./context/SidebarContext";
 import { Toaster } from "react-hot-toast";
+import { ReduxProvider } from "./context/ReduxProvider";
+import SupabaseListener from "@/components/supabase/supabaseListener";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -12,7 +14,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
+  title: "Inboxlyone",
   description: "The fastest way to build apps with Next.js and Supabase",
 };
 
@@ -29,14 +31,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={InerSans.className}>
       <body className={styles.container}>
-        <AuthProvider>
-          <QueryProvider>
-            <SidebarProvider>
-              <Toaster position="top-right" />
-              {children}
-            </SidebarProvider>
-          </QueryProvider>
-        </AuthProvider>
+        <ReduxProvider>
+          <AuthProvider>
+            <SupabaseListener>
+              <QueryProvider>
+                <SidebarProvider>
+                  <Toaster position="top-right" />
+                  {children}
+                </SidebarProvider>
+              </QueryProvider>
+            </SupabaseListener>
+          </AuthProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

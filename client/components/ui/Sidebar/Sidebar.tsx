@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { settings } from "@/lib/constants";
 import { getPlatformColor } from "@/lib/platformUtils";
 import { useRouter, usePathname } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/store";
 interface SidebarProps {
   user: any;
   platforms: Platform[];
@@ -27,8 +29,13 @@ export default function Sidebar({
 }: SidebarProps) {
   const router = useRouter();
 
-  const pathname = usePathname(); 
+  const platformStatus = useSelector(
+    (state: RootState) => state.platformStatus
+  );
 
+  const pathname = usePathname();
+
+  // Get the active platform from the URL path
   useEffect(() => {
     const parts = pathname.split("/");
     if (parts.length > 2 && parts[2] !== activePlatform) {
@@ -69,23 +76,31 @@ export default function Sidebar({
               Platforms
             </h2>
             <ul className="space-y-1">
-              {platforms.map((platform, index) => (
-                <li key={platform.id}>
-                  <button
-                    className={cn(
-                      "flex gap-2 w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                      activePlatform === platform.id
-                        ? `bg-slate-200 ${getPlatformColor(platform.name)}`
-                        : "text-gray-800 hover:bg-gray-100 hover:text-gray-900"
-                    )}
-                    onClick={() => handlePlatformClick(platform.id)}
-                    title={platform.name}
-                  >
-                    {platform.icon}
-                    {platform.name}
-                  </button>
-                </li>
-              ))}
+              {platforms.map((platform, index) => {
+                const hasNew = platformStatus[platform.id]?.hasNew;
+                return (
+                  <li key={index}>
+                    <button
+                      className={cn(
+                        "flex gap-2 justify-between w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                        activePlatform === platform.id
+                          ? `bg-slate-200 ${getPlatformColor(platform.name)}`
+                          : "text-gray-800 hover:bg-gray-100 hover:text-gray-900"
+                      )}
+                      onClick={() => handlePlatformClick(platform.id)}
+                      title={platform.name}
+                    >
+                      <div className="flex items-center gap-2">
+                        {platform.icon}
+                        {platform.name}
+                      </div>
+                      {hasNew && (
+                        <span className="ml-2 h-2 w-2 rounded-full bg-purple-800 animate-pulse"></span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
