@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Home, Settings, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ReactElement, use, useEffect } from "react";
+import { ReactElement, use, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { settings } from "@/lib/constants";
 import { getPlatformColor } from "@/lib/platformUtils";
@@ -38,15 +38,15 @@ export default function Sidebar({
   // Get the active platform from the URL path
   useEffect(() => {
     const parts = pathname.split("/");
-    if (parts.length > 2) {
+    if (parts.length > 2 && parts[2] !== activePlatform) {
       setActivePlatform(parts[2]);
     }
-  }, [pathname, setActivePlatform]);
+  }, [pathname, setActivePlatform, activePlatform]);
 
-  const handlePlatformClick = (platformId: string) => {
+  const handlePlatformClick = useCallback((platformId: string) => {
     setActivePlatform(platformId);
     router.push(`/dashboard/${platformId}`);
-  };
+  }, [router, setActivePlatform]);
 
   return (
     <aside

@@ -6,6 +6,7 @@ import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { useDispatch } from "react-redux";
 import { setHasNew } from "@/lib/features/platformStatusSlice";
+import { toast } from "react-hot-toast";
 
 export default function GmailPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -60,6 +61,7 @@ export default function GmailPage() {
         setMessages(data);
       } catch (error) {
         console.error("Error fetching emails:", error);
+        toast.error("Failed to fetch Gmail messages.");
       } finally {
         setIsLoading(false);
       }

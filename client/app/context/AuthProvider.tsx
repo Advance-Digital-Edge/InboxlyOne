@@ -26,6 +26,7 @@ type Integrations = {
     email?: string;
     name?: string;
     picture?: string;
+    workspaces?: any;
   };
 };
 

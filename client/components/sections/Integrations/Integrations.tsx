@@ -94,6 +94,7 @@ export default function Integrations() {
           id: match.id,
           name: match.metadata.email,
           picture: match.metadata.picture,
+          workspaces: match.metadata.workspaces, // <-- add this line
         })),
       };
     });
@@ -118,7 +119,13 @@ export default function Integrations() {
     let url = "";
 
     if (integrationId === "slack") {
-      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read&user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,chat:write,im:write,users:read&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}&force_scope=1&force_reinstall=1`;
+      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}
+        &scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read,team:read
+        &user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,chat:write,im:write,users:read,team:read
+        &redirect_uri=${TEMP_URL}/api/slack/oauth/callback
+        &state=${userId}
+        &force_scope=1
+        &force_reinstall=1`;
     } else if (integrationId === "gmail") {
       url = "/api/oauth/login"; 
     }
@@ -130,8 +137,16 @@ export default function Integrations() {
         if (event.origin !== window.location.origin) return;
 
         if (event.data === "gmail-connected") {
-          fetchUserIntegrations?.(); // Refresh integrations after adding
-          toast.success("Account connected successfully!");
+          fetchUserIntegrations?.()
+            .catch(() => toast.error("Failed to refresh integrations."));
+          toast.success("Gmail connected successfully!");
+          window.removeEventListener("message", receiveMessage);
+        }
+
+        if (event.data === "slack-connected") {
+          fetchUserIntegrations?.()
+            .catch(() => toast.error("Failed to refresh integrations."));
+          toast.success("Slack connected successfully!");
           window.removeEventListener("message", receiveMessage);
         }
       };
@@ -218,10 +233,7 @@ export default function Integrations() {
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
                     {integration.accounts.map((account, index) => {
-                      const contrastColor = getContrastColor(
-                        integration.color,
-                        index
-                      );
+                      const contrastColor = getContrastColor(integration.color, index);
                       return (
                         <TooltipProvider key={account.id}>
                           <Tooltip>
@@ -237,14 +249,19 @@ export default function Integrations() {
                                   <span className="max-w-[120px] truncate">
                                     {account.name}
                                   </span>
+                                  {/* Show channels only for Slack */}
+                                  {integration.id === "slack" &&
+                                    account.workspaces &&
+                                    account.workspaces.length > 0 && (
+                                      <div className="text-xs text-gray-500 mt-1">
+                                        Workspace: {account.workspaces.map((w: any) => w.workspace_name).join(", ")}
+                                      </div>
+                                  )}
                                   <button
                                     onClick={() => removeAccount(account.id)}
                                     className="ml-1.5 rounded-full bg-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
-                                    <X
-                                      color="red"
-                                      className="h-3 w-3 text-gray-500"
-                                    />
+                                    <X color="red" className="h-3 w-3 text-gray-500" />
                                   </button>
                                 </div>
                               </div>
