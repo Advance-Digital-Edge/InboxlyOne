@@ -76,6 +76,49 @@ export async function DELETE(request: Request, context: any) {
     }
   }
 
+  // 👉 Add Slack integration removal
+  if (integration.provider === "slack") {
+    try {
+      // 1. Revoke the Slack access token
+      const revokeRes = await fetch("https://slack.com/api/auth.revoke", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${integration.access_token}`,
+        },
+        body: "test=false",
+      });
+
+      const revokeData = await revokeRes.json();
+      if (revokeData.ok) {
+        console.log(
+          "✅ Slack token revoked for:",
+          integration.metadata?.team_name || integration.metadata?.email
+        );
+      } else {
+        console.error("❌ Failed to revoke Slack token:", revokeData.error);
+      }
+
+      // 2. Remove from slack_tokens table
+      const { error: slackTokenError } = await supabase
+        .from("slack_tokens")
+        .delete()
+        .eq("integration_id", integration.id);
+
+      if (slackTokenError) {
+        console.error("❌ Failed to delete from slack_tokens:", slackTokenError);
+      } else {
+        console.log("✅ Slack tokens deleted for integration:", integration.id);
+      }
+    } catch (err) {
+      console.error(
+        "❌ Failed to revoke Slack token or delete from slack_tokens:",
+        err
+      );
+      // Optionally handle errors here
+    }
+  }
+
   // Delete integration from DB
   await supabase.from("user_integrations").delete().eq("id", id);
 
