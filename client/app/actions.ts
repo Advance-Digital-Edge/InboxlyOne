@@ -6,6 +6,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Login, Register } from "@/types/auth";
 
+const baseUrl = process.env.NEXT_SERVER_URL
+
 export const signUpAction = async (formData: Register) => {
   const { email, password, repeatPassword } = formData;
   const supabase = await createClient();
@@ -174,15 +176,13 @@ export const getUserIntegrations = async () => {
 };
 
 export const removeIntegration = async (integrationId: string) => {
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("user_integrations")
-    .delete()
-    .eq("id", integrationId);
+  const res = await fetch(`${baseUrl}/api/integrations/${integrationId}`, {
+    method: "DELETE",
+  });
 
-  if (error) {
-    console.error("Error removing integration:", error);
-    throw new Error("Failed to remove integration");
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(error || "Failed to remove integration");
   }
 
   return true;

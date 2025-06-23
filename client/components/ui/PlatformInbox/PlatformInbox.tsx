@@ -17,6 +17,7 @@ export default function PlatformInbox({
   fetchedMessages,
   onSend,
   sending,
+  onMarkAsRead,
 }: {
   platform: string;
   fetchUrl?: string;
@@ -25,11 +26,11 @@ export default function PlatformInbox({
   sending?: boolean;
   selectedMessage?: Message | null;
   setSelectedMessage?: (msg: Message | null) => void;
+  onMarkAsRead?: (messageId: string) => void;
 }) {
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const { sidebarOpen } = useSidebar();
-
 
   // Handle initial message selection from query params
   const router = useRouter();
@@ -47,15 +48,17 @@ export default function PlatformInbox({
     }
   }, [fetchedMessages, messageIdFromQuery]);
 
-  
   // Select message handler to update state and URL
   const selectMessageHandler = (message: Message) => {
     setSelectedMessage(message);
     router.push(`?msg=${message.id}`, { scroll: false });
     if (!rightPanelOpen) setRightPanelOpen(true);
+    if (message.unread === true) {
+      onMarkAsRead?.(message.id);
+    }
   };
 
-  // Close the right panel and reset selected message 
+  // Close the right panel and reset selected message
   const closeRightPanel = () => {
     setRightPanelOpen(false);
     setSelectedMessage(null);

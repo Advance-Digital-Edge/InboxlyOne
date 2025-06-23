@@ -1,12 +1,11 @@
 import { google } from "googleapis";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest } from "next/server";
-import { formatGmailData } from "@/lib/utils";
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const supabase = await createClient();
 
-  // 🔐 Get current Supabase user
+  // Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -17,7 +16,15 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // 🧠 Get tokens from your DB
+  const { messageId } = await req.json();
+
+  if (!messageId) {
+    return new Response(JSON.stringify({ error: "Missing messageId" }), {
+      status: 400,
+    });
+  }
+
+  // Get tokens from DB
   const { data: tokenData, error } = await supabase
     .from("user_integrations")
     .select("*")
@@ -31,14 +38,14 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  //  Initialize Google OAuth2 client with tokens
+
+  // Initialize OAuth2 client
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
     process.env.GOOGLE_REDIRECT_URI
   );
 
-  // Set credentials using the stored access and refresh tokens
   oauth2Client.setCredentials({
     access_token: tokenData.access_token,
     refresh_token: tokenData.refresh_token,
@@ -46,36 +53,16 @@ export async function GET(req: NextRequest) {
 
   const gmail = google.gmail({ version: "v1", auth: oauth2Client });
 
-  // List messages
   try {
-    const messagesRes = await gmail.users.messages.list({
+    await gmail.users.messages.modify({
       userId: "me",
-      labelIds: ["INBOX"],
-      maxResults: 20,
-      q: "category:primary newer_than:7d",
+      id: messageId,
+      requestBody: {
+        removeLabelIds: ["UNREAD"],
+      },
     });
 
-    const messageIds = messagesRes.data.messages || [];
-
-    // 🔁 Fetch message details
-    const messagePromises = messageIds.map((msg) =>
-      gmail.users.messages.get({
-        userId: "me",
-        id: msg.id!,
-        format: "full", 
-        metadataHeaders: ["Subject", "From", "Date"],
-      })
-    );
-
-    const messages = await Promise.all(messagePromises);
-
-    const formatedMessages = messages.map((message) =>
-      formatGmailData(message.data)
-    );
-
-    
-
-    return new Response(JSON.stringify(formatedMessages), {
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
     });
   } catch (error: any) {
