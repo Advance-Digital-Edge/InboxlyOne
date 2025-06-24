@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 export async function DELETE(request: Request, context: any) {
   const supabase = await createClient();
   const { id } = await context.params;
-
+ 
   const { data: integration, error } = await supabase
     .from("user_integrations")
     .select("*")
@@ -103,7 +103,7 @@ export async function DELETE(request: Request, context: any) {
       const { error: slackTokenError } = await supabase
         .from("slack_tokens")
         .delete()
-        .eq("integration_id", integration.id);
+        .eq("access_token", integration.access_token);
 
       if (slackTokenError) {
         console.error("❌ Failed to delete from slack_tokens:", slackTokenError);
