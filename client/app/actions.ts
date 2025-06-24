@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Login, Register } from "@/types/auth";
 
-const baseUrl = process.env.NEXT_SERVER_URL
+const baseUrl = process.env.NEXT_SERVER_URL || "http://localhost:3000";
 
 export const signUpAction = async (formData: Register) => {
   const { email, password, repeatPassword } = formData;
