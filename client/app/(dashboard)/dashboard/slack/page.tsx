@@ -84,9 +84,46 @@ export default function SlackPage() {
     }
   };
 
-  useEffect(() => {
-    toast.success("Toaster works!");
-  }, []);
+  // Mark as read handler
+  const handleMarkAsRead = async (messageId: string) => {
+    if (!user?.id) return;
+    
+    const message = messages.find((msg: any) => msg.id === messageId);
+    if (!message || !message.unread) return;
+
+    try {
+      const res = await fetch("/api/slack/markread", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user.id,
+        },
+        body: JSON.stringify({
+          messageId: messageId,
+          channelId: message.channelId,
+          timestamp: message.ts,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        // Update local state to reflect the read status
+        setMessages(prevMessages => 
+          prevMessages.map(msg => 
+            msg.id === messageId 
+              ? { ...msg, unread: false }
+              : msg
+          )
+        );
+        toast.success("Message marked as read");
+      } else {
+        toast.error(data.error || "Failed to mark message as read");
+      }
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      toast.error("Failed to mark message as read");
+    }
+  };
 
   if (isLoading) {
     return <MessageListSkeleton />;
@@ -100,6 +137,7 @@ export default function SlackPage() {
       sending={sending}
       selectedMessage={selectedMessage}
       setSelectedMessage={setSelectedMessage}
+      onMarkAsRead={handleMarkAsRead}
     />
   );
 }
