@@ -18,6 +18,13 @@ export default function ReplyBox({ selectedMessage, onSend, sending }: ReplyBoxP
     setInput("");
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     <div className="border-t border-gray-300 p-4">
       <div className="rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
@@ -26,6 +33,7 @@ export default function ReplyBox({ selectedMessage, onSend, sending }: ReplyBoxP
           className="min-h-24 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           value={input}
           onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={sending}
         />
         <div className="flex items-center justify-between border-t border-gray-300 pt-2">
