@@ -5,6 +5,7 @@ import { useAuth } from "@/app/context/AuthProvider";
 import { useSlackSocket } from "@/hooks/useSlackSocket"; // <-- import the hook
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import { toast } from "react-hot-toast";
+import { useGenericMutation } from "@/hooks/useMutation";
 
 export default function SlackPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -12,6 +13,46 @@ export default function SlackPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const { user } = useAuth();
+
+  const markAsReadMutation = useGenericMutation({
+    mutationFn: async (messageId: string) => {
+      const message = messages.find((msg: any) => msg.id === messageId);
+      if (!message) {
+        throw new Error("Message not found");
+      }
+
+      const res = await fetch("/api/slack/markread", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user?.id || "",
+        },
+        body: JSON.stringify({
+          messageId: messageId,
+          channelId: message.channelId,
+          timestamp: message.ts,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to mark message as read");
+      }
+
+      return res.json();
+    },
+    onSuccess: (_, messageId) => {
+      // Update the messages state to mark that message as read
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === messageId ? { ...msg, unread: false } : msg
+        )
+      );
+    },
+    onError: (err) => {
+      console.error("❌ Failed to mark Slack message as read", err);
+      toast.error("Failed to mark message as read");
+    },
+  });
 
   // Fetch messages function
   const fetchMessages = useCallback(async () => {
@@ -84,10 +125,6 @@ export default function SlackPage() {
     }
   };
 
-  useEffect(() => {
-    toast.success("Toaster works!");
-  }, []);
-
   if (isLoading) {
     return <MessageListSkeleton />;
   }
@@ -100,6 +137,7 @@ export default function SlackPage() {
       sending={sending}
       selectedMessage={selectedMessage}
       setSelectedMessage={setSelectedMessage}
+      onMarkAsRead={markAsReadMutation.mutate}
     />
   );
 }

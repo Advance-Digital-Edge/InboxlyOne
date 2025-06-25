@@ -121,6 +121,7 @@ export async function GET(req: NextRequest) {
           id: index,
           sender: partnerName,         // The name of the person you're chatting with
           senderId: channel.user,      // Their Slack ID
+          channelId: channel.id,       // Channel ID for marking as read
           avatar,
           preview: lastMessage?.text || "No messages yet",
           timestamp: lastMessage
