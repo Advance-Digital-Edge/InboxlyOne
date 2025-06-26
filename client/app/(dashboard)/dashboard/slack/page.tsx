@@ -134,6 +134,12 @@ export default function SlackPage() {
     if (!rightPanelOpen) setRightPanelOpen(true);
   };
 
+  // Close the right panel and reset selected message
+  const closeRightPanel = () => {
+    setRightPanelOpen(false);
+    if (setSelectedMessage) setSelectedMessage(null);
+  };
+
   if (isLoading) {
     return <MessageListSkeleton />;
   }
@@ -147,6 +153,7 @@ export default function SlackPage() {
       selectedMessage={selectedMessage}
       rightPanelOpen={rightPanelOpen}
       handleSelectMessage={selectMessageHandler}
+      closeRightPanel={closeRightPanel}
     />
   );
 }
