@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 export async function DELETE(request: Request, context: any) {
   const supabase = await createClient();
   const { id } = await context.params;
-
+ 
   const { data: integration, error } = await supabase
     .from("user_integrations")
     .select("*")
@@ -73,6 +73,49 @@ export async function DELETE(request: Request, context: any) {
     } catch (err) {
       console.error("❌ Failed to stop Gmail watch or revoke token:", err);
       // Optionally handle errors here (maybe return 500 or continue)
+    }
+  }
+
+  // 👉 Add Slack integration removal
+  if (integration.provider === "slack") {
+    try {
+      // 1. Revoke the Slack access token
+      const revokeRes = await fetch("https://slack.com/api/auth.revoke", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${integration.access_token}`,
+        },
+        body: "test=false",
+      });
+
+      const revokeData = await revokeRes.json();
+      if (revokeData.ok) {
+        console.log(
+          "✅ Slack token revoked for:",
+          integration.metadata?.team_name || integration.metadata?.email
+        );
+      } else {
+        console.error("❌ Failed to revoke Slack token:", revokeData.error);
+      }
+
+      // 2. Remove from slack_tokens table
+      const { error: slackTokenError } = await supabase
+        .from("slack_tokens")
+        .delete()
+        .eq("access_token", integration.access_token);
+
+      if (slackTokenError) {
+        console.error("❌ Failed to delete from slack_tokens:", slackTokenError);
+      } else {
+        console.log("✅ Slack tokens deleted for integration:", integration.id);
+      }
+    } catch (err) {
+      console.error(
+        "❌ Failed to revoke Slack token or delete from slack_tokens:",
+        err
+      );
+      // Optionally handle errors here
     }
   }
 

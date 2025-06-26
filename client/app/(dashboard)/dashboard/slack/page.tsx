@@ -6,6 +6,7 @@ import { useSlackSocket } from "@/hooks/useSlackSocket"; // <-- import the hook
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useGenericMutation } from "@/hooks/useMutation";
 
 export default function SlackPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -15,6 +16,46 @@ export default function SlackPage() {
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+
+  const markAsReadMutation = useGenericMutation({
+    mutationFn: async (messageId: string) => {
+      const message = messages.find((msg: any) => msg.id === messageId);
+      if (!message) {
+        throw new Error("Message not found");
+      }
+
+      const res = await fetch("/api/slack/markread", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user?.id || "",
+        },
+        body: JSON.stringify({
+          messageId: messageId,
+          channelId: message.channelId,
+          timestamp: message.ts,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to mark message as read");
+      }
+
+      return res.json();
+    },
+    onSuccess: (_, messageId) => {
+      // Update the messages state to mark that message as read
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === messageId ? { ...msg, unread: false } : msg
+        )
+      );
+    },
+    onError: (err) => {
+      console.error("❌ Failed to mark Slack message as read", err);
+      toast.error("Failed to mark message as read");
+    },
+  });
 
   // Fetch messages function
   const fetchMessages = useCallback(async () => {
