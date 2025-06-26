@@ -16,9 +16,11 @@ export default function PlatformInbox({
   fetchedMessages,
   onSend,
   sending,
-  onMarkAsRead,
+  handleSelectMessage,
   selectedMessage,
   setSelectedMessage,
+  closeRightPanel,
+  rightPanelOpen,
 }: {
   platform: string;
   fetchUrl?: string;
@@ -27,43 +29,11 @@ export default function PlatformInbox({
   sending?: boolean;
   selectedMessage?: Message | null;
   setSelectedMessage?: (msg: Message | null) => void;
-  onMarkAsRead?: (messageId: string) => void;
+  closeRightPanel?: () => void;
+  handleSelectMessage?: (message: Message) => void;
+  rightPanelOpen?: boolean;
 }) {
-  const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const { sidebarOpen } = useSidebar();
-
-  // Handle initial message selection from query params
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const messageIdFromQuery = searchParams?.get("msg");
-
-  // Set selected message based on query param if it exists
-  useEffect(() => {
-    if (!selectedMessage && messageIdFromQuery && fetchedMessages?.length) {
-      const msg = fetchedMessages.find((m) => m.id === messageIdFromQuery);
-      if (msg) {
-        if (setSelectedMessage) setSelectedMessage(msg);
-        setRightPanelOpen(true);
-      }
-    }
-  }, [fetchedMessages, messageIdFromQuery]);
-
-  // Select message handler to update state and URL
-  const selectMessageHandler = (message: Message) => {
-    if (setSelectedMessage) setSelectedMessage(message);
-    router.push(`?msg=${message.id}`, { scroll: false });
-    if (!rightPanelOpen) setRightPanelOpen(true);
-    if (message.unread === true) {
-      onMarkAsRead?.(message.id);
-    }
-  };
-
-  // Close the right panel and reset selected message
-  const closeRightPanel = () => {
-    setRightPanelOpen(false);
-    if (setSelectedMessage) setSelectedMessage(null);
-    // router.push("/dashboard", { scroll: false });
-  };
 
   const tagColors = {
     Client: "bg-blue-100 text-blue-800 hover:bg-blue-200",
@@ -91,11 +61,11 @@ export default function PlatformInbox({
         <MessageList
           messages={Array.isArray(fetchedMessages) ? fetchedMessages : []}
           activePlatform={platform}
-          rightPanelOpen={rightPanelOpen}
+          rightPanelOpen={rightPanelOpen ?? true}
           sidebarOpen={sidebarOpen}
           tagColors={tagColors}
           selectedMessage={selectedMessage ?? null}
-          selectMessageHandler={selectMessageHandler}
+          selectMessageHandler={handleSelectMessage ?? (() => {})}
         />
         {rightPanelOpen && (
           <div className="w-full md:w-4/6  overflow-y-auto bg-white  ">
@@ -105,7 +75,7 @@ export default function PlatformInbox({
                 tagColors={tagColors}
                 onSend={(text: string) => onSend?.(text, selectedMessage)}
                 sending={sending}
-                closeRightPanel={closeRightPanel}
+                closeRightPanel={closeRightPanel ?? (() => {})}
               />
             ) : (
               <div className="flex h-full items-center justify-center">

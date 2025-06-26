@@ -5,13 +5,16 @@ import { useAuth } from "@/app/context/AuthProvider";
 import { useSlackSocket } from "@/hooks/useSlackSocket"; // <-- import the hook
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function SlackPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [sending, setSending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const { user } = useAuth();
+  const router = useRouter();
 
   // Fetch messages function
   const fetchMessages = useCallback(async () => {
@@ -84,9 +87,11 @@ export default function SlackPage() {
     }
   };
 
-  useEffect(() => {
-    toast.success("Toaster works!");
-  }, []);
+  const selectMessageHandler = (message: Message) => {
+    if (setSelectedMessage) setSelectedMessage(message);
+    router.push(`?msg=${message.id}`, { scroll: false });
+    if (!rightPanelOpen) setRightPanelOpen(true);
+  };
 
   if (isLoading) {
     return <MessageListSkeleton />;
@@ -99,7 +104,8 @@ export default function SlackPage() {
       onSend={handleSend}
       sending={sending}
       selectedMessage={selectedMessage}
-      setSelectedMessage={setSelectedMessage}
+      rightPanelOpen={rightPanelOpen}
+      handleSelectMessage={selectMessageHandler}
     />
   );
 }

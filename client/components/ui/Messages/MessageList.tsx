@@ -11,7 +11,7 @@ interface MessageListProps {
   sidebarOpen: boolean;
   tagColors: Record<string, string>;
   selectedMessage: Message | null;
-  selectMessageHandler: (message: Message) => void;
+  selectMessageHandler: (message: Message ) => void;
 }
 
 export default function MessageList({
