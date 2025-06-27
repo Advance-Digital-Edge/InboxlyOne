@@ -19,7 +19,7 @@ export default function SlackPage() {
 
   const markAsReadMutation = useGenericMutation({
     mutationFn: async (messageId: string) => {
-      const message = messages.find((msg: any) => msg.id === messageId);
+      const message = messages.find((msg: any) => msg.id == messageId || msg.id === messageId);
       if (!message) {
         throw new Error("Message not found");
       }
@@ -47,7 +47,7 @@ export default function SlackPage() {
       // Update the messages state to mark that message as read
       setMessages((prevMessages) =>
         prevMessages.map((msg) =>
-          msg.id === messageId ? { ...msg, unread: false } : msg
+          msg.id == messageId || msg.id === messageId ? { ...msg, unread: false } : msg
         )
       );
     },
@@ -132,6 +132,9 @@ export default function SlackPage() {
     if (setSelectedMessage) setSelectedMessage(message);
     router.push(`?msg=${message.id}`, { scroll: false });
     if (!rightPanelOpen) setRightPanelOpen(true);
+    if (message.unread === true) {
+      markAsReadMutation.mutate(message.id);
+    }
   };
 
   // Close the right panel and reset selected message
