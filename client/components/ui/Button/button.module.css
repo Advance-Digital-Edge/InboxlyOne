@@ -1,111 +1,111 @@
 .button {
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   border-radius: 0.375rem;
-   font-weight: 500;
-   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-   transition-duration: 150ms;
-   cursor: pointer;
-   font-size: 0.875rem;
-   line-height: 1.25rem;
- }
- 
- .button:disabled {
-   pointer-events: none;
-   opacity: 0.5;
- }
- 
- /* Variants */
- .default {
-   background-color: #6366f1;
-   color: white;
-   border: 1px solid transparent;
- }
- 
- .default:hover {
-   background-color: #4f46e5;
- }
- 
- .default:focus-visible {
-   outline: 2px solid transparent;
-   outline-offset: 2px;
-   box-shadow: 0 0 0 2px #c7d2fe;
- }
- 
- .outline {
-   background-color: transparent;
-   border: 1px solid #d1d5db;
-   color: #4b5563;
- }
- 
- .outline:hover {
-   background-color: #f3f4f6;
-   color: #111827;
- }
- 
- .outline:focus-visible {
-   outline: 2px solid transparent;
-   outline-offset: 2px;
-   box-shadow: 0 0 0 2px #e5e7eb;
- }
- 
- .ghost {
-   background-color: transparent;
-   border: 1px solid transparent;
-   color: #4b5563;
- }
- 
- .ghost:hover {
-   background-color: #f3f4f6;
-   color: #111827;
- }
- 
- .ghost:focus-visible {
-   outline: 2px solid transparent;
-   outline-offset: 2px;
-   box-shadow: 0 0 0 2px #e5e7eb;
- }
- 
- .link {
-   background-color: transparent;
-   border: none;
-   color: #6366f1;
-   text-decoration: underline;
-   text-underline-offset: 4px;
-   padding: 0;
-   height: auto;
- }
- 
- .link:hover {
-   color: #4f46e5;
- }
- 
- /* Sizes */
- .sizeDefault {
-   height: 2.5rem;
-   padding-left: 1rem;
-   padding-right: 1rem;
- }
- 
- .sizeSm {
-   height: 2rem;
-   padding-left: 0.75rem;
-   padding-right: 0.75rem;
-   font-size: 0.75rem;
- }
- 
- .sizeLg {
-   height: 2.75rem;
-   padding-left: 1.5rem;
-   padding-right: 1.5rem;
-   font-size: 1rem;
- }
- 
- .sizeIcon {
-   height: 2.5rem;
-   width: 2.5rem;
-   padding: 0;
- }
- 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  cursor: pointer;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Variants */
+.default {
+  background-color: #4a148c;
+  color: white;
+  border: 1px solid transparent;
+}
+
+.default:hover {
+  background-color: #4f46e5;
+}
+
+.default:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+.outline {
+  background-color: transparent;
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+}
+
+.outline:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.outline:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #e5e7eb;
+}
+
+.ghost {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: #4b5563;
+}
+
+.ghost:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.ghost:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #e5e7eb;
+}
+
+.link {
+  background-color: transparent;
+  border: none;
+  color: #6366f1;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: 0;
+  height: auto;
+}
+
+.link:hover {
+  color: #4f46e5;
+}
+
+/* Sizes */
+.sizeDefault {
+  height: 2.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.sizeSm {
+  height: 2rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.sizeLg {
+  height: 2.75rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  font-size: 1rem;
+}
+
+.sizeIcon {
+  height: 2.5rem;
+  width: 2.5rem;
+  padding: 0;
+}

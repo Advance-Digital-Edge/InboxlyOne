@@ -77,11 +77,19 @@ export default function GmailPage() {
 
   // Fetch emails from Gmail API
   const fetchEmails = async () => {
-    const response = await fetch("/api/gmail/emails");
-    if (!response.ok) {
-      throw new Error("Failed to fetch Gmail messages");
+    const res = await fetch("/api/gmail/emails");
+
+    if (!res.ok) {
+      const data = await res.json();
+
+      // Now throw a custom error object including status
+      throw {
+        message: data.error || "Unknown error",
+        status: res.status,
+      };
     }
-    return response.json();
+
+    return res.json();
   };
 
   //  React Query to fetch emails
@@ -106,8 +114,25 @@ export default function GmailPage() {
     }
   }, [localMessages, dispatch]);
 
+  if (error) {
+    console.log(error);
+  }
   if (isLoading) return <MessageListSkeleton />;
-  if (error) return <p>Error loading emails.</p>;
+
+if (error) {
+  // @ts-ignore
+  if (error.status === 401) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center p-8">
+        <h2 className="text-xl font-semibold mb-2">No accounts connected yet</h2>
+        <p className="text-gray-600">Please connect your Gmail account to view your inbox.</p>
+      </div>
+    );
+  }
+
+  return <p className="text-center text-red-500 mt-4">Error loading emails</p>;
+}
+
 
   return (
     <PlatformInbox

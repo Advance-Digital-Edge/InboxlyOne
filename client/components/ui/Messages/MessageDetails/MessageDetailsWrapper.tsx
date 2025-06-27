@@ -35,7 +35,7 @@ export default function MessageDetailsWrapper({
       {selectedMessage.platform === "Gmail" ? (
         <Button
           onClick={() => openGmailMessage(selectedMessage.id)}
-          className="mx-auto  my-2 w-4/6"
+          className="mx-auto my-2 w-4/6 font-mono"
           size={"sm"}
         >
           REPLY IN GMAIL <Send size={16} className="ml-2" />
