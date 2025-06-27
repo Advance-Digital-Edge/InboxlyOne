@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Home, Settings, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import SidebarUserInfoSkeleton from "./SidebarUserInfoSkeleton";
 import { ReactElement, use, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { settings } from "@/lib/constants";
@@ -14,6 +15,7 @@ interface SidebarProps {
   user: any;
   platforms: Platform[];
   activePlatform: string;
+  loading?: boolean;
   setActivePlatform: (platform: string) => void;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
@@ -23,6 +25,7 @@ export default function Sidebar({
   user,
   platforms,
   activePlatform,
+  loading,
   setActivePlatform,
   sidebarOpen,
   setSidebarOpen,
@@ -43,10 +46,13 @@ export default function Sidebar({
     }
   }, [pathname, setActivePlatform, activePlatform]);
 
-  const handlePlatformClick = useCallback((platformId: string) => {
-    setActivePlatform(platformId);
-    router.push(`/dashboard/${platformId}`);
-  }, [router, setActivePlatform]);
+  const handlePlatformClick = useCallback(
+    (platformId: string) => {
+      setActivePlatform(platformId);
+      router.push(`/dashboard/${platformId}`);
+    },
+    [router, setActivePlatform]
+  );
 
   return (
     <aside
@@ -132,23 +138,26 @@ export default function Sidebar({
         </nav>
 
         {/* Settings */}
-        <div className="border-t border-gray-300 p-4">
-          <div className="flex items-center">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.user_metadata?.avatar_url} alt="User" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-            <div className="ml-3">
-              <p className="text-sm font-medium">{user?.user_metadata?.name}</p>
-              <p className="text-xs text-gray-500 truncate overflow-hidden whitespace-nowrap max-w-[150px]">
-                {user?.user_metadata?.email}
-              </p>
+        {loading ? (
+          <SidebarUserInfoSkeleton />
+        ) : (
+          <div className="border-t border-gray-300 p-4">
+            <div className="flex items-center cursor-pointer">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.user_metadata?.avatar_url} alt="User" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+              <div className="ml-3">
+                <p className="text-sm font-medium">
+                  {user?.user_metadata?.name}
+                </p>
+                <p className="text-xs text-gray-500 truncate overflow-hidden whitespace-nowrap max-w-[150px]">
+                  {user?.user_metadata?.email}
+                </p>
+              </div>
             </div>
-            <Button variant="ghost" size="icon" className="ml-auto">
-              <Settings className="h-4 w-4" />
-            </Button>
           </div>
-        </div>
+        )}
       </div>
     </aside>
   );
