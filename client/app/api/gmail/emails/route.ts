@@ -26,9 +26,12 @@ export async function GET(req: NextRequest) {
     .single();
 
   if (error || !tokenData) {
-    return new Response(JSON.stringify({ error: "No Gmail token found" }), {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "No Gmail token found. Please authenticate." }),
+      {
+        status: 401,
+      }
+    );
   }
 
   //  Initialize Google OAuth2 client with tokens
@@ -62,7 +65,7 @@ export async function GET(req: NextRequest) {
       gmail.users.messages.get({
         userId: "me",
         id: msg.id!,
-        format: "full", 
+        format: "full",
         metadataHeaders: ["Subject", "From", "Date"],
       })
     );
@@ -72,8 +75,6 @@ export async function GET(req: NextRequest) {
     const formatedMessages = messages.map((message) =>
       formatGmailData(message.data)
     );
-
-    
 
     return new Response(JSON.stringify(formatedMessages), {
       status: 200,
