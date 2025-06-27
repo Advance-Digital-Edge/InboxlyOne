@@ -10,11 +10,13 @@ import {
 } from "react";
 import { getUser, getUserIntegrations } from "../actions";
 import { get } from "http";
+import { set } from "react-hook-form";
 
 type AuthContextType = {
   user: any;
   setUser: (user: any) => void;
   loading: boolean;
+  loadingIntegrations: boolean;
   userIntegrations: Integrations[] | null;
   fetchUserIntegrations?: () => Promise<void>;
 };
@@ -38,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     Integrations[] | null
   >(null);
   const [loading, setLoading] = useState(true);
+  const [loadingIntegrations, setLoadingIntegrations] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,11 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const res: Integrations[] = await getUserIntegrations();
-
       setUserIntegrations(res);
+      setLoadingIntegrations(false);
     } catch (error) {
       console.error("Failed to fetch user integrations:", error);
       setUserIntegrations(null); // Reset or handle the state gracefully
+      setLoadingIntegrations(false);
     }
   };
 
@@ -80,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         userIntegrations,
         fetchUserIntegrations,
+        loadingIntegrations,
       }}
     >
       {children}

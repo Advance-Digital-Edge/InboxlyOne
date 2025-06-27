@@ -2,18 +2,52 @@
 
 import { useEffect, useState } from "react";
 import { useGenericMutation } from "@/hooks/useMutation";
+import { useQuery } from "@tanstack/react-query";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { useDispatch } from "react-redux";
 import { setHasNew } from "@/lib/features/platformStatusSlice";
 import { toast } from "react-hot-toast";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function GmailPage() {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
   const dispatch = useDispatch();
+  const [localMessages, setLocalMessages] = useState<any[]>([]);
+  const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const messageIdFromQuery = searchParams?.get("msg");
+
+  // Set selected message based on query param if it exists
+  useEffect(() => {
+    if (!selectedMessage && messageIdFromQuery && localMessages?.length) {
+      const msg = localMessages.find((m) => m.id === messageIdFromQuery);
+      if (msg) {
+        if (setSelectedMessage) setSelectedMessage(msg);
+        setRightPanelOpen(true);
+      }
+    }
+  }, [localMessages, messageIdFromQuery]);
+
+  // Select message handler to update state and URL
+  const selectMessageHandler = (message: Message) => {
+    if (setSelectedMessage) setSelectedMessage(message);
+    router.push(`?msg=${message.id}`, { scroll: false });
+    if (!rightPanelOpen) setRightPanelOpen(true);
+    if (message.unread === true) {
+      markAsReadMutation.mutate(message.id);
+    }
+  };
+
+  // Close the right panel and reset selected message
+  const closeRightPanel = () => {
+    setRightPanelOpen(false);
+    if (setSelectedMessage) setSelectedMessage(null);
+  };
+
+  // Mark message as read
   const markAsReadMutation = useGenericMutation({
     mutationFn: async (messageId: string) => {
       const res = await fetch("/api/gmail/markread", {
@@ -29,8 +63,7 @@ export default function GmailPage() {
       return res.json();
     },
     onSuccess: (_, messageId) => {
-      // Update the messages state to mark that message as read
-      setMessages((prevMessages) =>
+      setLocalMessages((prevMessages) =>
         prevMessages.map((msg) =>
           msg.id === messageId ? { ...msg, unread: false } : msg
         )
@@ -38,51 +71,52 @@ export default function GmailPage() {
     },
     onError: (err) => {
       console.error("❌ Failed to mark as read", err);
+      toast.error("Failed to mark email as read");
     },
   });
 
-  useEffect(() => {
-    if (!isLoading) {
-      const hasUnread = messages.some((msg) => msg.unread);
-      if (!hasUnread) {
-        dispatch(setHasNew({ platformId: "gmail", hasNew: false }));
-      }
+  // Fetch emails from Gmail API
+  const fetchEmails = async () => {
+    const response = await fetch("/api/gmail/emails");
+    if (!response.ok) {
+      throw new Error("Failed to fetch Gmail messages");
     }
-  }, [messages, isLoading, dispatch]);
+    return response.json();
+  };
 
-  // fetch messages on mount and set up polling every 15 seconds
+  //  React Query to fetch emails
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["gmailEmails"],
+    queryFn: fetchEmails,
+    refetchInterval: 15000,
+    refetchOnWindowFocus: false,
+  });
+
+  // Handle message selection from query params
   useEffect(() => {
-    let intervalId;
+    if (data) {
+      setLocalMessages(data);
+    }
+  }, [data]);
 
-    const fetchMessages = async () => {
-      try {
-        const response = await fetch("/api/gmail/emails");
-        const data = await response.json();
-        setMessages(data);
-      } catch (error) {
-        console.error("Error fetching emails:", error);
-        toast.error("Failed to fetch Gmail messages.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMessages(); 
-
-    intervalId = setInterval(fetchMessages, 15000); 
-
-    return () => {
-      clearInterval(intervalId); 
-    };
-  }, []);
+  useEffect(() => {
+    if (localMessages.length > 0) {
+      const hasUnread = localMessages.some((msg) => msg.unread);
+      dispatch(setHasNew({ platformId: "gmail", hasNew: hasUnread }));
+    }
+  }, [localMessages, dispatch]);
 
   if (isLoading) return <MessageListSkeleton />;
+  if (error) return <p>Error loading emails.</p>;
 
   return (
     <PlatformInbox
       platform="gmail"
-      fetchedMessages={messages}
-      onMarkAsRead={markAsReadMutation.mutate}
+      fetchedMessages={localMessages}
+      selectedMessage={selectedMessage}
+      handleSelectMessage={selectMessageHandler}
+      rightPanelOpen={rightPanelOpen}
+      closeRightPanel={closeRightPanel}
     />
   );
 }

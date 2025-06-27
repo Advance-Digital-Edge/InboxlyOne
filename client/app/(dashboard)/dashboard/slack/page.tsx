@@ -5,6 +5,7 @@ import { useAuth } from "@/app/context/AuthProvider";
 import { useSlackSocket } from "@/hooks/useSlackSocket"; // <-- import the hook
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 import { useGenericMutation } from "@/hooks/useMutation";
 
 export default function SlackPage() {
@@ -12,7 +13,9 @@ export default function SlackPage() {
   const [sending, setSending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const { user } = useAuth();
+  const router = useRouter();
 
   const markAsReadMutation = useGenericMutation({
     mutationFn: async (messageId: string) => {
@@ -125,6 +128,18 @@ export default function SlackPage() {
     }
   };
 
+  const selectMessageHandler = (message: Message) => {
+    if (setSelectedMessage) setSelectedMessage(message);
+    router.push(`?msg=${message.id}`, { scroll: false });
+    if (!rightPanelOpen) setRightPanelOpen(true);
+  };
+
+  // Close the right panel and reset selected message
+  const closeRightPanel = () => {
+    setRightPanelOpen(false);
+    if (setSelectedMessage) setSelectedMessage(null);
+  };
+
   if (isLoading) {
     return <MessageListSkeleton />;
   }
@@ -136,8 +151,9 @@ export default function SlackPage() {
       onSend={handleSend}
       sending={sending}
       selectedMessage={selectedMessage}
-      setSelectedMessage={setSelectedMessage}
-      onMarkAsRead={markAsReadMutation.mutate}
+      rightPanelOpen={rightPanelOpen}
+      handleSelectMessage={selectMessageHandler}
+      closeRightPanel={closeRightPanel}
     />
   );
 }
