@@ -7,15 +7,43 @@ import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useGenericMutation } from "@/hooks/useMutation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function SlackPage() {
-  const [messages, setMessages] = useState<any[]>([]);
   const [sending, setSending] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const fetchMessages = async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch("/api/slack/messages", {
+        headers: { "x-user-id": user.id },
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        return data.messages;
+      } else {
+        toast.error(data.error || "Failed to fetch Slack messages.");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching Slack messages:", error);
+      toast.error("Failed to fetch Slack messages.");
+      return [];
+    }
+  };
+
+  const { data: messages, isLoading } = useQuery({
+    queryKey: ["slackMessages", user?.id],
+    queryFn: fetchMessages,
+    enabled: !!user?.id,
+    refetchOnWindowFocus: false,
+  });
 
   const markAsReadMutation = useGenericMutation({
     mutationFn: async (messageId: string) => {
@@ -44,12 +72,13 @@ export default function SlackPage() {
       return res.json();
     },
     onSuccess: (_, messageId) => {
-      // Update the messages state to mark that message as read
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
+      // Update the React Query cache to mark message as read
+      queryClient.setQueryData(["slackMessages", user?.id], (oldData: any) => {
+        if (!oldData) return oldData;
+        return oldData.map((msg: any) =>
           msg.id == messageId || msg.id === messageId ? { ...msg, unread: false } : msg
-        )
-      );
+        );
+      });
     },
     onError: (err) => {
       console.error("❌ Failed to mark Slack message as read", err);
@@ -57,45 +86,20 @@ export default function SlackPage() {
     },
   });
 
-  // Fetch messages function
-  const fetchMessages = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const res = await fetch("/api/slack/messages", {
-        headers: { "x-user-id": user.id },
-      });
-
-      const data = await res.json();
-      if (data.ok) {
-        setMessages(data.messages);
-      } else {
-        toast.error(data.error || "Failed to fetch Slack messages.");
-      }
-    } catch (error) {
-      console.error("Error fetching Slack messages:", error);
-      toast.error("Failed to fetch Slack messages.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id]);
-
   useEffect(() => {
-    fetchMessages();
-  }, [fetchMessages]);
-
-  useEffect(() => {
-    if (selectedMessage && messages.length > 0) {
+    if (selectedMessage && messages?.length > 0) {
       const updated = messages.find(
         (msg: any) => msg.id === selectedMessage.id
       );
       if (updated) setSelectedMessage(updated);
     }
-  }, [messages]);
+  }, [messages, selectedMessage]);
 
   // Listen for real-time Slack events and refresh messages
   useSlackSocket((event) => {
     console.log("Received slack_event:", event);
-    fetchMessages();
+    // Invalidate and refetch the React Query cache
+    queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
   });
 
   // Send message handler
@@ -116,7 +120,8 @@ export default function SlackPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        // No need to fetch here, real-time will handle it
+        // Invalidate the query to refresh the list
+        queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
       } else {
         toast.error(data.error || "Failed to send message");
       }
@@ -150,7 +155,7 @@ export default function SlackPage() {
   return (
     <PlatformInbox
       platform="slack"
-      fetchedMessages={messages}
+      fetchedMessages={messages || []}
       onSend={handleSend}
       sending={sending}
       selectedMessage={selectedMessage}
