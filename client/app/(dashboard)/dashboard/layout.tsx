@@ -10,7 +10,7 @@ import { useSidebar } from "@/app/context/SidebarContext";
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [activePlatform, setActivePlatform] = useState("all");
   const { sidebarOpen, setSidebarOpen } = useSidebar();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const setActivePlatformHandler = (platform: string) => {
     setActivePlatform(platform);
@@ -28,6 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Sidebar stays here across all dashboard routes */}
       <Sidebar
         user={user}
+        loading={loading}
         platforms={platforms}
         activePlatform={activePlatform}
         setActivePlatform={setActivePlatformHandler}
