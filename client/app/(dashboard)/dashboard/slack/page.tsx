@@ -95,9 +95,28 @@ export default function SlackPage() {
     }
   }, [messages, selectedMessage]);
 
+  // Auto-mark messages as read when they arrive in the currently opened chat
+  useEffect(() => {
+    if (selectedMessage && messages?.length > 0 && rightPanelOpen) {
+      // Find any unread messages in the current conversation (including the selected message)
+      const unreadMessagesInCurrentChat = messages.filter((msg: any) => {
+        // Check if it's the same conversation (by senderId or conversation identifier)
+        const isSameConversation = msg.senderId === selectedMessage.senderId || 
+                                   msg.channelId === selectedMessage.channelId;
+        const isUnread = msg.unread === true;
+        
+        return isSameConversation && isUnread;
+      });
+
+      // Mark all unread messages in current chat as read
+      unreadMessagesInCurrentChat.forEach((msg: any) => {
+        markAsReadMutation.mutate(msg.id);
+      });
+    }
+  }, [messages, selectedMessage, rightPanelOpen]);
+
   // Listen for real-time Slack events and refresh messages
   useSlackSocket((event) => {
-    console.log("Received slack_event:", event);
     // Invalidate and refetch the React Query cache
     queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
   });
@@ -133,12 +152,27 @@ export default function SlackPage() {
     }
   };
 
-  const selectMessageHandler = (message: Message) => {
+  const selectMessageHandler = (message: any) => {
     if (setSelectedMessage) setSelectedMessage(message);
     router.push(`?msg=${message.id}`, { scroll: false });
     if (!rightPanelOpen) setRightPanelOpen(true);
+    
+    // Mark the selected message as read if it's unread
     if (message.unread === true) {
       markAsReadMutation.mutate(message.id);
+    }
+    
+    // Also mark any other unread messages in the same conversation as read
+    if (messages?.length > 0) {
+      const unreadMessagesInSameConversation = messages.filter((msg: any) => {
+        const isSameConversation = msg.senderId === message.senderId || 
+                                   msg.channelId === message.channelId;
+        return isSameConversation && msg.unread === true && msg.id !== message.id;
+      });
+      
+      unreadMessagesInSameConversation.forEach((msg: any) => {
+        markAsReadMutation.mutate(msg.id);
+      });
     }
   };
 
