@@ -2,14 +2,24 @@ import { cn } from "@/lib/utils";
 import DOMPurify from "dompurify";
 import styles from "./Conversation.module.css";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useEffect, useRef } from "react";
 
 interface ConversationProps {
   selectedMessage: Message;
 }
 
 export default function Conversation({ selectedMessage }: ConversationProps) {
+  const conversationRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when conversation changes or new messages are added
+  useEffect(() => {
+    if (conversationRef.current) {
+      conversationRef.current.scrollTop = conversationRef.current.scrollHeight;
+    }
+  }, [selectedMessage.conversation.length, selectedMessage.id]);
+
   return (
-    <div className="w-full h-full overflow-y-auto p-4">
+    <div ref={conversationRef} className="w-full h-full overflow-y-auto p-4">
       <div className="space-y-4">
         {selectedMessage.conversation.map((message) => (
           <div
