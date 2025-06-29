@@ -13,6 +13,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: false, messages: [], error: 'Missing user ID' }, { status: 400 });
     }
 
+    const url = new URL(req.url);
+    const channelId = url.searchParams.get('channelId');
+    const cursor = url.searchParams.get('cursor');
+    const limit = parseInt(url.searchParams.get('limit') || '20');
+
+    // If channelId is provided, return paginated conversation messages
+    if (channelId) {
+      return getConversationMessages(authUserId, channelId, cursor, limit);
+    }
+
+    // Otherwise, return conversation list (existing functionality)
     const { data: tokenRow, error } = await supabase
       .from('slack_tokens')
       .select('access_token, slack_user_id')
@@ -217,4 +228,93 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ ok: true, ts: sendData.ts });
+}
+
+async function getConversationMessages(authUserId: string, channelId: string, cursor?: string | null, limit: number = 20) {
+  const { data: tokenRow, error } = await supabase
+    .from('slack_tokens')
+    .select('access_token, slack_user_id')
+    .eq('auth_user_id', authUserId)
+    .single();
+
+  if (error || !tokenRow) {
+    return NextResponse.json({ ok: false, messages: [], error: 'Slack token not found' }, { status: 404 });
+  }
+
+  const token = tokenRow.access_token;
+  const currentUserSlackId = tokenRow.slack_user_id;
+
+  // Build URL for fetching conversation history with pagination
+  let historyUrl = `https://slack.com/api/conversations.history?channel=${channelId}&limit=${limit}`;
+  if (cursor) {
+    historyUrl += `&cursor=${cursor}`;
+  }
+
+  const historyRes = await fetch(historyUrl, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const history = await historyRes.json();
+
+  if (!history.ok) {
+    return NextResponse.json({ 
+      ok: false, 
+      messages: [], 
+      error: history.error || "Failed to fetch conversation history" 
+    }, { status: 500 });
+  }
+
+  const allMessages = history.messages || [];
+
+  // Get all unique user IDs from messages
+  const uniqueUserIds = [
+    ...Array.from(new Set(allMessages.map((msg: any) => msg.user).filter(Boolean))) as string[]
+  ];
+
+  // Fetch all user names
+  const userMap: Record<string, string> = {};
+  await Promise.all(
+    uniqueUserIds.map(async (userId: string) => {
+      const res = await fetch(`https://slack.com/api/users.info?user=${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      userMap[userId] =
+        data.user?.profile?.display_name ||
+        data.user?.real_name ||
+        data.user?.name ||
+        'Unknown User';
+    })
+  );
+
+  // Get last_read for this channel
+  const infoRes = await fetch(`https://slack.com/api/conversations.info?channel=${channelId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const infoData = await infoRes.json();
+  const lastRead = infoData.ok && infoData.channel?.last_read ? infoData.channel.last_read : "0";
+
+  // Sort messages by timestamp in descending order (newest first)
+  const conversation = allMessages
+    .sort((a: any, b: any) => parseFloat(b.ts) - parseFloat(a.ts))
+    .map((msg: any, i: number) => ({
+      id: `${msg.ts}_${i}`,
+      senderId: msg.user || 'system',
+      sender: userMap[msg.user] || 'Unknown User',
+      content: msg.text,
+      timestamp: new Date(parseFloat(msg.ts) * 1000).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }),
+      ts: msg.ts,
+      isIncoming: msg.user !== currentUserSlackId,
+      unread: parseFloat(msg.ts) > parseFloat(lastRead),
+    }));
+
+  return NextResponse.json({ 
+    ok: true, 
+    messages: conversation,
+    hasMore: !!history.response_metadata?.next_cursor,
+    nextCursor: history.response_metadata?.next_cursor || null
+  });
 }
