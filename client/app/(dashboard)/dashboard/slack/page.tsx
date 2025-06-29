@@ -2,7 +2,8 @@
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/app/context/AuthProvider";
-import { useSlackSocket } from "@/hooks/useSlackSocket"; // <-- import the hook
+import { useSlackSocket } from "@/hooks/useSlackSocket";
+import { useSlackConversation } from "@/hooks/useSlackConversation";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,7 @@ export default function SlackPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  // Fetch conversation overview (list of conversations without full message history)
   const fetchMessages = async () => {
     if (!user?.id) return;
     try {
@@ -43,7 +45,19 @@ export default function SlackPage() {
     queryFn: fetchMessages,
     enabled: !!user?.id,
     refetchOnWindowFocus: false,
+    refetchInterval: 5000, // Poll every 5 seconds for new messages
   });
+
+  // Use the new conversation hook for paginated messages
+  const {
+    messages: conversationMessages,
+    isLoading: isLoadingConversation,
+    isLoadingMore,
+    hasMoreMessages,
+    handleScroll,
+    scrollContainerRef,
+    invalidateConversation,
+  } = useSlackConversation(user?.id, selectedMessage?.channelId);
 
   const markAsReadMutation = useGenericMutation({
     mutationFn: async (messageId: string) => {
@@ -116,10 +130,18 @@ export default function SlackPage() {
   }, [messages, selectedMessage, rightPanelOpen]);
 
   // Listen for real-time Slack events and refresh messages
-  useSlackSocket((event) => {
-    // Invalidate and refetch the React Query cache
+  useSlackSocket(useCallback((event) => {
+    console.log('📨 Real-time Slack event received:', event);
+    
+    // Always invalidate and refetch the conversation list to show new messages
     queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
-  });
+    
+    // Also invalidate the current conversation if one is open
+    if (selectedMessage?.channelId) {
+      console.log('🔄 Invalidating current conversation:', selectedMessage.channelId);
+      invalidateConversation();
+    }
+  }, [queryClient, user?.id, selectedMessage?.channelId, invalidateConversation]));
 
   // Send message handler
   const handleSend = async (text: string, selectedMessage: any) => {
@@ -139,8 +161,9 @@ export default function SlackPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        // Invalidate the query to refresh the list
+        // Invalidate both the conversation list and current conversation
         queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
+        invalidateConversation();
       } else {
         toast.error(data.error || "Failed to send message");
       }
@@ -186,16 +209,25 @@ export default function SlackPage() {
     return <MessageListSkeleton />;
   }
 
+  // Create the selected message with conversation data just-in-time
+  const selectedMessageWithConversation = selectedMessage && conversationMessages?.length > 0 
+    ? { ...selectedMessage, conversation: conversationMessages }
+    : selectedMessage;
+
   return (
     <PlatformInbox
       platform="slack"
       fetchedMessages={messages || []}
       onSend={handleSend}
       sending={sending}
-      selectedMessage={selectedMessage}
+      selectedMessage={selectedMessageWithConversation}
       rightPanelOpen={rightPanelOpen}
       handleSelectMessage={selectMessageHandler}
       closeRightPanel={closeRightPanel}
+      onScroll={handleScroll}
+      scrollRef={scrollContainerRef}
+      isLoadingMore={isLoadingMore}
+      hasMoreMessages={hasMoreMessages}
     />
   );
 }
