@@ -6,22 +6,56 @@ import { useEffect, useRef } from "react";
 
 interface ConversationProps {
   selectedMessage: Message;
+  onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
+  isLoadingMore?: boolean;
+  hasMoreMessages?: boolean;
 }
 
-export default function Conversation({ selectedMessage }: ConversationProps) {
-  const conversationRef = useRef<HTMLDivElement>(null);
+export default function Conversation({ 
+  selectedMessage, 
+  onScroll, 
+  scrollRef, 
+  isLoadingMore, 
+  hasMoreMessages 
+}: ConversationProps) {
+  const defaultConversationRef = useRef<HTMLDivElement>(null);
+  const conversationRef = scrollRef || defaultConversationRef;
 
-  // Scroll to bottom when conversation changes or new messages are added
+  // Auto-scroll to bottom only for the first load or when new messages arrive
+  // Don't auto-scroll when loading more historical messages
   useEffect(() => {
-    if (conversationRef.current) {
+    if (conversationRef.current && !isLoadingMore) {
+      // Always scroll to bottom for new conversations or when new messages arrive
+      // Only avoid scrolling when we're loading more historical messages
       conversationRef.current.scrollTop = conversationRef.current.scrollHeight;
     }
-  }, [selectedMessage.conversation.length, selectedMessage.id]);
+  }, [selectedMessage.conversation?.length, selectedMessage.id, isLoadingMore]);
 
   return (
-    <div ref={conversationRef} className="w-full h-full overflow-y-auto p-4">
+    <div 
+      ref={conversationRef} 
+      className="w-full h-full overflow-y-auto p-4"
+      onScroll={onScroll}
+    >
       <div className="space-y-4">
-        {selectedMessage.conversation.map((message) => (
+        {/* Loading indicator at the top */}
+        {isLoadingMore && (
+          <div className="flex justify-center py-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          </div>
+        )}
+        
+        {/* Show "Load more" hint if there are more messages and not currently loading */}
+        {hasMoreMessages && !isLoadingMore && (
+          <div className="flex justify-center py-2">
+            <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              Scroll up to load more messages
+            </div>
+          </div>
+        )}
+        
+        {selectedMessage.conversation?.map((message) => (
           <div
             key={message.id}
             className={cn(
