@@ -25,6 +25,8 @@ export default function PlatformInbox({
   scrollRef,
   isLoadingMore,
   hasMoreMessages,
+  messageStatuses,
+  temporaryMessages,
 }: {
   platform: string;
   fetchUrl?: string;
@@ -40,6 +42,8 @@ export default function PlatformInbox({
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   isLoadingMore?: boolean;
   hasMoreMessages?: boolean;
+  messageStatuses?: Map<string, MessageStatus>;
+  temporaryMessages?: Map<string, any>;
 }) {
   const { sidebarOpen } = useSidebar();
 
@@ -88,6 +92,8 @@ export default function PlatformInbox({
                 scrollRef={scrollRef}
                 isLoadingMore={isLoadingMore}
                 hasMoreMessages={hasMoreMessages}
+                messageStatuses={messageStatuses}
+                temporaryMessages={temporaryMessages}
               />
             ) : (
               <div className="flex h-full items-center justify-center">
