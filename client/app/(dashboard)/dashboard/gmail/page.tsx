@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useGenericMutation } from "@/hooks/useMutation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { useDispatch } from "react-redux";
@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 export default function GmailPage() {
   const dispatch = useDispatch();
-  const [localMessages, setLocalMessages] = useState<any[]>([]);
+  const queryClient = useQueryClient();
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
@@ -20,34 +20,53 @@ export default function GmailPage() {
   const searchParams = useSearchParams();
   const messageIdFromQuery = searchParams?.get("msg");
 
-  // Set selected message based on query param if it exists
+  // Fetch emails from Gmail API
+  const fetchEmails = async () => {
+    const res = await fetch("/api/gmail/emails");
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw {
+        message: data.error || "Unknown error",
+        status: res.status,
+      };
+    }
+
+    return res.json();
+  };
+
+  // React Query to fetch emails and cache them
+  const {
+    data: messages,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["gmailEmails"],
+    queryFn: fetchEmails,
+    refetchInterval: 15000,
+    refetchOnWindowFocus: false,
+  });
+
+  // Set selected message from query param once messages are loaded
   useEffect(() => {
-    if (!selectedMessage && messageIdFromQuery && localMessages?.length) {
-      const msg = localMessages.find((m) => m.id === messageIdFromQuery);
+    if (!selectedMessage && messageIdFromQuery && messages?.length) {
+      const msg = messages.find((m: any) => m.id === messageIdFromQuery);
       if (msg) {
-        if (setSelectedMessage) setSelectedMessage(msg);
+        setSelectedMessage(msg);
         setRightPanelOpen(true);
       }
     }
-  }, [localMessages, messageIdFromQuery]);
+  }, [messages, messageIdFromQuery, selectedMessage]);
 
-  // Select message handler to update state and URL
-  const selectMessageHandler = (message: Message) => {
-    if (setSelectedMessage) setSelectedMessage(message);
-    router.push(`?msg=${message.id}`, { scroll: false });
-    if (!rightPanelOpen) setRightPanelOpen(true);
-    if (message.unread === true) {
-      markAsReadMutation.mutate(message.id);
+  // Update Redux state when messages change to reflect unread status
+  useEffect(() => {
+    if (messages?.length > 0) {
+      const hasUnread = messages.some((msg: any) => msg.unread);
+      dispatch(setHasNew({ platformId: "gmail", hasNew: hasUnread }));
     }
-  };
+  }, [messages, dispatch]);
 
-  // Close the right panel and reset selected message
-  const closeRightPanel = () => {
-    setRightPanelOpen(false);
-    if (setSelectedMessage) setSelectedMessage(null);
-  };
-
-  // Mark message as read
+  // Mark message as read mutation, updates React Query cache directly
   const markAsReadMutation = useGenericMutation({
     mutationFn: async (messageId: string) => {
       const res = await fetch("/api/gmail/markread", {
@@ -63,11 +82,12 @@ export default function GmailPage() {
       return res.json();
     },
     onSuccess: (_, messageId) => {
-      setLocalMessages((prevMessages) =>
-        prevMessages.map((msg) =>
+      queryClient.setQueryData(["gmailEmails"], (oldData: any) => {
+        if (!oldData) return oldData;
+        return oldData.map((msg: any) =>
           msg.id === messageId ? { ...msg, unread: false } : msg
-        )
-      );
+        );
+      });
     },
     onError: (err) => {
       console.error("❌ Failed to mark as read", err);
@@ -75,69 +95,47 @@ export default function GmailPage() {
     },
   });
 
-  // Fetch emails from Gmail API
-  const fetchEmails = async () => {
-    const res = await fetch("/api/gmail/emails");
-
-    if (!res.ok) {
-      const data = await res.json();
-
-      // Now throw a custom error object including status
-      throw {
-        message: data.error || "Unknown error",
-        status: res.status,
-      };
+  // Select message handler updates selected message and URL, triggers mark as read if unread
+  const selectMessageHandler = (message: any) => {
+    setSelectedMessage(message);
+    router.push(`?msg=${message.id}`, { scroll: false });
+    if (!rightPanelOpen) setRightPanelOpen(true);
+    if (message.unread === true) {
+      markAsReadMutation.mutate(message.id);
     }
-
-    return res.json();
   };
 
-  //  React Query to fetch emails
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["gmailEmails"],
-    queryFn: fetchEmails,
-    refetchInterval: 15000,
-    refetchOnWindowFocus: false,
-  });
-
-  // Handle message selection from query params
-  useEffect(() => {
-    if (data) {
-      setLocalMessages(data);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (localMessages.length > 0) {
-      const hasUnread = localMessages.some((msg) => msg.unread);
-      dispatch(setHasNew({ platformId: "gmail", hasNew: hasUnread }));
-    }
-  }, [localMessages, dispatch]);
+  // Close right panel and clear selected message
+  const closeRightPanel = () => {
+    setRightPanelOpen(false);
+    setSelectedMessage(null);
+  };
 
   if (error) {
-    console.log(error);
-  }
-  if (isLoading) return <MessageListSkeleton />;
-
-if (error) {
-  // @ts-ignore
-  if (error.status === 401) {
+    // @ts-ignore
+    if (error.status === 401) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-center p-8">
+          <h2 className="text-xl font-semibold mb-2">
+            No accounts connected yet
+          </h2>
+          <p className="text-gray-600">
+            Please connect your Gmail account to view your inbox.
+          </p>
+        </div>
+      );
+    }
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-8">
-        <h2 className="text-xl font-semibold mb-2">No accounts connected yet</h2>
-        <p className="text-gray-600">Please connect your Gmail account to view your inbox.</p>
-      </div>
+      <p className="text-center text-red-500 mt-4">Error loading emails</p>
     );
   }
 
-  return <p className="text-center text-red-500 mt-4">Error loading emails</p>;
-}
-
+  if (isLoading) return <MessageListSkeleton />;
 
   return (
     <PlatformInbox
       platform="gmail"
-      fetchedMessages={localMessages}
+      fetchedMessages={messages || []}
       selectedMessage={selectedMessage}
       handleSelectMessage={selectMessageHandler}
       rightPanelOpen={rightPanelOpen}
