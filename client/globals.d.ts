@@ -11,12 +11,15 @@ declare global {
     unreadCount?: number; // optional, defaults to 0 or undefined
   };
 
+  type MessageStatus = 'sending' | 'delivered' | 'seen' | 'failed';
+
   type ConversationMessage = {
     id: number;
     sender: string;
     content: string;
     timestamp: string;
     isIncoming: boolean;
+    status?: MessageStatus; // For outgoing messages
   };
 
   type Message = {
@@ -30,6 +33,7 @@ declare global {
     unread: boolean;
     tags: string[];
     conversation: ConversationMessage[];
+    status?: MessageStatus; // For tracking message delivery status
   };
 }
 

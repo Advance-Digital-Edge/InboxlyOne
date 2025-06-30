@@ -14,6 +14,8 @@ interface MessageDetailsWrapperProps {
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   isLoadingMore?: boolean;
   hasMoreMessages?: boolean;
+  messageStatuses?: Map<string, MessageStatus>;
+  temporaryMessages?: Map<string, any>;
 }
 
 const openGmailMessage = (messageId: number) => {
@@ -31,6 +33,8 @@ export default function MessageDetailsWrapper({
   scrollRef,
   isLoadingMore,
   hasMoreMessages,
+  messageStatuses,
+  temporaryMessages,
 }: MessageDetailsWrapperProps) {
   return (
     <div className="flex w-full h-full flex-col ">
@@ -45,6 +49,8 @@ export default function MessageDetailsWrapper({
         scrollRef={scrollRef}
         isLoadingMore={isLoadingMore}
         hasMoreMessages={hasMoreMessages}
+        messageStatuses={messageStatuses}
+        temporaryMessages={temporaryMessages}
       />
       {selectedMessage.platform === "Gmail" ? (
         <Button

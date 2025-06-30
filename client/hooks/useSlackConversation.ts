@@ -63,9 +63,9 @@ export function useSlackConversation(userId: string | undefined, channelId: stri
     enabled: !!userId && !!channelId,
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
-    staleTime: 1000 * 30, // 30 seconds cache
+    staleTime: 1000 * 60, // Increased to 60 seconds cache
     refetchOnWindowFocus: false,
-    refetchInterval: 3000, // Poll every 3 seconds for new messages in open conversation
+    refetchInterval: 8000, // Reduced polling to every 8 seconds for smoother experience
   });
 
   // Flatten all pages into a single array of messages

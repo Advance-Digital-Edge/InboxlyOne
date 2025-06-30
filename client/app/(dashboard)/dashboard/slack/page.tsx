@@ -14,6 +14,9 @@ export default function SlackPage() {
   const [sending, setSending] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [messageStatuses, setMessageStatuses] = useState<Map<string, MessageStatus>>(new Map());
+  const [temporaryMessages, setTemporaryMessages] = useState<Map<string, any>>(new Map());
+  const [pauseRefetch, setPauseRefetch] = useState(false); // Add pause state
   const { user } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -43,9 +46,9 @@ export default function SlackPage() {
   const { data: messages, isLoading } = useQuery({
     queryKey: ["slackMessages", user?.id],
     queryFn: fetchMessages,
-    enabled: !!user?.id,
+    enabled: !!user?.id && !pauseRefetch, // Pause refetch during sending
     refetchOnWindowFocus: false,
-    refetchInterval: 5000, // Poll every 5 seconds for new messages
+    refetchInterval: pauseRefetch ? false : 10000, // Disable interval during sending
   });
 
   // Use the new conversation hook for paginated messages
@@ -143,10 +146,38 @@ export default function SlackPage() {
     }
   }, [queryClient, user?.id, selectedMessage?.channelId, invalidateConversation]));
 
-  // Send message handler
+  // Send message handler with status tracking
   const handleSend = async (text: string, selectedMessage: any) => {
     if (!selectedMessage || !user?.id) return;
+    
+    const tempMessageId = `temp_${Date.now()}`;
+    
+    // Pause automatic refetching during send process
+    setPauseRefetch(true);
+    
+    // Create temporary message for immediate UI feedback
+    const tempMessage = {
+      id: tempMessageId,
+      ts: tempMessageId,
+      sender: 'You',
+      content: text,
+      timestamp: new Date().toLocaleTimeString(),
+      isIncoming: false,
+      status: 'sending' as MessageStatus
+    };
+    
+    // Add temporary message to the selected conversation
+    setTemporaryMessages(prev => new Map(prev.set(tempMessageId, tempMessage)));
+    
+    // Set status to sending initially
+    setMessageStatuses(prev => new Map(prev.set(tempMessageId, 'sending')));
     setSending(true);
+    
+    // Optimistically update to delivered after a short delay (before API response)
+    setTimeout(() => {
+      setMessageStatuses(prev => new Map(prev.set(tempMessageId, 'delivered')));
+    }, 800); // Show delivered status optimistically
+    
     try {
       const res = await fetch("/api/slack/messages", {
         method: "POST",
@@ -157,21 +188,76 @@ export default function SlackPage() {
         body: JSON.stringify({
           toUserId: selectedMessage.senderId,
           text,
+          tempMessageId, // Send temp ID for tracking
         }),
       });
+      
       const data = await res.json();
+      
       if (data.ok) {
-        // Invalidate both the conversation list and current conversation
+        // Don't remove temporary message immediately - let it transition smoothly
+        // Update the temporary message status to delivered first
+        setMessageStatuses(prev => new Map(prev.set(tempMessageId, 'delivered')));
+        
+        // Add the real message status mapping but keep temp message visible for now
+        setMessageStatuses(prev => new Map(prev.set(data.ts, 'delivered')));
+        
+        // Check if message was seen after a delay
+        setTimeout(() => {
+          checkMessageSeenStatus(data.ts, data.ts, selectedMessage.channelId);
+        }, 2000);
+        
+        // Invalidate queries first to get the real message
         queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
         invalidateConversation();
+        
+        // Resume refetching and cleanup after real message should be loaded
+        setTimeout(() => {
+          setPauseRefetch(false);
+          setTemporaryMessages(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(tempMessageId);
+            return newMap;
+          });
+          // Clean up temp message status
+          setMessageStatuses(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(tempMessageId);
+            return newMap;
+          });
+        }, 2000); // Even longer delay to ensure smooth transition
+        
       } else {
+        // Set status to failed and keep temporary message
+        setMessageStatuses(prev => new Map(prev.set(tempMessageId, 'failed')));
         toast.error(data.error || "Failed to send message");
+        setPauseRefetch(false); // Resume refetching on error
       }
     } catch (error) {
+      // Set status to failed and keep temporary message
+      setMessageStatuses(prev => new Map(prev.set(tempMessageId, 'failed')));
       toast.error("Server error: Failed to send message.");
       console.error("Send message error:", error);
+      setPauseRefetch(false); // Resume refetching on error
     } finally {
       setSending(false);
+    }
+  };
+
+  // Check if message has been seen
+  const checkMessageSeenStatus = async (messageId: string, messageTs: string, channelId: string) => {
+    try {
+      const res = await fetch(`/api/slack/message-status?messageTs=${messageTs}&channelId=${channelId}`, {
+        headers: { "x-user-id": user?.id || "" },
+      });
+      
+      const data = await res.json();
+      
+      if (data.ok && data.seen) {
+        setMessageStatuses(prev => new Map(prev.set(messageId, 'seen')));
+      }
+    } catch (error) {
+      console.error("Error checking message status:", error);
     }
   };
 
@@ -209,9 +295,20 @@ export default function SlackPage() {
     return <MessageListSkeleton />;
   }
 
-  // Create the selected message with conversation data just-in-time
+  // Create the selected message with conversation data including temporary messages
   const selectedMessageWithConversation = selectedMessage && conversationMessages?.length > 0 
-    ? { ...selectedMessage, conversation: conversationMessages }
+    ? { 
+        ...selectedMessage, 
+        conversation: [
+          ...conversationMessages,
+          ...Array.from(temporaryMessages.values())
+        ].sort((a, b) => {
+          // Sort by timestamp to maintain chronological order
+          const aTime = a.ts?.startsWith('temp_') ? parseInt(a.ts.replace('temp_', '')) : parseFloat(a.ts || '0') * 1000;
+          const bTime = b.ts?.startsWith('temp_') ? parseInt(b.ts.replace('temp_', '')) : parseFloat(b.ts || '0') * 1000;
+          return aTime - bTime;
+        })
+      }
     : selectedMessage;
 
   return (
@@ -228,6 +325,8 @@ export default function SlackPage() {
       scrollRef={scrollContainerRef}
       isLoadingMore={isLoadingMore}
       hasMoreMessages={hasMoreMessages}
+      messageStatuses={messageStatuses}
+      temporaryMessages={temporaryMessages}
     />
   );
 }

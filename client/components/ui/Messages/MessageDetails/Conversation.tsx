@@ -3,6 +3,7 @@ import DOMPurify from "dompurify";
 import styles from "./Conversation.module.css";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect, useRef } from "react";
+import { Check, CheckCheck, Clock, X } from "lucide-react";
 
 interface ConversationProps {
   selectedMessage: Message;
@@ -10,6 +11,8 @@ interface ConversationProps {
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   isLoadingMore?: boolean;
   hasMoreMessages?: boolean;
+  messageStatuses?: Map<string, MessageStatus>;
+  temporaryMessages?: Map<string, any>;
 }
 
 export default function Conversation({ 
@@ -17,10 +20,54 @@ export default function Conversation({
   onScroll, 
   scrollRef, 
   isLoadingMore, 
-  hasMoreMessages 
+  hasMoreMessages,
+  messageStatuses,
+  temporaryMessages
 }: ConversationProps) {
   const defaultConversationRef = useRef<HTMLDivElement>(null);
   const conversationRef = scrollRef || defaultConversationRef;
+
+  // Function to render status icon for outgoing messages
+  const renderStatusIcon = (message: any) => {
+    if (message.isIncoming) return null;
+    
+    // For Slack messages, use 'ts' field as the identifier, for others use 'id'
+    const messageId = message.ts || message.id?.toString();
+    const status = message.status || messageStatuses?.get(messageId);
+    
+    switch (status) {
+      case 'sending':
+        return (
+          <div className="flex items-center">
+            <Check className="h-3 w-3 text-white/50" />
+          </div>
+        );
+      case 'delivered':
+        return (
+          <div className="flex items-center">
+            <Check className="h-3 w-3 text-gray-400" />
+            <Check className="h-3 w-3 text-gray-400 -ml-1" />
+          </div>
+        );
+      case 'seen':
+        return (
+          <div className="flex items-center">
+            <Check className="h-3 w-3 text-blue-500 font-bold" />
+            <Check className="h-3 w-3 text-blue-500 font-bold -ml-1" />
+          </div>
+        );
+      case 'failed':
+        return <X className="h-3 w-3 text-red-400" />;
+      default:
+        // Show default delivered status for outgoing messages without explicit status
+        return (
+          <div className="flex items-center">
+            <Check className="h-3 w-3 text-gray-300" />
+            <Check className="h-3 w-3 text-gray-300 -ml-1" />
+          </div>
+        );
+    }
+  };
 
   // Auto-scroll to bottom only for the first load or when new messages arrive
   // Don't auto-scroll when loading more historical messages
@@ -55,9 +102,41 @@ export default function Conversation({
           </div>
         )}
         
-        {selectedMessage.conversation?.map((message) => (
+        {selectedMessage.conversation?.map((message: any, index: number) => {
+          // For Slack messages, use 'ts' field as the identifier, for others use 'id'
+          const messageId = message.ts || message.id?.toString();
+          const status = message.status || messageStatuses?.get(messageId);
+          
+          // Skip rendering if this is a temporary message and we have a real message with similar content and timestamp
+          const isTemporary = messageId && messageId.startsWith('temp_');
+          if (isTemporary) {
+            const hasRealVersion = selectedMessage.conversation?.some((m: any, i: number) => {
+              if (i === index || m.ts?.startsWith('temp_')) return false;
+              
+              // Check if content matches and it's from the same sender (you)
+              const contentMatches = m.content === message.content;
+              const sameOutgoingMessage = !m.isIncoming && !message.isIncoming;
+              
+              // Check if timestamps are close (within 30 seconds)
+              const tempTime = parseInt(messageId.replace('temp_', ''));
+              const realTime = parseFloat(m.ts || '0') * 1000;
+              const timeDiff = Math.abs(realTime - tempTime);
+              const closeInTime = timeDiff < 30000; // 30 seconds
+              
+              return contentMatches && sameOutgoingMessage && closeInTime;
+            });
+            
+            if (hasRealVersion) {
+              return null; // Don't render temporary message if real one exists
+            }
+          }
+          
+          // Create a stable key that helps prevent re-mounting
+          const stableKey = isTemporary ? messageId : `real-${messageId}`;
+          
+          return (
           <div
-            key={message.id}
+            key={stableKey}
             className={cn(
               "flex",
               message.isIncoming ? "justify-center" : "justify-end"
@@ -66,12 +145,18 @@ export default function Conversation({
             {/* Message bubble  */}
             <div
               className={cn(
-                "w-full md:max-w-[80%] rounded-lg px-4 py-3 shadow-sm break-words whitespace-pre-line",
+                "w-full md:max-w-[80%] rounded-lg px-4 py-3 shadow-sm break-words whitespace-pre-line relative",
                 message.isIncoming
                   ? selectedMessage.platform === "Gmail"
                     ? ""
                     : "bg-yellow-50"
-                  : "bg-blue-500 text-white"
+                  : "bg-blue-500 text-white",
+                // Smooth transitions for all state changes
+                "transition-all duration-700 ease-in-out",
+                // Apply opacity and transform based on message status
+                !message.isIncoming && status === 'sending' 
+                  ? "opacity-60 scale-95 transform translate-y-1" 
+                  : "opacity-100 scale-100 transform translate-y-0"
               )}
             >
               <div className="mb-1 flex items-center justify-between gap-4">
@@ -99,32 +184,43 @@ export default function Conversation({
                 </span>
               </div>
 
-              {/* Render HTML content for Gmail messages */}
-              {selectedMessage.platform === "Gmail" ? (
-                <div
-                  className={styles.messageHtml}
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(message.content, {
-                      FORBID_TAGS: ["style", "script", "iframe", "form"],
-                      ADD_ATTR: ["style"],
-                      ALLOWED_ATTR: [
-                        "href",
-                        "src",
-                        "alt",
-                        "title",
-                        "style",
-                        "width",
-                        "height",
-                      ], // avoid random fixed widths
-                    }),
-                  }}
-                />
-              ) : (
-                <span className="text-sm">{message.content}</span>
+              {/* Message content */}
+              <div className="pb-2">
+                {/* Render HTML content for Gmail messages */}
+                {selectedMessage.platform === "Gmail" ? (
+                  <div
+                    className={styles.messageHtml}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(message.content, {
+                        FORBID_TAGS: ["style", "script", "iframe", "form"],
+                        ADD_ATTR: ["style"],
+                        ALLOWED_ATTR: [
+                          "href",
+                          "src",
+                          "alt",
+                          "title",
+                          "style",
+                          "width",
+                          "height",
+                        ],
+                      }),
+                    }}
+                  />
+                ) : (
+                  <span className="text-sm pr-8">{message.content}</span>
+                )}
+              </div>
+
+              {/* Status indicator in bottom right corner */}
+              {!message.isIncoming && (
+                <div className="absolute bottom-2 right-2 flex items-center">
+                  {renderStatusIcon(message)}
+                </div>
               )}
             </div>
           </div>
-        ))}
+        );
+        }).filter(Boolean)}
       </div>
     </div>
   );

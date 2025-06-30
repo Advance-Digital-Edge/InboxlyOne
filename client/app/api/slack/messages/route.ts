@@ -172,10 +172,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
   }
 
-  const { toUserId, text } = await req.json();
+  const { toUserId, text, channelId, tempMessageId } = await req.json();
 
-  if (!toUserId || !text) {
-    return NextResponse.json({ error: 'Missing toUserId or text' }, { status: 400 });
+  if ((!toUserId && !channelId) || !text) {
+    return NextResponse.json({ error: 'Missing toUserId/channelId or text' }, { status: 400 });
   }
 
   const { data: tokenRow, error } = await supabase
@@ -189,26 +189,29 @@ export async function POST(req: NextRequest) {
   }
 
   const token = tokenRow.access_token;
+  let targetChannelId = channelId;
 
-  // 1. Open or fetch the DM channel
-  const openRes = await fetch('https://slack.com/api/conversations.open', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ users: toUserId })
-  });
+  // If no channelId provided, open DM channel with user
+  if (!targetChannelId && toUserId) {
+    const openRes = await fetch('https://slack.com/api/conversations.open', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ users: toUserId })
+    });
 
-  const openData = await openRes.json();
+    const openData = await openRes.json();
 
-  if (!openData.ok) {
-    return NextResponse.json({ error: openData.error }, { status: 500 });
+    if (!openData.ok) {
+      return NextResponse.json({ error: openData.error }, { status: 500 });
+    }
+
+    targetChannelId = openData.channel.id;
   }
 
-  const channelId = openData.channel.id;
-
-  // 2. Send the message
+  // Send the message
   const sendRes = await fetch('https://slack.com/api/chat.postMessage', {
     method: 'POST',
     headers: {
@@ -216,7 +219,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      channel: channelId,
+      channel: targetChannelId,
       text
     })
   });
@@ -227,7 +230,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: sendData.error }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, ts: sendData.ts });
+  return NextResponse.json({ 
+    ok: true, 
+    ts: sendData.ts,
+    tempMessageId: tempMessageId 
+  });
 }
 
 async function getConversationMessages(authUserId: string, channelId: string, cursor?: string | null, limit: number = 20) {
