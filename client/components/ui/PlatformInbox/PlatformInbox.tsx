@@ -21,6 +21,10 @@ export default function PlatformInbox({
   setSelectedMessage,
   closeRightPanel,
   rightPanelOpen,
+  onScroll,
+  scrollRef,
+  isLoadingMore,
+  hasMoreMessages,
 }: {
   platform: string;
   fetchUrl?: string;
@@ -32,6 +36,10 @@ export default function PlatformInbox({
   closeRightPanel?: () => void;
   handleSelectMessage?: (message: Message) => void;
   rightPanelOpen?: boolean;
+  onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
+  isLoadingMore?: boolean;
+  hasMoreMessages?: boolean;
 }) {
   const { sidebarOpen } = useSidebar();
 
@@ -76,6 +84,10 @@ export default function PlatformInbox({
                 onSend={(text: string) => onSend?.(text, selectedMessage)}
                 sending={sending}
                 closeRightPanel={closeRightPanel ?? (() => {})}
+                onScroll={onScroll}
+                scrollRef={scrollRef}
+                isLoadingMore={isLoadingMore}
+                hasMoreMessages={hasMoreMessages}
               />
             ) : (
               <div className="flex h-full items-center justify-center">

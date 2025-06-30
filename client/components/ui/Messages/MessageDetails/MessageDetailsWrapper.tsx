@@ -10,6 +10,10 @@ interface MessageDetailsWrapperProps {
   onSend: (text: string) => void;
   sending?: boolean;
   closeRightPanel: () => void;
+  onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
+  isLoadingMore?: boolean;
+  hasMoreMessages?: boolean;
 }
 
 const openGmailMessage = (messageId: number) => {
@@ -23,6 +27,10 @@ export default function MessageDetailsWrapper({
   onSend,
   sending,
   closeRightPanel,
+  onScroll,
+  scrollRef,
+  isLoadingMore,
+  hasMoreMessages,
 }: MessageDetailsWrapperProps) {
   return (
     <div className="flex w-full h-full flex-col ">
@@ -31,10 +39,16 @@ export default function MessageDetailsWrapper({
         tagColors={tagColors}
         closeRightPanel={closeRightPanel}
       />
-      <Conversation selectedMessage={selectedMessage} />
+      <Conversation 
+        selectedMessage={selectedMessage} 
+        onScroll={onScroll}
+        scrollRef={scrollRef}
+        isLoadingMore={isLoadingMore}
+        hasMoreMessages={hasMoreMessages}
+      />
       {selectedMessage.platform === "Gmail" ? (
         <Button
-          onClick={() => openGmailMessage(selectedMessage.id)}
+          onClick={() => openGmailMessage(Number(selectedMessage.id))}
           className="mx-auto my-2 w-4/6 font-mono"
           size={"sm"}
         >
