@@ -6,7 +6,8 @@ import { AuthProvider } from "./context/AuthProvider";
 import { SidebarProvider } from "./context/SidebarContext";
 import { Toaster } from "react-hot-toast";
 import { ReduxProvider } from "./context/ReduxProvider";
-import SupabaseListener from "@/components/supabase/supabaseListener";
+import GmailListener from "@/components/listeners/GmailListener";
+import NotificationListener from "@/components/listeners/NotificationListener";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -32,15 +33,16 @@ export default function RootLayout({
     <html lang="en" className={InerSans.className}>
       <body className={styles.container}>
         <ReduxProvider>
+          <NotificationListener />
           <AuthProvider>
-            <SupabaseListener>
+            <GmailListener>
               <QueryProvider>
                 <SidebarProvider>
                   <Toaster position="top-right" />
                   {children}
                 </SidebarProvider>
               </QueryProvider>
-            </SupabaseListener>
+            </GmailListener>
           </AuthProvider>
         </ReduxProvider>
       </body>
