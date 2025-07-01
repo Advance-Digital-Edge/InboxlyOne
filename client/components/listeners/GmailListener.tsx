@@ -6,7 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/context/AuthProvider";
 
-export default function SupabaseListener({
+export default function GmailListener({
   children,
 }: {
   children: React.ReactNode;
@@ -45,16 +45,7 @@ export default function SupabaseListener({
 
           seenHistoryIds.current.add(newHistoryId);
 
-          // Debounce toast
-          if (!toastShownRef.current) {
-            toastShownRef.current = true;
-            toast.success("You have unread emails", { duration: 3000 });
-            dispatch(setHasNew({ platformId: "gmail", hasNew: true }));
-
-            setTimeout(() => {
-              toastShownRef.current = false;
-            }, 1500);
-          }
+          dispatch(setHasNew({ platformId: "gmail", hasNew: true }));
         }
       )
       .subscribe();

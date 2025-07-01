@@ -49,14 +49,18 @@ export default function GmailPage() {
 
   // Set selected message from query param once messages are loaded
   useEffect(() => {
-    if (!selectedMessage && messageIdFromQuery && messages?.length) {
+    if (messageIdFromQuery && messages?.length) {
       const msg = messages.find((m: any) => m.id === messageIdFromQuery);
       if (msg) {
         setSelectedMessage(msg);
         setRightPanelOpen(true);
       }
+    } else {
+      // If no msg in query, clear selection and close panel
+      setSelectedMessage(null);
+      setRightPanelOpen(false);
     }
-  }, [messages, messageIdFromQuery, selectedMessage]);
+  }, [messageIdFromQuery, messages]);
 
   // Update Redux state when messages change to reflect unread status
   useEffect(() => {
@@ -110,6 +114,8 @@ export default function GmailPage() {
     setRightPanelOpen(false);
     setSelectedMessage(null);
   };
+
+  console.log(rightPanelOpen, "rightPanelOpen");
 
   if (error) {
     // @ts-ignore
