@@ -1,10 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getValidSlackToken, SlackTokenData } from '@/lib/slack-token-manager';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+/**
+ * Helper function to check for token-related errors in Slack API responses
+ * @param response The JSON response from a Slack API call
+ * @returns true if the error is related to an invalid token
+ */
+function isTokenError(response: any): boolean {
+  if (!response.ok) {
+    const errorMsg = response.error?.toLowerCase() || '';
+    return errorMsg.includes('token') || 
+           errorMsg.includes('auth') || 
+           errorMsg.includes('invalid_auth') ||
+           errorMsg.includes('expired');
+  }
+  return false;
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,18 +41,14 @@ export async function GET(req: NextRequest) {
     }
 
     // Otherwise, return conversation list (existing functionality)
-    const { data: tokenRow, error } = await supabase
-      .from('slack_tokens')
-      .select('access_token, slack_user_id')
-      .eq('auth_user_id', authUserId)
-      .single();
-
-    if (error || !tokenRow) {
-      return NextResponse.json({ ok: false, messages: [], error: 'Slack token not found' }, { status: 404 });
+    const tokenData = await getValidSlackToken(authUserId);
+    
+    if (!tokenData) {
+      return NextResponse.json({ ok: false, messages: [], error: 'Slack token not found or expired' }, { status: 404 });
     }
 
-    const token = tokenRow.access_token;
-    const currentUserSlackId = tokenRow.slack_user_id;
+    const token = tokenData.access_token;
+    const currentUserSlackId = tokenData.slack_user_id;
 
     // Step 1: Get all IM channels
     const imRes = await fetch('https://slack.com/api/conversations.list?types=im', {
@@ -46,6 +59,16 @@ export async function GET(req: NextRequest) {
     const channels = imData.channels;
 
     if (!imData.ok || !Array.isArray(channels)) {
+      // Check if this is a token-related error
+      if (isTokenError(imData)) {
+        return NextResponse.json({
+          ok: false,
+          messages: [],
+          error: "Slack authentication expired. Please reconnect your account.",
+          requiresReauth: true
+        }, { status: 401 });
+      }
+      
       return NextResponse.json({
         ok: false,
         messages: [],
@@ -178,17 +201,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing toUserId/channelId or text' }, { status: 400 });
   }
 
-  const { data: tokenRow, error } = await supabase
-    .from('slack_tokens')
-    .select('access_token')
-    .eq('auth_user_id', authUserId)
-    .single();
-
-  if (error || !tokenRow) {
-    return NextResponse.json({ error: 'Slack token not found' }, { status: 404 });
+  const tokenData = await getValidSlackToken(authUserId);
+  
+  if (!tokenData) {
+    return NextResponse.json({ error: 'Slack token not found or expired' }, { status: 404 });
   }
 
-  const token = tokenRow.access_token;
+  const token = tokenData.access_token;
   let targetChannelId = channelId;
 
   // If no channelId provided, open DM channel with user
@@ -205,6 +224,15 @@ export async function POST(req: NextRequest) {
     const openData = await openRes.json();
 
     if (!openData.ok) {
+      // Check if this is a token-related error
+      if (isTokenError(openData)) {
+        return NextResponse.json({
+          ok: false,
+          error: "Slack authentication expired. Please reconnect your account.",
+          requiresReauth: true
+        }, { status: 401 });
+      }
+      
       return NextResponse.json({ error: openData.error }, { status: 500 });
     }
 
@@ -227,6 +255,15 @@ export async function POST(req: NextRequest) {
   const sendData = await sendRes.json();
 
   if (!sendData.ok) {
+    // Check if this is a token-related error
+    if (isTokenError(sendData)) {
+      return NextResponse.json({
+        ok: false,
+        error: "Slack authentication expired. Please reconnect your account.",
+        requiresReauth: true
+      }, { status: 401 });
+    }
+    
     return NextResponse.json({ error: sendData.error }, { status: 500 });
   }
 
@@ -238,18 +275,14 @@ export async function POST(req: NextRequest) {
 }
 
 async function getConversationMessages(authUserId: string, channelId: string, cursor?: string | null, limit: number = 20) {
-  const { data: tokenRow, error } = await supabase
-    .from('slack_tokens')
-    .select('access_token, slack_user_id')
-    .eq('auth_user_id', authUserId)
-    .single();
-
-  if (error || !tokenRow) {
-    return NextResponse.json({ ok: false, messages: [], error: 'Slack token not found' }, { status: 404 });
+  const tokenData = await getValidSlackToken(authUserId);
+  
+  if (!tokenData) {
+    return NextResponse.json({ ok: false, messages: [], error: 'Slack token not found or expired' }, { status: 404 });
   }
 
-  const token = tokenRow.access_token;
-  const currentUserSlackId = tokenRow.slack_user_id;
+  const token = tokenData.access_token;
+  const currentUserSlackId = tokenData.slack_user_id;
 
   // Build URL for fetching conversation history with pagination
   let historyUrl = `https://slack.com/api/conversations.history?channel=${channelId}&limit=${limit}`;
@@ -263,6 +296,16 @@ async function getConversationMessages(authUserId: string, channelId: string, cu
   const history = await historyRes.json();
 
   if (!history.ok) {
+    // Check if this is a token-related error
+    if (isTokenError(history)) {
+      return NextResponse.json({ 
+        ok: false, 
+        messages: [], 
+        error: "Slack authentication expired. Please reconnect your account.",
+        requiresReauth: true
+      }, { status: 401 });
+    }
+    
     return NextResponse.json({ 
       ok: false, 
       messages: [], 
