@@ -44,11 +44,13 @@ export async function GET(req: NextRequest) {
 
   const accessToken = data.authed_user.access_token;
   const slackUserId = data.authed_user.id;
+  const refreshToken = data.authed_user.refresh_token || null;
 
   const insertPayload = {
     auth_user_id: trimmedUserId,
     slack_user_id: slackUserId,
     access_token: accessToken,
+    refresh_token: refreshToken,
   };
 
   const { error } = await supabase.from('slack_tokens').upsert([insertPayload]);
@@ -78,6 +80,7 @@ export async function GET(req: NextRequest) {
       provider: "slack",
       external_account_id: slackUserId,
       access_token: accessToken,
+      refresh_token: refreshToken,
       metadata: {
         slack_user_id: slackUserId,
         workspaces, // [{workspace_name, workspace_id}]
