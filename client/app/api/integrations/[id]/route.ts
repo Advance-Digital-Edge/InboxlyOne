@@ -1,10 +1,13 @@
 import { google } from "googleapis";
 import { createClient } from "@/utils/supabase/server";
 
+
 export async function DELETE(request: Request, context: any) {
-  const supabase = await createClient();
   const { id } = await context.params;
- 
+  const supabase = await createClient();
+
+
+  // Your code here, e.g. read cookie, etc.
   const { data: integration, error } = await supabase
     .from("user_integrations")
     .select("*")
@@ -12,6 +15,8 @@ export async function DELETE(request: Request, context: any) {
     .single();
 
   if (error || !integration) {
+    console.log("❌ Integration not found or error:", error);
+    console.log(integration, "Integration data");
     return new Response("Integration not found", { status: 404 });
   }
 
@@ -106,7 +111,10 @@ export async function DELETE(request: Request, context: any) {
         .eq("access_token", integration.access_token);
 
       if (slackTokenError) {
-        console.error("❌ Failed to delete from slack_tokens:", slackTokenError);
+        console.error(
+          "❌ Failed to delete from slack_tokens:",
+          slackTokenError
+        );
       } else {
         console.log("✅ Slack tokens deleted for integration:", integration.id);
       }

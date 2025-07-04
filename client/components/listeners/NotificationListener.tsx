@@ -31,7 +31,7 @@ export default function NotificationListener() {
   );
 
   // Only flash title and play sound if user is NOT on the app tab
-  useTitleFlasher(!isPageVisible && hasAnyNew, "📬 New notifications!");
+  useTitleFlasher(!isPageVisible && hasAnyNew, "📬 New messages!");
   useNotificationSound(!isPageVisible && hasAnyNew, "/sounds/notification.mp3");
 
   return null;

@@ -176,13 +176,20 @@ export const getUserIntegrations = async () => {
 };
 
 export const removeIntegration = async (integrationId: string) => {
+  const headersList = await headers();
+  const cookie = headersList.get("cookie") || "";
+
   const res = await fetch(`${baseUrl}/api/integrations/${integrationId}`, {
     method: "DELETE",
+    headers: {
+      cookie, // manually forward cookie header
+    },
+    // credentials not needed here, because fetch is server-side
   });
 
   if (!res.ok) {
     const error = await res.text();
-    throw new Error(error || "Failed to remove integration");
+    throw new Error(error);
   }
 
   return true;

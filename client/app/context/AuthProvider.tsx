@@ -76,6 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUserIntegrations();
   }, [user]);
 
+  console.log("User Integrations:", userIntegrations);
+
   return (
     <AuthContext.Provider
       value={{
