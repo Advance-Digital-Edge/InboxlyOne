@@ -115,7 +115,6 @@ export default function GmailPage() {
     setSelectedMessage(null);
   };
 
-  console.log(rightPanelOpen, "rightPanelOpen");
 
   if (error) {
     // @ts-ignore

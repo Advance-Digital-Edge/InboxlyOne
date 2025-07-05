@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { google } from "googleapis";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 // Required to decode base64
 const decodeBase64Json = (message: string) => {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       return new Response("Bad Request: Missing fields", { status: 400 });
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: integration, error } = await supabase
       .from("user_integrations")

@@ -167,7 +167,6 @@ export const getUserIntegrations = async () => {
       throw new Error("Failed to fetch user integrations");
     }
 
-    console.log("Integration status:", data);
     return data;
   } catch (error) {
     console.error("An error occurred in getUserIntegrations:", error);
