@@ -166,6 +166,29 @@ export default function SlackPage() {
       status: 'sending' as MessageStatus
     };
     
+    // OPTIMISTIC CACHE UPDATE - Update the messages cache immediately
+    queryClient.setQueryData(["slackMessages", user?.id], (oldData: any) => {
+      if (!oldData) return oldData;
+      
+      return oldData.map((msg: any) => {
+        // Update the message that matches our current conversation
+        if (msg.channelId === selectedMessage.channelId || msg.senderId === selectedMessage.senderId) {
+          return {
+            ...msg,
+            preview: text,
+            timestamp: new Date().toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+            }),
+            ts: tempMessageId, // Temporary timestamp for sorting
+            unread: false, // Don't show as unread since it's our message
+          };
+        }
+        return msg;
+      });
+    });
+    
     // Add temporary message to the selected conversation
     setTemporaryMessages(prev => new Map(prev.set(tempMessageId, tempMessage)));
     
@@ -195,11 +218,30 @@ export default function SlackPage() {
       const data = await res.json();
       
       if (data.ok) {
-        // Don't remove temporary message immediately - let it transition smoothly
-        // Update the temporary message status to delivered first
-        setMessageStatuses(prev => new Map(prev.set(tempMessageId, 'delivered')));
+        // Update the cache with the real message data, maintaining the optimistic update
+        queryClient.setQueryData(["slackMessages", user?.id], (oldData: any) => {
+          if (!oldData) return oldData;
+          
+          return oldData.map((msg: any) => {
+            // Update the message that matches our current conversation
+            if (msg.channelId === selectedMessage.channelId || msg.senderId === selectedMessage.senderId) {
+              return {
+                ...msg,
+                preview: text, // Keep the sent text
+                timestamp: new Date(parseFloat(data.ts) * 1000).toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false,
+                }),
+                ts: data.ts, // Update with real timestamp
+                unread: false,
+              };
+            }
+            return msg;
+          });
+        });
         
-        // Add the real message status mapping but keep temp message visible for now
+        // Update message statuses
         setMessageStatuses(prev => new Map(prev.set(data.ts, 'delivered')));
         
         // Check if message was seen after a delay
@@ -207,11 +249,10 @@ export default function SlackPage() {
           checkMessageSeenStatus(data.ts, data.ts, selectedMessage.channelId);
         }, 2000);
         
-        // Invalidate queries first to get the real message
-        queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
+        // Only invalidate conversation to get the real message in conversation view
         invalidateConversation();
         
-        // Resume refetching and cleanup after real message should be loaded
+        // Clean up temporary data after a short delay
         setTimeout(() => {
           setPauseRefetch(false);
           setTemporaryMessages(prev => {
@@ -225,15 +266,21 @@ export default function SlackPage() {
             newMap.delete(tempMessageId);
             return newMap;
           });
-        }, 2000); // Even longer delay to ensure smooth transition
+        }, 1000); // Shorter delay since we're not waiting for refetch
         
       } else {
+        // Revert the optimistic cache update on error
+        queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
+        
         // Set status to failed and keep temporary message
         setMessageStatuses(prev => new Map(prev.set(tempMessageId, 'failed')));
         toast.error(data.error || "Failed to send message");
         setPauseRefetch(false); // Resume refetching on error
       }
     } catch (error) {
+      // Revert the optimistic cache update on error
+      queryClient.invalidateQueries({ queryKey: ["slackMessages", user?.id] });
+      
       // Set status to failed and keep temporary message
       setMessageStatuses(prev => new Map(prev.set(tempMessageId, 'failed')));
       toast.error("Server error: Failed to send message.");

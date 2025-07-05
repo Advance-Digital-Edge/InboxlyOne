@@ -78,6 +78,8 @@ export default function PlatformInbox({
           tagColors={tagColors}
           selectedMessage={selectedMessage ?? null}
           selectMessageHandler={handleSelectMessage ?? (() => {})}
+          messageStatuses={messageStatuses}
+          temporaryMessages={temporaryMessages}
         />
         {rightPanelOpen && (
           <div className="w-full md:w-4/6  overflow-y-auto bg-white  ">
