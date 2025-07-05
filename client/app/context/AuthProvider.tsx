@@ -58,8 +58,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Function to fetch user integrations
   const fetchUserIntegrations = async () => {
-    if (!user) return;
-
     try {
       const res: Integrations[] = await getUserIntegrations();
       setUserIntegrations(res);
@@ -75,8 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchUserIntegrations();
   }, [user]);
-
-  console.log("User Integrations:", userIntegrations);
 
   return (
     <AuthContext.Provider
