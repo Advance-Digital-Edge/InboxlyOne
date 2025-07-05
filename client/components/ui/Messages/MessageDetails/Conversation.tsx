@@ -153,10 +153,11 @@ export default function Conversation({
                   : "bg-blue-500 text-white",
                 // Smooth transitions for all state changes
                 "transition-all duration-700 ease-in-out",
-                // Apply opacity and transform based on message status
-                !message.isIncoming && status === 'sending' 
-                  ? "opacity-60 scale-95 transform translate-y-1" 
-                  : "opacity-100 scale-100 transform translate-y-0"
+                // Apply opacity based on message status, but keep same scale
+                /* !message.isIncoming && status === 'sending' 
+                  ? "opacity-60" 
+                  : "opacity-100"
+                  */
               )}
             >
               <div className="mb-1 flex items-center justify-between gap-4">
