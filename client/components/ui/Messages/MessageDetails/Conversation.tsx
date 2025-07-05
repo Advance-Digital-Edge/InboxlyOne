@@ -39,31 +39,31 @@ export default function Conversation({
       case 'sending':
         return (
           <div className="flex items-center">
-            <Check className="h-3 w-3 text-white/50" />
+            <Check className="h-4 w-4 text-white/60" />
           </div>
         );
       case 'delivered':
         return (
           <div className="flex items-center">
-            <Check className="h-3 w-3 text-gray-400" />
-            <Check className="h-3 w-3 text-gray-400 -ml-1" />
+            <Check className="h-4 w-4 text-white/80" />
+            <Check className="h-4 w-4 text-white/80 -ml-1" />
           </div>
         );
       case 'seen':
         return (
           <div className="flex items-center">
-            <Check className="h-3 w-3 text-blue-500 font-bold" />
-            <Check className="h-3 w-3 text-blue-500 font-bold -ml-1" />
+            <Check className="h-4 w-4 text-green-400 font-bold" />
+            <Check className="h-4 w-4 text-green-400 font-bold -ml-1" />
           </div>
         );
       case 'failed':
-        return <X className="h-3 w-3 text-red-400" />;
+        return <X className="h-4 w-4 text-red-400" />;
       default:
         // Show default delivered status for outgoing messages without explicit status
         return (
           <div className="flex items-center">
-            <Check className="h-3 w-3 text-gray-300" />
-            <Check className="h-3 w-3 text-gray-300 -ml-1" />
+            <Check className="h-4 w-4 text-white/80" />
+            <Check className="h-4 w-4 text-white/80 -ml-1" />
           </div>
         );
     }
@@ -139,7 +139,7 @@ export default function Conversation({
             key={stableKey}
             className={cn(
               "flex",
-              message.isIncoming ? "justify-center" : "justify-end"
+              message.isIncoming ? "justify-start" : "justify-end"
             )}
           >
             {/* Message bubble  */}
