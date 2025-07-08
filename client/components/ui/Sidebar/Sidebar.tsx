@@ -3,6 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { Home, Settings, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "../dropdown-menu";
 import SidebarUserInfoSkeleton from "./SidebarUserInfoSkeleton";
 import { ReactElement, use, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -11,6 +18,7 @@ import { getPlatformColor } from "@/lib/platformUtils";
 import { useRouter, usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
+import LogoutButton from "../Button/LogoutButton";
 interface SidebarProps {
   user: any;
   platforms: Platform[];
@@ -20,7 +28,6 @@ interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
 }
-
 export default function Sidebar({
   user,
   platforms,
@@ -37,7 +44,7 @@ export default function Sidebar({
   );
 
   const pathname = usePathname();
-
+  console.log(user?.user_metadata?.avatar_url, "Avatar URL from user metadata");
   // Get the active platform from the URL path
   useEffect(() => {
     const parts = pathname.split("/");
@@ -142,11 +149,29 @@ export default function Sidebar({
           <SidebarUserInfoSkeleton />
         ) : (
           <div className="border-t border-gray-300 p-4">
-            <div className="flex items-center cursor-pointer">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.user_metadata?.avatar_url} alt="User" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
+            <div className="flex items-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="cursor-pointer">
+                    <Avatar className="h-10 w-10 border-purple-900 border">
+                      <AvatarImage
+                        src={user?.user_metadata?.avatar_url}
+                        alt="User"
+                      />
+                      <AvatarFallback>
+                        {user?.user_metadata?.name[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="top" sideOffset={4} className="w-48">
+                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                    {/* Logout
+                    <LogOut color="red" className="h-4 w-4" /> */}
+                    <LogoutButton />
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <div className="ml-3">
                 <p className="text-sm font-medium">
                   {user?.user_metadata?.name}

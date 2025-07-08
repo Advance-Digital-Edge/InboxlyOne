@@ -6,11 +6,13 @@
    gap: 0.5rem;
    border-top: 1px solid #ccc;
    padding: 0.5rem 0;
-   color: red;
    transition: all 0.3s ease-in-out;
 }
 
 .logoutIcon{
+   color: red;
+   width: 16px;
+   height: 16px;
    transition: all 0.3s ease-in-out;
 }
 
