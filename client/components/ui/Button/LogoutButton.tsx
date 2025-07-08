@@ -1,30 +1,27 @@
-
-import { JSX } from 'react';
-import styles from './logoutButton.module.css';
-import { useAuth } from '@/app/context/AuthProvider';
-import { signOutAction } from '@/app/actions';
-import { LogOut } from 'lucide-react';
+import { JSX } from "react";
+import styles from "./logoutButton.module.css";
+import { useAuth } from "@/app/context/AuthProvider";
+import { signOutAction } from "@/app/actions";
+import { LogOut } from "lucide-react";
 
 export default function LogoutButton({
-   onClick,
+  onClick,
 }: {
-   onClick?: () => void;
+  onClick?: () => void;
 }): JSX.Element {
-   const { setUser } = useAuth();
-      
-   const signOutHandler = async (): Promise<void> => {
-      setUser(null);
-      await signOutAction();
-   };
+  const { setUser } = useAuth();
 
-   return(
-      <div className={styles.buttonContainer} onClick={onClick}>
-         <button
-            onClick={signOutHandler}
-         >
-            Logout
-         </button>
-         <LogOut className={styles.logoutIcon}/>
-      </div>
-   );
-};
+  const signOutHandler = async (): Promise<void> => {
+    await signOutAction();
+    setUser(null);
+  };
+
+  return (
+    <div className={styles.buttonContainer} onClick={onClick}>
+      <button className="flex items-center gap-2" onClick={signOutHandler}>
+        Logout
+        <LogOut className={styles.logoutIcon} />
+      </button>
+    </div>
+  );
+}
