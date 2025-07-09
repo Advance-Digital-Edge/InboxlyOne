@@ -76,7 +76,10 @@ const getContrastColor = (platformColor: string, index: number) => {
 };
 
 const SLACK_CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
-const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL; 
+const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL;
+
+const MESSENGER_APP_ID = process.env.NEXT_PUBLIC_MESSENGER_APP_ID;
+const MESSENGER_REDIRECT_URI = process.env.NEXT_PUBLIC_MESSENGER_REDIRECT_URI;
 
 export default function Integrations() {
   const { userIntegrations, fetchUserIntegrations, user } = useAuth();
@@ -127,7 +130,9 @@ export default function Integrations() {
         &force_scope=1
         &force_reinstall=1`;
     } else if (integrationId === "gmail") {
-      url = "/api/oauth/login"; 
+      url = "/api/oauth/login";
+    } else if (integrationId === "messenger") {
+      url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${MESSENGER_REDIRECT_URI}&scope=pages_messaging,pages_show_list,pages_read_engagement,public_profile`;
     }
 
     if (url) {
@@ -137,16 +142,26 @@ export default function Integrations() {
         if (event.origin !== window.location.origin) return;
 
         if (event.data === "gmail-connected") {
-          fetchUserIntegrations?.()
-            .catch(() => toast.error("Failed to refresh integrations."));
+          fetchUserIntegrations?.().catch(() =>
+            toast.error("Failed to refresh integrations.")
+          );
           toast.success("Gmail connected successfully!");
           window.removeEventListener("message", receiveMessage);
         }
 
         if (event.data === "slack-connected") {
-          fetchUserIntegrations?.()
-            .catch(() => toast.error("Failed to refresh integrations."));
+          fetchUserIntegrations?.().catch(() =>
+            toast.error("Failed to refresh integrations.")
+          );
           toast.success("Slack connected successfully!");
+          window.removeEventListener("message", receiveMessage);
+        }
+
+        if (event.data === "messenger-connected") {
+          fetchUserIntegrations?.().catch(() =>
+            toast.error("Failed to refresh integrations.")
+          );
+          toast.success("Messenger connected successfully!");
           window.removeEventListener("message", receiveMessage);
         }
       };
@@ -233,7 +248,10 @@ export default function Integrations() {
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
                     {integration.accounts.map((account, index) => {
-                      const contrastColor = getContrastColor(integration.color, index);
+                      const contrastColor = getContrastColor(
+                        integration.color,
+                        index
+                      );
                       return (
                         <TooltipProvider key={account.id}>
                           <Tooltip>
@@ -254,14 +272,20 @@ export default function Integrations() {
                                     account.workspaces &&
                                     account.workspaces.length > 0 && (
                                       <div className="text-xs text-gray-500 mt-1">
-                                        Workspace: {account.workspaces.map((w: any) => w.workspace_name).join(", ")}
+                                        Workspace:{" "}
+                                        {account.workspaces
+                                          .map((w: any) => w.workspace_name)
+                                          .join(", ")}
                                       </div>
-                                  )}
+                                    )}
                                   <button
                                     onClick={() => removeAccount(account.id)}
                                     className="ml-1.5 rounded-full bg-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
-                                    <X color="red" className="h-3 w-3 text-gray-500" />
+                                    <X
+                                      color="red"
+                                      className="h-3 w-3 text-gray-500"
+                                    />
                                   </button>
                                 </div>
                               </div>
