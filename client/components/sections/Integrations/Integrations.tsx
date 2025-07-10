@@ -43,7 +43,7 @@ const BASE_INTEGRATIONS = [
     maxAccounts: 2,
   },
   {
-    id: "messenger",
+    id: "facebook",
     name: "Messenger",
     icon: <Facebook className="h-6 w-6" />,
     connected: false,
@@ -131,7 +131,7 @@ export default function Integrations() {
         &force_reinstall=1`;
     } else if (integrationId === "gmail") {
       url = "/api/oauth/login";
-    } else if (integrationId === "messenger") {
+    } else if (integrationId === "facebook") {
       url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${MESSENGER_REDIRECT_URI}&scope=pages_messaging,pages_show_list,pages_read_engagement,public_profile`;
     }
 
