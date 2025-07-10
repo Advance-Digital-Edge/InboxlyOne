@@ -127,6 +127,17 @@ export async function DELETE(request: Request, context: any) {
     }
   }
 
+  // 👉 Add Instagram integration removal
+  if (integration.provider === "instagram") {
+    try {
+      // Instagram long-lived tokens can't be revoked via API, they expire naturally
+      // We just need to remove from our database
+      console.log("✅ Instagram integration removed for:", integration.metadata?.username);
+    } catch (err) {
+      console.error("❌ Failed to remove Instagram integration:", err);
+    }
+  }
+
   // Delete integration from DB
   await supabase.from("user_integrations").delete().eq("id", id);
 
