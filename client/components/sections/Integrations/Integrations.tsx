@@ -21,6 +21,7 @@ import { useAuth } from "@/app/context/AuthProvider";
 import { useMemo } from "react";
 import { toast } from "react-hot-toast";
 import { removeIntegration } from "@/app/actions";
+import { IntegrationMetadata } from "@/types/integration";
 
 // Integration data with only the requested platforms
 const BASE_INTEGRATIONS = [
@@ -81,6 +82,9 @@ const TEMP_URL = process.env.NEXT_PUBLIC_TEMPORARY_SLACK_URL;
 const MESSENGER_APP_ID = process.env.NEXT_PUBLIC_MESSENGER_APP_ID;
 const MESSENGER_REDIRECT_URI = process.env.NEXT_PUBLIC_MESSENGER_REDIRECT_URI;
 
+const INSTAGRAM_APP_ID = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID;
+const INSTAGRAM_REDIRECT_URI = process.env.NEXT_PUBLIC_INSTAGRAM_REDIRECT_URI;
+
 export default function Integrations() {
   const { userIntegrations, fetchUserIntegrations, user } = useAuth();
   const userId = user?.id;
@@ -93,12 +97,35 @@ export default function Integrations() {
       return {
         ...base,
         connected: matches.length > 0,
-        accounts: matches.map((match, index) => ({
-          id: match.id,
-          name: match.metadata.email,
-          picture: match.metadata.picture,
-          workspaces: match.metadata.workspaces, // <-- add this line
-        })),
+        accounts: matches.map((match, index) => {
+          // Handle different metadata structures for different providers
+          let name, picture;
+          const metadata = match.metadata as IntegrationMetadata;
+          
+          if (match.provider === "gmail") {
+            name = metadata.email;
+            picture = metadata.picture;
+          } else if (match.provider === "slack") {
+            name = metadata.email;
+            picture = metadata.picture;
+          } else if (match.provider === "facebook") {
+            name = metadata.name || metadata.email;
+            picture = metadata.picture;
+          } else if (match.provider === "instagram") {
+            name = `@${metadata.username}`;
+            picture = null; // Instagram Basic Display API doesn't provide profile pictures
+          } else {
+            name = metadata.email || metadata.name || "Unknown";
+            picture = metadata.picture;
+          }
+
+          return {
+            id: match.id,
+            name: name,
+            picture: picture,
+            workspaces: metadata.workspaces, // for Slack
+          };
+        }),
       };
     });
   }, [userIntegrations]);
@@ -133,6 +160,8 @@ export default function Integrations() {
       url = "/api/oauth/login";
     } else if (integrationId === "facebook") {
       url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${MESSENGER_REDIRECT_URI}&scope=pages_messaging,pages_show_list,pages_read_engagement,public_profile`;
+    } else if (integrationId === "instagram") {
+      url = `https://api.instagram.com/oauth/authorize?client_id=${INSTAGRAM_APP_ID}&redirect_uri=${INSTAGRAM_REDIRECT_URI}&scope=user_profile,user_media&response_type=code`;
     }
 
     if (url) {
@@ -162,6 +191,14 @@ export default function Integrations() {
             toast.error("Failed to refresh integrations.")
           );
           toast.success("Messenger connected successfully!");
+          window.removeEventListener("message", receiveMessage);
+        }
+
+        if (event.data === "instagram-connected") {
+          fetchUserIntegrations?.().catch(() =>
+            toast.error("Failed to refresh integrations.")
+          );
+          toast.success("Instagram connected successfully!");
           window.removeEventListener("message", receiveMessage);
         }
       };
