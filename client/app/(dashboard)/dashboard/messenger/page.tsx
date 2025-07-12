@@ -3,6 +3,7 @@ import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { messengerMessages } from "@/lib/constants";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 export default function MessengerPage() {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
@@ -42,6 +43,8 @@ export default function MessengerPage() {
     refetchInterval: 15000,
     refetchOnWindowFocus: false,
   });
+
+  if (isLoading) return <MessageListSkeleton />;
 
   console.log("Messenger messages:", messages);
   return (
