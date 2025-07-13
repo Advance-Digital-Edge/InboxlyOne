@@ -120,3 +120,27 @@ export function transformMessengerData(data: any[], currentUserId: string) {
     })
     .sort((a, b) => parseFloat(b.ts) - parseFloat(a.ts));
 }
+
+export function transformMessengerNewMessage(
+  event: { senderId: string; message: string; timestamp?: number },
+  currentUserId: string,
+  senderName: string
+) {
+  const timestamp = event.timestamp || Date.now();
+  const date = new Date(timestamp);
+
+  return {
+    id: timestamp, // или някакъв уникален ID, примерно timestamp
+    senderId: event.senderId,
+    sender: senderName,
+    content: event.message,
+    timestamp: date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }),
+    ts: timestamp.toString(),
+    isIncoming: event.senderId !== currentUserId,
+    unread: false,
+  };
+}
