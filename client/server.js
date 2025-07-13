@@ -19,6 +19,16 @@ app.post("/broadcast", (req, res) => {
   res.sendStatus(200);
 });
 
+app.post("/facebook-message", (req, res) => {
+  const { senderId, message } = req.body;
+
+  console.log("Facebook message received:", senderId, message);
+  io.emit("facebook_message", { senderId, message });
+
+  res.sendStatus(200);
+});
+
+
 server.listen(4000, () => {
   console.log("WebSocket server running on port 4000");
 });

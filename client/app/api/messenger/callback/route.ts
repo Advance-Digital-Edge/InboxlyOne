@@ -23,7 +23,6 @@ export async function GET(req: NextRequest) {
 
   const tokenData = await tokenRes.json();
 
-  console.log("Token Data:", tokenData);
 
   if (!tokenData.access_token) {
     return new Response("Failed to exchange code", { status: 400 });

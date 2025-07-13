@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const emailAddress = data.emailAddress;
     const historyId = data.historyId;
 
-    console.log("Received Pub/Sub webhook:", emailAddress);
+    console.log("Received Pub/Sub webhook:", emailAddress , data);
 
     if (!emailAddress || !historyId) {
       return new Response("Bad Request: Missing fields", { status: 400 });

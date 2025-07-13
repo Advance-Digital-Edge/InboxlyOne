@@ -24,7 +24,6 @@ export async function GET(req: NextRequest) {
     .eq("provider", "facebook")
     .single();
 
-  console.log("Token data:", tokenData, "Error:", error);
 
   if (error || !tokenData) {
     return new Response(

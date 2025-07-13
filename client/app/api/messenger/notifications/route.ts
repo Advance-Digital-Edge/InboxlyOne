@@ -29,8 +29,32 @@ export async function POST(req: NextRequest) {
         for (const event of entry.messaging) {
           const senderId = event.sender.id;
           const message = event.message?.text;
-          console.log(`Message from ${senderId}: ${message}`);
-          // You can now process or respond
+
+          if (!message) {
+            console.log(
+              `Skipping event from ${senderId} because no message text.`
+            );
+            continue;
+          }
+
+          try {
+            const response = await fetch(
+              "http://localhost:4000/facebook-message",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ senderId, message }),
+              }
+            );
+
+            if (!response.ok) {
+              console.error("Failed to send message:", await response.text());
+            } else {
+              console.log("Successfully sent message to socket server");
+            }
+          } catch (error) {
+            console.error("Error sending to socket server:", error);
+          }
         }
       }
 
