@@ -142,7 +142,7 @@ export default function Conversation({
               ? messageId.startsWith("temp_")
                 ? messageId
                 : `real-${messageId}`
-              : messageId;
+              : `${messageId}-${index}`;
 
             return (
               <div
