@@ -34,9 +34,31 @@ export default function MessengerPage() {
     return res.json();
   };
 
+  const sendFacebookMessage = async (recipientId: string, message: string) => {
+    const res = await fetch("/api/messenger/sendmessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        senderId: recipientId,
+        message,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to send message");
+    }
+
+    return res.json();
+  };
   useConnectSocket("facebook_message", (event) => {
     const currentUserId = user?.id;
-    const senderName = selectedMessage?.sender;
+    
+    const senderName =
+      queryClient
+        .getQueryData<any>(["messengerMessages"])
+        ?.find((msg: any) => msg.senderId === event.senderId)?.sender ||
+      "Unknown";
+
 
     const newMessage = transformMessengerNewMessage(
       event,
@@ -84,6 +106,43 @@ export default function MessengerPage() {
           : thread
       );
     });
+  });
+  const sendMessageMutation = useGenericMutation({
+    mutationFn: ({
+      senderId,
+      message,
+    }: {
+      senderId: string;
+      message: string;
+    }) => sendFacebookMessage(senderId, message),
+    onMutate: async ({ senderId, message }) => {
+      setSelectedMessage((prev: any) => {
+        if (!prev) return prev;
+
+        const newMsg = {
+          id: `temp-${Date.now()}`,
+          senderId,
+          senderName: user.name,
+          content: message,
+          direction: "outgoing",
+          createdAt: new Date().toISOString(),
+        };
+
+        return {
+          ...prev,
+          preview: message,
+          timestamp: newMsg.createdAt,
+          conversation: [...(prev.conversation || []), newMsg],
+        };
+      });
+    },
+
+    onSuccess: () => {
+      toast.success("Message sent");
+    },
+    onError: () => {
+      toast.error("Failed to send message");
+    },
   });
 
   const markMessengerAsReadMutation = useGenericMutation({
@@ -168,6 +227,17 @@ export default function MessengerPage() {
       selectedMessage={selectedMessage}
       handleSelectMessage={selectMessageHandler}
       closeRightPanel={closeRightPanel}
+      onSend={(text, selectedMessage) => {
+        if (!selectedMessage?.senderId) {
+          toast.error("No sender ID found.");
+          return;
+        }
+
+        sendMessageMutation.mutate({
+          senderId: selectedMessage.senderId,
+          message: text,
+        });
+      }}
     />
   );
 }
