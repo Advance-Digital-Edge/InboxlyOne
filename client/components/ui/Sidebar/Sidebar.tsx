@@ -44,7 +44,6 @@ export default function Sidebar({
   );
 
   const pathname = usePathname();
-  console.log(user?.user_metadata?.avatar_url, "Avatar URL from user metadata");
   // Get the active platform from the URL path
   useEffect(() => {
     const parts = pathname.split("/");

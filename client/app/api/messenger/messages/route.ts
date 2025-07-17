@@ -88,10 +88,10 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // ✅ Трансформацията
+
     const transformed = transformMessengerData(messages, pageId);
 
-    // ✅ Връщаме трансформирани съобщения
+
     return new Response(JSON.stringify(transformed), { status: 200 });
   } catch (err: any) {
     return new Response(
