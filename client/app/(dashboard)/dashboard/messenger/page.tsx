@@ -52,13 +52,12 @@ export default function MessengerPage() {
   };
   useConnectSocket("facebook_message", (event) => {
     const currentUserId = user?.id;
-    
+
     const senderName =
       queryClient
         .getQueryData<any>(["messengerMessages"])
         ?.find((msg: any) => msg.senderId === event.senderId)?.sender ||
       "Unknown";
-
 
     const newMessage = transformMessengerNewMessage(
       event,
@@ -91,22 +90,58 @@ export default function MessengerPage() {
       });
     }
 
-    // ✅ Обнови списъка с разговори (винаги)
     queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
       if (!oldData) return oldData;
+      return oldData.map((thread: any) => {
+        if (thread.senderId === event.senderId) {
+          // Add newMessage to conversation array (or create one if missing)
+          const updatedConversation = thread.conversation
+            ? [...thread.conversation, newMessage]
+            : [newMessage];
+
+          return {
+            ...thread,
+            preview: event.message,
+            timestamp: newMessage.timestamp,
+            ts: newMessage.ts,
+            unread: true,
+            conversation: updatedConversation,
+          };
+        }
+        return thread;
+      });
+    });
+  });
+
+  useConnectSocket("facebook_message_seen", ({ senderId, seenAt }) => {
+    // Update the messengerMessages cache to mark that conversation as read/seen
+    queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
+      if (!oldData) return oldData;
+
       return oldData.map((thread: any) =>
-        thread.senderId === event.senderId
+        thread.senderId === senderId
           ? {
               ...thread,
-              preview: event.message,
-              timestamp: newMessage.timestamp,
-              ts: newMessage.ts,
-              unread: true,
+              unread: false, // Mark as read
+              lastSeenAt: seenAt, // Optionally store last seen timestamp
             }
           : thread
       );
     });
+
+    // Optionally update selectedMessage if it matches senderId (e.g. for UI update)
+    if (selectedMessage?.senderId === senderId) {
+      setSelectedMessage((prev: any) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          unread: false,
+          lastSeenAt: seenAt,
+        };
+      });
+    }
   });
+
   const sendMessageMutation = useGenericMutation({
     mutationFn: ({
       senderId,
@@ -139,6 +174,7 @@ export default function MessengerPage() {
 
     onSuccess: () => {
       toast.success("Message sent");
+      queryClient.invalidateQueries({ queryKey: ["messengerMessages"] });
     },
     onError: () => {
       toast.error("Failed to send message");
@@ -188,7 +224,7 @@ export default function MessengerPage() {
       ...message,
       conversation: mergedConversation,
     });
-
+    console.log(pendingMessages);
     // 🧹 Изчисти pending буфера за този sender
     setPendingMessages((prev) => {
       const updated = { ...prev };
