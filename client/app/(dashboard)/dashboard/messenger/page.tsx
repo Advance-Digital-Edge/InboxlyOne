@@ -90,6 +90,8 @@ export default function MessengerPage() {
       });
     }
 
+    console.log("Pending messages:", pendingMessages);
+
     queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
       if (!oldData) return oldData;
       return oldData.map((thread: any) => {
@@ -217,15 +219,19 @@ export default function MessengerPage() {
 
     const mergedConversation = [
       ...(message.conversation || []),
-      ...pendingForThisSender,
+      ...pendingForThisSender.filter(
+        (pendingMsg) =>
+          !(message.conversation || []).some(
+            (msg: { id: any }) => msg.id === pendingMsg.id
+          )
+      ),
     ];
 
     setSelectedMessage({
       ...message,
       conversation: mergedConversation,
     });
-    console.log(pendingMessages);
-    // 🧹 Изчисти pending буфера за този sender
+
     setPendingMessages((prev) => {
       const updated = { ...prev };
       delete updated[message.senderId];
