@@ -3,7 +3,6 @@ import { useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setHasNew } from "@/lib/features/platformStatusSlice";
 import { createClient } from "@/utils/supabase/client";
-import toast from "react-hot-toast";
 import { useAuth } from "@/app/context/AuthProvider";
 
 export default function GmailListener({

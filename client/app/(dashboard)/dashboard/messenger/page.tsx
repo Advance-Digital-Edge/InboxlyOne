@@ -2,13 +2,15 @@
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { messengerMessages } from "@/lib/constants";
 import { useConnectSocket } from "@/hooks/useConnectSocket";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGenericMutation } from "@/hooks/useMutation";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
 import { transformMessengerNewMessage } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
 import { toast } from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { setHasNew } from "@/lib/features/platformStatusSlice";
 
 export default function MessengerPage() {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
@@ -17,6 +19,7 @@ export default function MessengerPage() {
     {}
   );
 
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -65,7 +68,8 @@ export default function MessengerPage() {
       senderName
     );
 
-    const isActiveChat = selectedMessage?.senderId === event.senderId;
+    const isActiveChat =
+      selectedMessage?.senderId === event.senderId && rightPanelOpen;
 
     if (isActiveChat) {
       setSelectedMessage((prev: { conversation: any }) => {
@@ -77,7 +81,6 @@ export default function MessengerPage() {
           conversation: [...prev.conversation, newMessage],
         };
       });
-
       markMessengerAsReadMutation.mutate(event.senderId);
     } else {
       // 👇 добавяме съобщението в pending буфера
@@ -89,8 +92,6 @@ export default function MessengerPage() {
         };
       });
     }
-
-    console.log("Pending messages:", pendingMessages);
 
     queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
       if (!oldData) return oldData;
@@ -115,34 +116,34 @@ export default function MessengerPage() {
     });
   });
 
-  useConnectSocket("facebook_message_seen", ({ senderId, seenAt }) => {
-    // Update the messengerMessages cache to mark that conversation as read/seen
-    queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
-      if (!oldData) return oldData;
+  // useConnectSocket("facebook_message_seen", ({ senderId, seenAt }) => {
+  //   // Update the messengerMessages cache to mark that conversation as read/seen
+  //   queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
+  //     if (!oldData) return oldData;
 
-      return oldData.map((thread: any) =>
-        thread.senderId === senderId
-          ? {
-              ...thread,
-              unread: false, // Mark as read
-              lastSeenAt: seenAt, // Optionally store last seen timestamp
-            }
-          : thread
-      );
-    });
+  //     return oldData.map((thread: any) =>
+  //       thread.senderId === senderId
+  //         ? {
+  //             ...thread,
+  //             unread: false, // Mark as read
+  //             lastSeenAt: seenAt, // Optionally store last seen timestamp
+  //           }
+  //         : thread
+  //     );
+  //   });
 
-    // Optionally update selectedMessage if it matches senderId (e.g. for UI update)
-    if (selectedMessage?.senderId === senderId) {
-      setSelectedMessage((prev: any) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          unread: false,
-          lastSeenAt: seenAt,
-        };
-      });
-    }
-  });
+  //   // Optionally update selectedMessage if it matches senderId (e.g. for UI update)
+  //   if (selectedMessage?.senderId === senderId) {
+  //     setSelectedMessage((prev: any) => {
+  //       if (!prev) return prev;
+  //       return {
+  //         ...prev,
+  //         unread: false,
+  //         lastSeenAt: seenAt,
+  //       };
+  //     });
+  //   }
+  // });
 
   const sendMessageMutation = useGenericMutation({
     mutationFn: ({
@@ -237,11 +238,11 @@ export default function MessengerPage() {
       delete updated[message.senderId];
       return updated;
     });
-
     markMessengerAsReadMutation.mutate(message.senderId);
 
     if (!rightPanelOpen) setRightPanelOpen(true);
   };
+  console.log("Right panel open:", rightPanelOpen);
 
   // Close right panel and clear selected message
   const closeRightPanel = () => {
@@ -259,6 +260,12 @@ export default function MessengerPage() {
     refetchOnWindowFocus: false,
   });
 
+  useEffect(() => {
+    if (messages?.length > 0) {
+      const hasUnread = messages.some((msg: any) => msg.unread);
+      dispatch(setHasNew({ platformId: "messenger", hasNew: hasUnread }));
+    }
+  }, [messages, dispatch]);
   if (isLoading) return <MessageListSkeleton />;
 
   return (

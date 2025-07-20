@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import { ReduxProvider } from "./context/ReduxProvider";
 import GmailListener from "@/components/listeners/GmailListener";
 import NotificationListener from "@/components/listeners/NotificationListener";
+import { NotificationProvider } from "./context/NotificationProvider";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -33,17 +34,19 @@ export default function RootLayout({
     <html lang="en" className={InerSans.className}>
       <body className={styles.container}>
         <ReduxProvider>
-          <NotificationListener />
-          <AuthProvider>
-            <GmailListener>
-              <QueryProvider>
-                <SidebarProvider>
-                  <Toaster position="top-right" />
-                  {children}
-                </SidebarProvider>
-              </QueryProvider>
-            </GmailListener>
-          </AuthProvider>
+          <QueryProvider>
+            <NotificationProvider>
+              <NotificationListener />
+              <AuthProvider>
+                <GmailListener>
+                  <SidebarProvider>
+                    <Toaster position="top-right" />
+                    {children}
+                  </SidebarProvider>
+                </GmailListener>
+              </AuthProvider>
+            </NotificationProvider>
+          </QueryProvider>
         </ReduxProvider>
       </body>
     </html>
