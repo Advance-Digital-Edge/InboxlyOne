@@ -24,7 +24,6 @@ export async function GET(req: NextRequest) {
     .eq("provider", "facebook")
     .single();
 
-
   if (error || !tokenData) {
     return new Response(
       JSON.stringify({
@@ -34,24 +33,25 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  const { data: pages, error: pagesError } = await supabase
+    .from("facebook_pages")
+    .select("*")
+    .eq("user_id", user.id);
 
-  const metadata = tokenData.metadata;
-
-  if (!metadata?.pages || metadata.pages.length === 0) {
+  if (pagesError || !pages || pages.length === 0) {
     return new Response(
       JSON.stringify({
-        error:
-          "No pages found in metadata. Please reconnect your Facebook account.",
+        error: "No Facebook pages found for this user.",
       }),
       { status: 400 }
     );
   }
 
-  
-  const page = metadata.pages[0]; 
+  const page = pages[0];
+  console.log(page);
 
   const accessToken = page.access_token;
-  const pageId = page.id;
+  const pageId = page.page_id;
 
   if (!accessToken || !pageId) {
     return new Response(
@@ -88,9 +88,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-
     const transformed = transformMessengerData(messages, pageId);
-
 
     return new Response(JSON.stringify(transformed), { status: 200 });
   } catch (err: any) {
