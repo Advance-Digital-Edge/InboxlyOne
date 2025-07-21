@@ -32,26 +32,29 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const metadata = tokenData.metadata;
+  const { data: pageData, error: pageError } = await supabase
+    .from("facebook_pages")
+    .select("*")
+    .eq("integration_id", tokenData.id) // взимаме страницата свързана с integration
+    .single();
 
-  if (!metadata?.pages || metadata.pages.length === 0) {
+  if (pageError || !pageData) {
     return new Response(
       JSON.stringify({
         error:
-          "No pages found in metadata. Please reconnect your Facebook account.",
+          "No Facebook page found. Please reconnect your Facebook account.",
       }),
       { status: 400 }
     );
   }
 
-  const page = metadata.pages[0];
+  const pageId = pageData.page_id;
+  const accessToken = pageData.access_token;
 
-  const accessToken = page.access_token;
-
-  if (!accessToken) {
+  if (!accessToken || !pageId) {
     return new Response(
       JSON.stringify({
-        error: "Missing page access token.",
+        error: "Missing page access token or page ID.",
       }),
       { status: 400 }
     );

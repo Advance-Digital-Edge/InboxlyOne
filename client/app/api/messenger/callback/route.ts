@@ -23,7 +23,6 @@ export async function GET(req: NextRequest) {
 
   const tokenData = await tokenRes.json();
 
-
   if (!tokenData.access_token) {
     return new Response("Failed to exchange code", { status: 400 });
   }
@@ -40,7 +39,6 @@ export async function GET(req: NextRequest) {
     return new Response("Failed to fetch profile", { status: 400 });
   }
 
-  console.log("Profile Data:", profile);
   // Step 3: Get current Supabase user
   const {
     data: { user },
@@ -77,20 +75,49 @@ export async function GET(req: NextRequest) {
   );
   const pages = await pagesRes.json();
 
+  console.log(`pages`, pages.data);
+  console.log("Is pages data array", Array.isArray(pages.data));
+
   // Save to DB
-  await supabase.from("user_integrations").upsert({
-    user_id: user.id,
-    provider: "facebook",
-    external_account_id: profile.id,
-    access_token: accessToken,
-    expires_at: new Date(Date.now() + tokenData.expires_in * 1000), // Convert seconds to ms
-    metadata: {
-      name: profile.name,
-      email: profile.email,
-      picture: profile.picture.data.url,
-      pages: pages.data || [],
-    },
-  });
+  const { data: integrationData, error: integrationError } = await supabase
+    .from("user_integrations")
+    .upsert({
+      user_id: user.id,
+      provider: "facebook",
+      external_account_id: profile.id,
+      access_token: accessToken,
+      expires_at: new Date(Date.now() + tokenData.expires_in * 1000),
+      metadata: {
+        name: profile.name,
+        email: profile.email,
+        picture: profile.picture.data.url,
+      },
+    })
+    .select()
+    .single();
+
+  if (integrationError) {
+    return new Response("Failed to save integration", { status: 500 });
+  }
+
+  // Now save each page in facebook_pages table
+  if (pages.data && Array.isArray(pages.data)) {
+    for (const page of pages.data) {
+      const { data: pageData, error: pageError } = await supabase
+        .from("facebook_pages")
+        .upsert({
+          integration_id: integrationData.id, // link to user_integration
+          user_id: user.id, // link to user
+          page_id: page.id,
+          page_name: page.name,
+          access_token: page.access_token,
+          category: page.category,
+          tasks: page.tasks, // save as JSON array
+          category_list: page.category_list, // save as JSON array if you want
+        });
+      console.log(pageData, pageError);
+    }
+  }
 
   // Return a success HTML response (for popup)
   return new Response(
