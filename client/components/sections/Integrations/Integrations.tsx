@@ -161,7 +161,7 @@ export default function Integrations() {
     } else if (integrationId === "facebook") {
       url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${MESSENGER_REDIRECT_URI}&scope=pages_messaging,pages_show_list,pages_read_engagement,public_profile`;
     } else if (integrationId === "instagram") {
-      url = `https://api.instagram.com/oauth/authorize?client_id=${INSTAGRAM_APP_ID}&redirect_uri=${INSTAGRAM_REDIRECT_URI}&scope=user_profile,user_media&response_type=code`;
+      url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${INSTAGRAM_REDIRECT_URI}&scope=instagram_basic,instagram_manage_messages&response_type=code`;
     }
 
     if (url) {

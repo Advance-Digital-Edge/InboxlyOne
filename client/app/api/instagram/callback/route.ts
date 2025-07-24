@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 
-const IG_CLIENT_ID = process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID!;
-const IG_CLIENT_SECRET = process.env.NEXT_PUBLIC_INSTAGRAM_APP_SECRET!;
+const IG_CLIENT_ID = process.env.NEXT_PUBLIC_MESSENGER_APP_ID!;
+const IG_CLIENT_SECRET = process.env.NEXT_PUBLIC_META_APP_SECRET!;
 const IG_REDIRECT_URI = process.env.NEXT_PUBLIC_INSTAGRAM_REDIRECT_URI!;
 
 export async function GET(req: NextRequest) {
@@ -15,22 +15,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Step 1: Exchange code for short-lived access token
+    // Step 1: Exchange code for access token using Facebook Login OAuth endpoint
     const tokenRes = await fetch(
-      `https://api.instagram.com/oauth/access_token`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          client_id: IG_CLIENT_ID,
-          client_secret: IG_CLIENT_SECRET,
-          grant_type: "authorization_code",
-          redirect_uri: IG_REDIRECT_URI,
-          code: code,
-        }),
-      }
+      `https://graph.facebook.com/v19.0/oauth/access_token?client_id=${IG_CLIENT_ID}&redirect_uri=${encodeURIComponent(
+        IG_REDIRECT_URI
+      )}&client_secret=${IG_CLIENT_SECRET}&code=${code}`
     );
 
     const tokenData = await tokenRes.json();
@@ -39,27 +28,12 @@ export async function GET(req: NextRequest) {
       return new Response("Failed to exchange code", { status: 400 });
     }
 
-    const shortLivedToken = tokenData.access_token;
-    const userId = tokenData.user_id;
+    const accessToken = tokenData.access_token;
+    const expiresIn = tokenData.expires_in; // Usually 60 days
 
-    // Step 2: Exchange short-lived token for long-lived token
-    const longLivedTokenRes = await fetch(
-      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${IG_CLIENT_SECRET}&access_token=${shortLivedToken}`
-    );
-
-    const longLivedTokenData = await longLivedTokenRes.json();
-    console.log("Long-lived Token Data:", longLivedTokenData);
-
-    if (!longLivedTokenData.access_token) {
-      return new Response("Failed to get long-lived token", { status: 400 });
-    }
-
-    const accessToken = longLivedTokenData.access_token;
-    const expiresIn = longLivedTokenData.expires_in; // Usually 60 days
-
-    // Step 3: Get user profile info
+    // Step 2: Get user profile info from Instagram Graph API
     const profileRes = await fetch(
-      `https://graph.instagram.com/me?fields=id,username,account_type,media_count&access_token=${accessToken}`
+      `https://graph.facebook.com/v19.0/me?fields=id,name,email&access_token=${accessToken}`
     );
     const profile = await profileRes.json();
 
