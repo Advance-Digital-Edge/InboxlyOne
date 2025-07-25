@@ -218,7 +218,9 @@ export default function Conversation({
                         }}
                       />
                     ) : (
-                      <span className="text-sm pr-8">{message.content}</span>
+                      <span className="text-sm pr-8">
+                        {message.content || message.message}
+                      </span>
                     )}
                   </div>
 

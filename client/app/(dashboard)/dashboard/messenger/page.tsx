@@ -37,6 +37,15 @@ export default function MessengerPage() {
     return res.json();
   };
 
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["messengerMessages"],
+    queryFn: fetchMessages,
+    refetchOnWindowFocus: false,
+  });
+
+  const pageName = data?.page_name;
+  const messages = data?.conversations ?? [];
+
   const sendFacebookMessage = async (recipientId: string, message: string) => {
     const res = await fetch("/api/messenger/sendmessage", {
       method: "POST",
@@ -56,11 +65,10 @@ export default function MessengerPage() {
   useConnectSocket("facebook_message", (event) => {
     const currentUserId = user?.id;
 
+    const data = queryClient.getQueryData<any>(["messengerMessages"]);
     const senderName =
-      queryClient
-        .getQueryData<any>(["messengerMessages"])
-        ?.find((msg: any) => msg.senderId === event.senderId)?.sender ||
-      "Unknown";
+      data?.conversations?.find((msg: any) => msg.senderId === event.senderId)
+        ?.sender || "Unknown";
 
     const newMessage = transformMessengerNewMessage(
       event,
@@ -94,10 +102,10 @@ export default function MessengerPage() {
     }
 
     queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
-      if (!oldData) return oldData;
-      return oldData.map((thread: any) => {
+      if (!oldData || !Array.isArray(oldData.conversations)) return oldData;
+
+      const updatedConversations = oldData.conversations.map((thread: any) => {
         if (thread.senderId === event.senderId) {
-          // Add newMessage to conversation array (or create one if missing)
           const updatedConversation = thread.conversation
             ? [...thread.conversation, newMessage]
             : [newMessage];
@@ -113,10 +121,14 @@ export default function MessengerPage() {
         }
         return thread;
       });
+
+      return {
+        ...oldData,
+        conversations: updatedConversations,
+      };
     });
   });
 
-  // useConnectSocket("facebook_message_seen", ({ senderId, seenAt }) => {
   //   // Update the messengerMessages cache to mark that conversation as read/seen
   //   queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
   //     if (!oldData) return oldData;
@@ -156,16 +168,15 @@ export default function MessengerPage() {
     onMutate: async ({ senderId, message }) => {
       setSelectedMessage((prev: any) => {
         if (!prev) return prev;
-
         const newMsg = {
           id: `temp-${Date.now()}`,
           senderId,
-          senderName: user.name,
+          sender: pageName,
           content: message,
           direction: "outgoing",
           createdAt: new Date().toISOString(),
         };
-
+      
         return {
           ...prev,
           preview: message,
@@ -203,9 +214,12 @@ export default function MessengerPage() {
       queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
         if (!oldData) return oldData;
 
-        return oldData.map((thread: any) =>
-          thread.senderId === senderId ? { ...thread, unread: false } : thread
-        );
+        return {
+          ...oldData,
+          conversations: oldData.conversations.map((thread: any) =>
+            thread.senderId === senderId ? { ...thread, unread: false } : thread
+          ),
+        };
       });
     },
 
@@ -215,34 +229,59 @@ export default function MessengerPage() {
     },
   });
 
-  const selectMessageHandler = (message: any) => {
-    const pendingForThisSender = pendingMessages[message.senderId] || [];
+  const selectMessageHandler = async (message: any) => {
+    try {
+      const res = await fetch(
+        `/api/messenger/conversation/${message.conversationId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch conversation details");
 
-    const mergedConversation = [
-      ...(message.conversation || []),
-      ...pendingForThisSender.filter(
-        (pendingMsg) =>
-          !(message.conversation || []).some(
-            (msg: { id: any }) => msg.id === pendingMsg.id
-          )
-      ),
-    ];
+      const freshConversation = await res.json();
+      const pendingForThisSender = pendingMessages[message.senderId] || [];
+      const mergedConversation = [
+        ...freshConversation,
+        ...pendingForThisSender.filter(
+          (pendingMsg) =>
+            !freshConversation.some((msg: any) => msg.id === pendingMsg.id)
+        ),
+      ];
 
-    setSelectedMessage({
-      ...message,
-      conversation: mergedConversation,
-    });
+      setSelectedMessage({
+        ...message,
+        conversation: freshConversation,
+      });
 
-    setPendingMessages((prev) => {
-      const updated = { ...prev };
-      delete updated[message.senderId];
-      return updated;
-    });
-    markMessengerAsReadMutation.mutate(message.senderId);
+      // 🧠 UPDATE the cached messengerMessages:
+      queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
+        if (!oldData) return oldData;
 
-    if (!rightPanelOpen) setRightPanelOpen(true);
+        return {
+          ...oldData,
+          conversations: oldData.conversations.map((thread: any) =>
+            thread.conversationId === message.conversationId
+              ? {
+                  ...thread,
+                  conversation: freshConversation,
+                }
+              : thread
+          ),
+        };
+      });
+
+      setPendingMessages((prev) => {
+        const updated = { ...prev };
+        delete updated[message.senderId];
+        return updated;
+      });
+
+      markMessengerAsReadMutation.mutate(message.senderId);
+
+      if (!rightPanelOpen) setRightPanelOpen(true);
+    } catch (error) {
+      toast.error("Could not load conversation details.");
+      console.error(error);
+    }
   };
-  console.log("Right panel open:", rightPanelOpen);
 
   // Close right panel and clear selected message
   const closeRightPanel = () => {
@@ -250,24 +289,14 @@ export default function MessengerPage() {
     setSelectedMessage(null);
   };
 
-  const {
-    data: messages,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["messengerMessages"],
-    queryFn: fetchMessages,
-    refetchOnWindowFocus: false,
-  });
-
   useEffect(() => {
-    if (messages?.length > 0) {
-      const hasUnread = messages.some((msg: any) => msg.unread);
+    if (data?.conversations?.length > 0) {
+      const hasUnread = data.conversations.some((msg: any) => msg.unread);
       dispatch(setHasNew({ platformId: "messenger", hasNew: hasUnread }));
     }
-  }, [messages, dispatch]);
-  if (isLoading) return <MessageListSkeleton />;
+  }, [data, dispatch]);
 
+  if (isLoading) return <MessageListSkeleton />;
   return (
     <PlatformInbox
       platform="messenger"
