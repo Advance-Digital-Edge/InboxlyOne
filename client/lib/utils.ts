@@ -1,5 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import updateLocale from "dayjs/plugin/updateLocale";
+import { time } from "console";
 
 type RawMessengerMessage = {
   id: string;
@@ -62,6 +66,52 @@ export function formatGmailData(message: any) {
   };
 }
 
+dayjs.extend(relativeTime);
+dayjs.extend(updateLocale);
+
+dayjs.updateLocale("en", {
+  relativeTime: {
+    future: "in %s",
+    past: (input: string) => (input === "now" ? input : `${input} ago`),
+    s: "now",
+    m: "a minute",
+    mm: "%d minutes",
+    h: "an hour",
+    hh: "%d hours",
+    d: "a day",
+    dd: "%d days",
+    M: "a month",
+    MM: "%d months",
+    y: "a year",
+    yy: "%d years",
+  },
+});
+
+export const getDisplayTime = (dateStr: string) => {
+  let cleaned = dateStr;
+
+  // Handle +0000 (Messenger raw format) ➜ convert to Z
+  if (/\+0000$/.test(dateStr)) {
+    cleaned = dateStr.replace(/\+0000$/, "Z");
+  }
+
+  // Handle missing timezone ➜ add Z (for previews or other sources)
+  else if (!/Z|[+-]\d{2}:\d{2}$/.test(dateStr)) {
+    cleaned = dateStr + "Z";
+  }
+
+  const date = dayjs(cleaned);
+  if (!date.isValid()) return "Invalid date";
+
+  const daysDiff = dayjs().diff(date, "day");
+
+  if (daysDiff > 1) {
+    return date.format("M/D/YYYY");
+  }
+
+  return date.fromNow();
+};
+
 export function transformMessengerMetaData(data: any[], currentUserId: string) {
   return data
     .map((thread, index) => {
@@ -74,19 +124,12 @@ export function transformMessengerMetaData(data: any[], currentUserId: string) {
         conversationId: thread.conversation_id,
         avatar: thread.participant_picture_url || "",
         preview: thread.last_message_preview || "No messages yet",
-        timestamp: new Date(thread.last_message_time).toLocaleTimeString(
-          "en-US",
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }
-        ),
+        timestamp: getDisplayTime(thread.last_message_time),
         ts: timestamp.toString(),
         platform: "Messenger",
         unread: thread.unread_count > 0,
         tags: [],
-        conversation: [], // ако искаш да го запълниш по-късно с реални съобщения
+        conversation: [],
       };
     })
     .sort((a, b) => parseFloat(b.ts) - parseFloat(a.ts));
@@ -98,18 +141,13 @@ export function transformMessengerNewMessage(
   senderName: string
 ) {
   const timestamp = event.timestamp || Date.now();
-  const date = new Date(timestamp);
 
   return {
-    id: timestamp, // или някакъв уникален ID, примерно timestamp
+    id: timestamp,
     senderId: event.senderId,
     sender: senderName,
     content: event.message,
-    timestamp: date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }),
+    timestamp: getDisplayTime(new Date(timestamp).toISOString()), // <-- use getDisplayTime here
     ts: timestamp.toString(),
     isIncoming: event.senderId !== currentUserId,
     unread: false,
@@ -118,21 +156,16 @@ export function transformMessengerNewMessage(
 
 export function transformMessengerRawConversations(
   rawMessage: RawMessengerMessage,
-  pageId: string // това е ID-то на твоята Facebook страница
+  pageId: string
 ) {
   const timestamp = new Date(rawMessage.created_time).getTime();
-  const date = new Date(timestamp);
 
   return {
     id: rawMessage.id,
     senderId: rawMessage.from.id,
     sender: rawMessage.from.name,
     content: rawMessage.message,
-    timestamp: date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }),
+    timestamp: getDisplayTime(rawMessage.created_time), // <-- use getDisplayTime here
     ts: timestamp.toString(),
     isIncoming: rawMessage.from.id !== pageId,
     unread: false,

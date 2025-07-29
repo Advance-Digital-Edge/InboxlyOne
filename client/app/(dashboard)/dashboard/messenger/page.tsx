@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGenericMutation } from "@/hooks/useMutation";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
-import { transformMessengerNewMessage } from "@/lib/utils";
+import { getDisplayTime, transformMessengerNewMessage } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
@@ -208,7 +208,6 @@ export default function MessengerPage() {
     },
 
     onSuccess: async ({ senderId, preview }) => {
-
       queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
         if (!oldData) return oldData;
 
@@ -219,7 +218,7 @@ export default function MessengerPage() {
               ? {
                   ...thread,
                   preview: preview,
-                  timestamp: new Date().toISOString(),
+                  timestamp: getDisplayTime(new Date().toISOString()),
                 }
               : thread
           ),
