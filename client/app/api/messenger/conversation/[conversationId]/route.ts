@@ -56,7 +56,7 @@ export async function GET(
     }
 
     const msgData = await messagesRes.json();
-    console.log(msgData.data);
+ 
 
     const transformedMessages = msgData.data
       .reverse() // sort messages in ascending order
