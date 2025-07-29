@@ -27,7 +27,7 @@ export default function MessageList({
   messageStatuses,
   temporaryMessages,
 }: MessageListProps) {
-  
+
   return (
     <div
       className={cn(
@@ -93,7 +93,7 @@ export default function MessageList({
                       <h3
                         className={cn(
                           "font-medium",
-                          message.unread && "font-semibold"
+                          message.unread && "font-semibold "
                         )}
                       >
                         {message.sender}
@@ -117,9 +117,14 @@ export default function MessageList({
                         <span className="ml-0.5">{message.platform}</span>
                       </Badge>
                     </div>
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-                      {message.preview}
-                    </p>
+                   <p
+  className={cn(
+    "mt-2 text-sm text-gray-600 line-clamp-2",
+    message.unread && "font-semibold text-gray-900"
+  )}
+>
+  {message.preview}
+</p>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {message.tags.map((tag) => (
                         <Badge

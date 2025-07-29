@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setHasNew } from "@/lib/features/platformStatusSlice";
 import { useQueryClient } from "@tanstack/react-query";
+import { incrementFacebookUnread } from "../actions";
 
 export const NotificationProvider = ({
   children,
@@ -17,11 +18,12 @@ export const NotificationProvider = ({
   const queryClient = useQueryClient();
 
   // --- Messenger ---
-  useConnectSocket("facebook_message", (event) => {
+  useConnectSocket("facebook_message", async (event) => {
     const isInMessengerPage = pathname.startsWith("/dashboard/messenger");
 
     if (!isInMessengerPage) {
       dispatch(setHasNew({ platformId: "messenger", hasNew: true }));
+      await incrementFacebookUnread(event.senderId);
     }
   });
 
@@ -34,15 +36,6 @@ export const NotificationProvider = ({
     if (!isInSlackPage) {
     }
   });
-
-  // --- Example: WhatsApp (future) ---
-  // useConnectSocket("whatsapp_message", (event) => {
-  //   const isInWhatsAppPage = pathname.startsWith("/whatsapp");
-  //   toast("📲 New WhatsApp message received");
-  //   if (!isInWhatsAppPage) {
-  //     queryClient.invalidateQueries({ queryKey: ["whatsappMessages"] });
-  //   }
-  // });
 
   return <>{children}</>;
 };

@@ -193,3 +193,25 @@ export const removeIntegration = async (integrationId: string) => {
 
   return true;
 };
+
+export const incrementFacebookUnread = async (senderId: string) => {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("increment_facebook_unread", {
+    p_sender_id: senderId,
+  });
+
+  if (error) {
+    console.error("Failed to increment unread count:", error);
+  }
+};
+
+export const resetFacebookUnread = async (senderId: string) => {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("reset_facebook_unread", {
+    p_sender_id: senderId,
+  });
+
+  if (error) {
+    console.error("Failed to reset unread count:", error);
+  }
+};
