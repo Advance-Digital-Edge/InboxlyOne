@@ -11,6 +11,8 @@ import { useAuth } from "@/app/context/AuthProvider";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setHasNew } from "@/lib/features/platformStatusSlice";
+import { useRouter, useSearchParams } from "next/navigation";
+import { resetFacebookUnread } from "@/app/actions";
 
 export default function MessengerPage() {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
@@ -20,6 +22,8 @@ export default function MessengerPage() {
   );
 
   const dispatch = useDispatch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -32,6 +36,16 @@ export default function MessengerPage() {
         message: data.error || "Unknown error",
         status: res.status,
       };
+    }
+
+    return res.json();
+  };
+
+  const fetchFullConversation = async (conversationId: string) => {
+    const res = await fetch(`/api/messenger/conversation/${conversationId}`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch conversation details");
     }
 
     return res.json();
@@ -158,13 +172,20 @@ export default function MessengerPage() {
   // });
 
   const sendMessageMutation = useGenericMutation({
-    mutationFn: ({
+    mutationFn: async ({
       senderId,
       message,
     }: {
       senderId: string;
       message: string;
-    }) => sendFacebookMessage(senderId, message),
+    }) => {
+      await sendFacebookMessage(senderId, message);
+      return {
+        senderId,
+        preview: message,
+      };
+    },
+
     onMutate: async ({ senderId, message }) => {
       setSelectedMessage((prev: any) => {
         if (!prev) return prev;
@@ -176,7 +197,7 @@ export default function MessengerPage() {
           direction: "outgoing",
           createdAt: new Date().toISOString(),
         };
-      
+
         return {
           ...prev,
           preview: message,
@@ -186,10 +207,28 @@ export default function MessengerPage() {
       });
     },
 
-    onSuccess: () => {
+    onSuccess: async ({ senderId, preview }) => {
+
+      queryClient.setQueryData(["messengerMessages"], (oldData: any) => {
+        if (!oldData) return oldData;
+
+        return {
+          ...oldData,
+          conversations: oldData.conversations.map((thread: any) =>
+            thread.senderId === senderId
+              ? {
+                  ...thread,
+                  preview: preview,
+                  timestamp: new Date().toISOString(),
+                }
+              : thread
+          ),
+        };
+      });
+
       toast.success("Message sent");
-      queryClient.invalidateQueries({ queryKey: ["messengerMessages"] });
     },
+
     onError: () => {
       toast.error("Failed to send message");
     },
@@ -231,12 +270,9 @@ export default function MessengerPage() {
 
   const selectMessageHandler = async (message: any) => {
     try {
-      const res = await fetch(
-        `/api/messenger/conversation/${message.conversationId}`
+      const freshConversation = await fetchFullConversation(
+        message.conversationId
       );
-      if (!res.ok) throw new Error("Failed to fetch conversation details");
-
-      const freshConversation = await res.json();
       const pendingForThisSender = pendingMessages[message.senderId] || [];
       const mergedConversation = [
         ...freshConversation,
@@ -281,6 +317,10 @@ export default function MessengerPage() {
       toast.error("Could not load conversation details.");
       console.error(error);
     }
+    router.push(`/dashboard/messenger?msg=${message.conversationId}`);
+    if (message.unread) {
+      await resetFacebookUnread(message.senderId);
+    }
   };
 
   // Close right panel and clear selected message
@@ -295,6 +335,47 @@ export default function MessengerPage() {
       dispatch(setHasNew({ platformId: "messenger", hasNew: hasUnread }));
     }
   }, [data, dispatch]);
+
+  // Handle URL query parameter to select a message on page refresh
+  useEffect(() => {
+    const messageIdFromQuery = searchParams?.get("msg");
+
+    if (!messageIdFromQuery || !data?.conversations?.length) {
+      setSelectedMessage(null);
+      setRightPanelOpen(false);
+      return;
+    }
+
+    const conversationSummary = data.conversations.find(
+      (m: any) => m.conversationId === messageIdFromQuery
+    );
+
+    if (!conversationSummary) {
+      setSelectedMessage(null);
+      setRightPanelOpen(false);
+      return;
+    }
+
+    const loadConversation = async () => {
+      try {
+        const fullConversation =
+          await fetchFullConversation(messageIdFromQuery);
+
+        setSelectedMessage({
+          ...conversationSummary,
+          conversation: fullConversation,
+        });
+
+        setRightPanelOpen(true);
+      } catch (error) {
+        console.error(error);
+        setSelectedMessage(null);
+        setRightPanelOpen(false);
+      }
+    };
+
+    loadConversation();
+  }, [searchParams, data?.conversations]);
 
   if (isLoading) return <MessageListSkeleton />;
   return (
