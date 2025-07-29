@@ -56,10 +56,11 @@ export async function GET(
     }
 
     const msgData = await messagesRes.json();
+ 
 
-   const transformedMessages = msgData.data
-  .reverse() // sort messages in ascending order
-  .map((msg: any) => transformMessengerRawConversations(msg, page.page_id));  
+    const transformedMessages = msgData.data
+      .reverse() // sort messages in ascending order
+      .map((msg: any) => transformMessengerRawConversations(msg, page.page_id));
 
     return new Response(JSON.stringify(transformedMessages), { status: 200 });
   } catch (err: any) {
