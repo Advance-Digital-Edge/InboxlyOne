@@ -3,7 +3,6 @@ import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
-;
 
 type RawMessengerMessage = {
   id: string;
@@ -168,6 +167,101 @@ export function transformMessengerRawConversations(
     timestamp: getDisplayTime(rawMessage.created_time), // <-- use getDisplayTime here
     ts: timestamp.toString(),
     isIncoming: rawMessage.from.id !== pageId,
+    unread: false,
+  };
+}
+
+// Update the transformInstagramData function to handle the new data structure:
+
+export function transformInstagramData(data: any[], currentUserId: string) {
+  return data
+    .map((thread, threadIndex) => {
+      const allMessages = thread.messages || [];
+
+      if (allMessages.length === 0) {
+        return null; // Skip conversations with no messages
+      }
+
+      // Sort messages by created_time ascending
+      allMessages.sort(
+        (a: any, b: any) =>
+          new Date(a.created_time).getTime() -
+          new Date(b.created_time).getTime()
+      );
+
+      // Get participants (exclude the page itself)
+      const participants = thread.participants || [];
+      const otherParticipant = participants.find((p: any) => p.id !== currentUserId);
+      const senderName = otherParticipant?.name || otherParticipant?.id || "Instagram User";
+      const senderId = otherParticipant?.id || "unknown";
+
+      const conversation = allMessages.map((msg: any, index: number) => {
+        const ts = new Date(msg.created_time).getTime().toString();
+        const messageSenderId = msg.from?.id || senderId;
+        const messageSenderName = msg.from?.name || senderName;
+        
+        return {
+          id: index,
+          senderId: messageSenderId,
+          sender: messageSenderName,
+          content: msg.message || "",
+          timestamp: new Date(msg.created_time).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }),
+          ts,
+          isIncoming: messageSenderId !== currentUserId,
+          unread: false,
+        };
+      });
+
+      const lastMsg = allMessages[allMessages.length - 1];
+      const lastTimestamp = new Date(lastMsg?.created_time || Date.now()).getTime();
+
+      return {
+        id: threadIndex,
+        sender: senderName,
+        senderId: senderId,
+        channelId: thread.id,
+        avatar: "", // Pages API doesn't provide profile pictures
+        preview: lastMsg?.message || "No messages yet",
+        timestamp: new Date(lastTimestamp).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
+        ts: lastTimestamp.toString(),
+        platform: "Instagram",
+        unread: false,
+        tags: [],
+        conversation,
+      };
+    })
+    .filter(Boolean) // Remove null entries
+    .sort((a, b) => parseFloat(b.ts) - parseFloat(a.ts));
+}
+
+export function transformInstagramNewMessage(
+  event: { senderId: string; message: string; timestamp?: number },
+  currentUserId: string,
+  senderName: string
+) {
+  const timestamp = event.timestamp || Date.now();
+  const date = new Date(timestamp);
+
+  return {
+    id: timestamp,
+    senderId: event.senderId,
+    sender: senderName,
+    content: event.message,
+    timestamp: date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }),
+    ts: timestamp.toString(),
+    isIncoming: event.senderId !== currentUserId,
     unread: false,
   };
 }
