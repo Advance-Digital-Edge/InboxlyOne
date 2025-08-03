@@ -1,5 +1,16 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import updateLocale from "dayjs/plugin/updateLocale";
+;
+
+type RawMessengerMessage = {
+  id: string;
+  from: { id: string; name: string; email?: string };
+  message: string;
+  created_time: string;
+};
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -55,67 +66,70 @@ export function formatGmailData(message: any) {
   };
 }
 
-export function transformMessengerData(data: any[], currentUserId: string) {
+dayjs.extend(relativeTime);
+dayjs.extend(updateLocale);
+
+dayjs.updateLocale("en", {
+  relativeTime: {
+    future: "in %s",
+    past: (input: string) => (input === "now" ? input : `${input} ago`),
+    s: "now",
+    m: "a minute",
+    mm: "%d minutes",
+    h: "an hour",
+    hh: "%d hours",
+    d: "a day",
+    dd: "%d days",
+    M: "a month",
+    MM: "%d months",
+    y: "a year",
+    yy: "%d years",
+  },
+});
+
+export const getDisplayTime = (dateStr: string) => {
+  let cleaned = dateStr;
+
+  // Handle +0000 (Messenger raw format) ➜ convert to Z
+  if (/\+0000$/.test(dateStr)) {
+    cleaned = dateStr.replace(/\+0000$/, "Z");
+  }
+
+  // Handle missing timezone ➜ add Z (for previews or other sources)
+  else if (!/Z|[+-]\d{2}:\d{2}$/.test(dateStr)) {
+    cleaned = dateStr + "Z";
+  }
+
+  const date = dayjs(cleaned);
+  if (!date.isValid()) return "Invalid date";
+
+  const daysDiff = dayjs().diff(date, "day");
+
+  if (daysDiff > 1) {
+    return date.format("M/D/YYYY");
+  }
+
+  return date.fromNow();
+};
+
+export function transformMessengerMetaData(data: any[], currentUserId: string) {
   return data
-    .map((thread, threadIndex) => {
-      const allMessages = thread.messages || [];
-
-      // Sort messages by created_time ascending
-      allMessages.sort(
-        (a: any, b: any) =>
-          new Date(a.created_time).getTime() -
-          new Date(b.created_time).getTime()
-      );
-
-      const uniqueSenders = new Map();
-      allMessages.forEach((msg: any) => {
-        uniqueSenders.set(msg.from.id, msg.from.name);
-      });
-
-      const conversation = allMessages.map((msg: any, index: number) => {
-        const ts = new Date(msg.created_time).getTime().toString();
-        return {
-          id: index,
-          senderId: msg.from.id,
-          sender: msg.from.name,
-          content: msg.message,
-          timestamp: new Date(msg.created_time).toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }),
-          ts,
-          isIncoming: msg.from.id !== currentUserId,
-          unread: false, // You can implement unread logic if needed
-        };
-      });
-
-      const lastMsg = allMessages[allMessages.length - 1];
-      const lastTimestamp = new Date(lastMsg.created_time).getTime();
-
-      // Pick the sender that's not the current user
-      const otherParticipant = [...uniqueSenders.entries()].find(
-        ([id]) => id !== currentUserId
-      );
-      const [senderId, senderName] = otherParticipant || [currentUserId, "You"];
+    .map((thread, index) => {
+      const timestamp = new Date(thread.last_message_time).getTime();
 
       return {
-        id: threadIndex,
-        sender: senderName,
-        senderId: senderId,
-        channelId: thread.conversationId,
-        avatar: "", // Optional: if you have profile pics
-        preview: lastMsg?.message || "No messages yet",
-        timestamp: new Date(lastTimestamp).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }),
-        ts: lastTimestamp.toString(),
+        id: index,
+        sender: thread.participant_name || "Unknown",
+        senderId: thread.participant_id,
+        conversationId: thread.conversation_id,
+        avatar: thread.participant_picture_url || "",
+        preview: thread.last_message_preview || "No messages yet",
+        timestamp: getDisplayTime(thread.last_message_time),
+        ts: timestamp.toString(),
         platform: "Messenger",
-        unread: false, // implement if needed
+        unread: thread.unread_count > 0,
         tags: [],
-        conversation,
+        conversation: [],
       };
     })
     .sort((a, b) => parseFloat(b.ts) - parseFloat(a.ts));
@@ -127,20 +141,33 @@ export function transformMessengerNewMessage(
   senderName: string
 ) {
   const timestamp = event.timestamp || Date.now();
-  const date = new Date(timestamp);
 
   return {
-    id: timestamp, // или някакъв уникален ID, примерно timestamp
+    id: timestamp,
     senderId: event.senderId,
     sender: senderName,
     content: event.message,
-    timestamp: date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }),
+    timestamp: getDisplayTime(new Date(timestamp).toISOString()), // <-- use getDisplayTime here
     ts: timestamp.toString(),
     isIncoming: event.senderId !== currentUserId,
+    unread: false,
+  };
+}
+
+export function transformMessengerRawConversations(
+  rawMessage: RawMessengerMessage,
+  pageId: string
+) {
+  const timestamp = new Date(rawMessage.created_time).getTime();
+
+  return {
+    id: rawMessage.id,
+    senderId: rawMessage.from.id,
+    sender: rawMessage.from.name,
+    content: rawMessage.message,
+    timestamp: getDisplayTime(rawMessage.created_time), // <-- use getDisplayTime here
+    ts: timestamp.toString(),
+    isIncoming: rawMessage.from.id !== pageId,
     unread: false,
   };
 }
