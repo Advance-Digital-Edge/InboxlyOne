@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Facebook, Instagram, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -59,12 +58,6 @@ export default function SocialAccountSelector({
   const config = platformConfig[platform]
   const PlatformIcon = config.icon
 
-  // Auto-select if only one account exists
-  useEffect(() => {
-    if (!isLoading && !error && accounts.length === 1) {
-      onSelectAccount(accounts[0].id)
-    }
-  }, [accounts, isLoading, error, onSelectAccount])
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.95 },
@@ -84,12 +77,7 @@ export default function SocialAccountSelector({
     visible: { opacity: 1, y: 0 },
   }
 
-  const formatFollowerCount = (count?: number) => {
-    if (!count) return null
-    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
-    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
-    return count.toString()
-  }
+
 
   return (
     <AnimatePresence>
