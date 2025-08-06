@@ -69,15 +69,6 @@ export async function GET(req: NextRequest) {
     return new Response("Facebook already integrated", { status: 200 });
   }
 
-  // Step 5: (Optional) Get pages the user manages
-  const pagesRes = await fetch(
-    `https://graph.facebook.com/me/accounts?access_token=${accessToken}`
-  );
-  const pages = await pagesRes.json();
-
-  console.log(`pages`, pages.data);
-  console.log("Is pages data array", Array.isArray(pages.data));
-
   // Save to DB
   const { data: integrationData, error: integrationError } = await supabase
     .from("user_integrations")
@@ -97,48 +88,45 @@ export async function GET(req: NextRequest) {
     .single();
 
   if (integrationError) {
+    console.log(integrationError);
     return new Response("Failed to save integration", { status: 500 });
   }
 
-  // Now save each page in facebook_pages table
-  if (pages.data && Array.isArray(pages.data)) {
-    for (const page of pages.data) {
-      const { data: pageData, error: pageError } = await supabase
-        .from("facebook_pages")
-        .upsert({
-          integration_id: integrationData.id, // link to user_integration
-          user_id: user.id, // link to user
-          page_id: page.id,
-          page_name: page.name,
-          access_token: page.access_token,
-          category: page.category,
-          tasks: page.tasks, // save as JSON array
-          category_list: page.category_list, // save as JSON array if you want
-        });
-      console.log(pageData, pageError);
-    }
+  // Step 5: (Optional) Get pages the user manages
+  const pagesRes = await fetch(
+    `https://graph.facebook.com/me/accounts?access_token=${accessToken}`
+  );
+  const pages = await pagesRes.json();
+
+  if (!pagesRes.ok) {
+    const error = await pagesRes.json();
+    console.error("Error fetching pages:", error);
+    return new Response("Failed to fetch Facebook pages", { status: 500 });
   }
 
-  // Return a success HTML response (for popup)
-  return new Response(
-    `
-    <html>
-      <body>
-        <script>
-          if (window.opener) {
-            window.opener.postMessage("messenger-connected", window.origin);
-            window.close();
-          } else {
-            document.body.innerText = "Connected. Please close this window.";
-          }
-        </script>
-      </body>
-    </html>
-  `,
-    {
-      headers: {
-        "Content-Type": "text/html",
-      },
-    }
-  );
+  const html = `
+  <html>
+    <body>
+      <h1>Popup loaded</h1>
+      <script>
+    if (window.opener) {
+  console.log("Sending message to opener...");
+  window.opener.postMessage({
+    type: "messenger-pages",
+    integrationId: "${integrationData.id}",
+    userProfile: ${JSON.stringify(profile)},
+    pages: ${JSON.stringify(pages.data || [])}
+  }, "*");  // <---- allow any origin
+  window.close();
+} else {
+  document.body.innerText = "Connected. Please close this window.";
+}
+      </script>
+    </body>
+  </html>
+`;
+
+  return new Response(html, {
+    headers: { "Content-Type": "text/html" },
+  });
 }

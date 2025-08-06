@@ -18,10 +18,11 @@ import {
 import { Facebook, Mail, Slack, Instagram, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/context/AuthProvider";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import { removeIntegration } from "@/app/actions";
 import { IntegrationMetadata } from "@/types/integration";
+import SocialAccountSelector from "@/components/modals/social-account-selector";
 
 // Integration data with only the requested platforms
 const BASE_INTEGRATIONS = [
@@ -88,6 +89,12 @@ const INSTAGRAM_REDIRECT_URI = process.env.NEXT_PUBLIC_INSTAGRAM_REDIRECT_URI;
 export default function Integrations() {
   const { userIntegrations, fetchUserIntegrations, user } = useAuth();
   const userId = user?.id;
+  const [showMessengerPageModal, setShowMessengerPageModal] = useState(false);
+  const [messengerPages, setMessengerPages] = useState<{
+    integrationId: string;
+    pages: any[];
+    userProfile: any;
+  } | null>(null);
 
   const integrations = useMemo(() => {
     return BASE_INTEGRATIONS.map((base) => {
@@ -101,7 +108,7 @@ export default function Integrations() {
           // Handle different metadata structures for different providers
           let name, picture;
           const metadata = match.metadata as IntegrationMetadata;
-          
+
           if (match.provider === "gmail") {
             name = metadata.email;
             picture = metadata.picture;
@@ -149,13 +156,7 @@ export default function Integrations() {
     let url = "";
 
     if (integrationId === "slack") {
-      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}
-        &scope=channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,users:read,team:read
-        &user_scope=channels:history,groups:history,im:history,mpim:history,im:read,mpim:read,chat:write,im:write,users:read,team:read
-        &redirect_uri=${TEMP_URL}/api/slack/oauth/callback
-        &state=${userId}
-        &force_scope=1
-        &force_reinstall=1`;
+      url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=...&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}&force_scope=1&force_reinstall=1`;
     } else if (integrationId === "gmail") {
       url = "/api/oauth/login";
     } else if (integrationId === "facebook") {
@@ -164,46 +165,53 @@ export default function Integrations() {
       url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${INSTAGRAM_REDIRECT_URI}&scope=instagram_basic,instagram_manage_messages&response_type=code`;
     }
 
-    if (url) {
-      openPopup(url);
+    if (!url) {
+      console.error("No URL for integration", integrationId);
+      return;
+    }
 
-      const receiveMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+    // ✅ Добави event listener само веднъж
+    const receiveMessage = (event: MessageEvent) => {
+      const { data } = event;
+      if (data === "gmail-connected") {
+        fetchUserIntegrations?.().catch(() =>
+          toast.error("Failed to refresh integrations.")
+        );
+        toast.success("Gmail connected successfully!");
+        window.removeEventListener("message", receiveMessage);
+      }
 
-        if (event.data === "gmail-connected") {
-          fetchUserIntegrations?.().catch(() =>
-            toast.error("Failed to refresh integrations.")
-          );
-          toast.success("Gmail connected successfully!");
-          window.removeEventListener("message", receiveMessage);
-        }
+      if (data === "slack-connected") {
+        fetchUserIntegrations?.().catch(() =>
+          toast.error("Failed to refresh integrations.")
+        );
+        toast.success("Slack connected successfully!");
+        window.removeEventListener("message", receiveMessage);
+      }
 
-        if (event.data === "slack-connected") {
-          fetchUserIntegrations?.().catch(() =>
-            toast.error("Failed to refresh integrations.")
-          );
-          toast.success("Slack connected successfully!");
-          window.removeEventListener("message", receiveMessage);
-        }
+      if (data === "instagram-connected") {
+        fetchUserIntegrations?.().catch(() =>
+          toast.error("Failed to refresh integrations.")
+        );
+        toast.success("Instagram connected successfully!");
+        window.removeEventListener("message", receiveMessage);
+      }
 
-        if (event.data === "messenger-connected") {
-          fetchUserIntegrations?.().catch(() =>
-            toast.error("Failed to refresh integrations.")
-          );
-          toast.success("Messenger connected successfully!");
-          window.removeEventListener("message", receiveMessage);
-        }
+      const { type, integrationId, pages, userProfile } = data || {};
+      if (type === "messenger-pages") {
+        console.log("Received message data:", data);
+        setMessengerPages({ pages, integrationId, userProfile });
+        setShowMessengerPageModal(true);
+        window.removeEventListener("message", receiveMessage);
+      }
+    };
 
-        if (event.data === "instagram-connected") {
-          fetchUserIntegrations?.().catch(() =>
-            toast.error("Failed to refresh integrations.")
-          );
-          toast.success("Instagram connected successfully!");
-          window.removeEventListener("message", receiveMessage);
-        }
-      };
+    window.addEventListener("message", receiveMessage);
 
-      window.addEventListener("message", receiveMessage);
+    const popup = openPopup(url);
+    if (!popup) {
+      console.error("Popup failed to open");
+      window.removeEventListener("message", receiveMessage);
     }
   };
 
@@ -230,9 +238,60 @@ export default function Integrations() {
     handleConnectClick(integrationId);
   };
 
+  async function handleSelectPage(accountId: string) {
+    if (!messengerPages) {
+      console.error("No messenger pages available");
+      return;
+    }
+
+    const selectedPage = messengerPages.pages.find(
+      (page) => page.id === accountId
+    );
+
+    if (!selectedPage) {
+      console.error("Selected page not found");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/messenger/save-page", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          integrationId: messengerPages.integrationId,
+          page: selectedPage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to connect page. Please try again !");
+      }
+
+      toast.success("Page connected successfully!");
+      fetchUserIntegrations?.();
+      setShowMessengerPageModal(false);
+    } catch (error) {
+      console.error("Error connecting page:", error);
+      toast.error("Failed to connect page. Please try again.");
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
+      {showMessengerPageModal && messengerPages && (
+        <SocialAccountSelector
+          accounts={messengerPages.pages} // pass pages as accounts
+          isLoading={false} // or true if still loading
+          error={null} // or actual error string if any
+          onClose={() => setShowMessengerPageModal(false)}
+          onSelectAccount={handleSelectPage} // use the correct callback name
+          platform="facebook"
+        />
+      )}
+
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Integrations</h1>
         <p className="mt-2 text-muted-foreground">

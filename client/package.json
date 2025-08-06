@@ -25,6 +25,7 @@
     "dayjs": "^1.11.13",
     "dompurify": "^3.2.6",
     "express": "^5.1.0",
+    "framer-motion": "^12.23.12",
     "googleapis": "^149.0.0",
     "lucide-react": "^0.468.0",
     "next": "latest",
