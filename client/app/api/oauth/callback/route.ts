@@ -48,19 +48,17 @@ export async function GET(req: NextRequest) {
 
   // If already integrated, no need to create a new watch, just update tokens maybe
   if (existingIntegration) {
-    // Optional: Update tokens and metadata if needed
     await supabase
       .from("user_integrations")
       .update({
         access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
+        refresh_token:
+          tokens.refresh_token || existingIntegration.refresh_token, //
         expires_at: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
       })
       .eq("id", existingIntegration.id);
-
-    // Return early or continue based on your logic
-    return new Response("Account already integrated", { status: 200 });
   }
+
   // If not integrated, create Gmail API client to fetch profile and set watch
 
   const gmail = google.gmail({ version: "v1", auth: oauth2Client });
@@ -101,12 +99,16 @@ export async function GET(req: NextRequest) {
   // Respond with script to close popup
   return new Response(
     `
-  <html>
+  < <html>
     <body>
       <script>
         if (window.opener) {
-          window.opener.postMessage("gmail-connected", window.origin);
-          window.close();
+          try {
+            window.opener.postMessage("gmail-connected", "*");
+            window.close(); // optionally
+          } catch (err) {
+            document.body.innerText = "Message failed: " + err;
+          }
         } else {
           document.body.innerText = "Connected. Please close this window.";
         }

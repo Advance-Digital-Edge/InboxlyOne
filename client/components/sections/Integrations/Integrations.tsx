@@ -173,7 +173,6 @@ export default function Integrations() {
     // ✅ Добави event listener само веднъж
     const receiveMessage = (event: MessageEvent) => {
       const { data } = event;
-
       if (data === "gmail-connected") {
         fetchUserIntegrations?.().catch(() =>
           toast.error("Failed to refresh integrations.")
@@ -203,7 +202,7 @@ export default function Integrations() {
         console.log("Received message data:", data);
         setMessengerPages({ pages, integrationId, userProfile });
         setShowMessengerPageModal(true);
-        window.removeEventListener("message", receiveMessage); 
+        window.removeEventListener("message", receiveMessage);
       }
     };
 

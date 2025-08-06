@@ -7,7 +7,13 @@ const decodeBase64Json = (message: string) => {
   const buffer = Buffer.from(message, "base64").toString("utf-8");
   return JSON.parse(buffer);
 };
-
+const supabase = createAdminClient();
+let integration: {
+  access_token: any;
+  refresh_token: any;
+  metadata: { historyId: any };
+  id: any;
+};
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -21,21 +27,20 @@ export async function POST(req: NextRequest) {
     const emailAddress = data.emailAddress;
     const historyId = data.historyId;
 
-    console.log("Received Pub/Sub webhook:", emailAddress , data);
+    console.log("Received Pub/Sub webhook:", emailAddress, data);
 
     if (!emailAddress || !historyId) {
       return new Response("Bad Request: Missing fields", { status: 400 });
     }
 
-    const supabase = createAdminClient();
-
-    const { data: integration, error } = await supabase
+    const { data: integrationData, error } = await supabase
       .from("user_integrations")
       .select("*")
       .eq("provider", "gmail")
       .filter("metadata->>email", "eq", emailAddress)
       .single();
 
+    integration = integrationData;
     if (!integration) {
       return new Response("User not found for email", { status: 404 });
     }
@@ -138,10 +143,54 @@ export async function POST(req: NextRequest) {
 
     return new Response("No new messages", { status: 200 });
   } catch (err: any) {
-    console.error(
-      "Pub/Sub webhook error:",
-      err.response.data.error_description
-    );
+    const isExpired =
+      err?.response?.status === 400 ||
+      err?.response?.data?.error === "invalid_grant" ||
+      err?.response?.data?.error_description?.includes(
+        "Token has been expired"
+      );
+
+    if (isExpired) {
+      console.log("🔁 Token expired, trying to refresh...");
+
+      try {
+        const auth = new google.auth.OAuth2(
+          process.env.GOOGLE_CLIENT_ID,
+          process.env.GOOGLE_CLIENT_SECRET
+        );
+
+        auth.setCredentials({
+          refresh_token: integration.refresh_token,
+        });
+
+        const tokens = await auth.refreshAccessToken();
+        console.log("🔁 New access token received:", tokens);
+        const newAccessToken = tokens.credentials.access_token;
+
+        if (!newAccessToken) {
+          throw new Error("No new access token received during refresh");
+        }
+
+        // Save new token
+        await supabase
+          .from("user_integrations")
+          .update({ access_token: newAccessToken })
+          .eq("id", integration.id);
+
+        console.log("✅ Token refreshed, retrying...");
+
+        // Retry the original logic (probably as a helper function)
+        // Example:
+        // return await handlePubSubLogicWithFreshToken(data, integration);
+      } catch (refreshError) {
+        console.error("❌ Failed to refresh token:", refreshError);
+        return new Response("Unauthorized: token refresh failed", {
+          status: 401,
+        });
+      }
+    }
+
+    console.error("Pub/Sub webhook error:", err?.response?.data || err.message);
     return new Response("Internal Server Error", { status: 500 });
   }
 }
