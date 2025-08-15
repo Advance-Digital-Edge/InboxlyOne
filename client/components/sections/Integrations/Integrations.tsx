@@ -23,6 +23,12 @@ import { toast } from "react-hot-toast";
 import { removeIntegration } from "@/app/actions";
 import { IntegrationMetadata } from "@/types/integration";
 
+interface UserIntegration {
+  id: string;
+  provider: string;
+  metadata: IntegrationMetadata;
+}
+
 // Integration data with only the requested platforms
 const BASE_INTEGRATIONS = [
   {
@@ -91,39 +97,44 @@ export default function Integrations() {
 
   const integrations = useMemo(() => {
     return BASE_INTEGRATIONS.map((base) => {
-      const matches =
-        userIntegrations?.filter((u) => u.provider === base.id) || [];
+      // Get the array of integrations for this provider
+      const matches: UserIntegration[] = userIntegrations?.[base.id] || [];
 
       return {
         ...base,
         connected: matches.length > 0,
-        accounts: matches.map((match, index) => {
-          // Handle different metadata structures for different providers
-          let name, picture;
-          const metadata = match.metadata as IntegrationMetadata;
-          
-          if (match.provider === "gmail") {
-            name = metadata.email;
-            picture = metadata.picture;
-          } else if (match.provider === "slack") {
-            name = metadata.email;
-            picture = metadata.picture;
-          } else if (match.provider === "facebook") {
-            name = metadata.name || metadata.email;
-            picture = metadata.picture;
-          } else if (match.provider === "instagram") {
-            name = `@${metadata.username}`;
-            picture = null; // Instagram Basic Display API doesn't provide profile pictures
-          } else {
-            name = metadata.email || metadata.name || "Unknown";
-            picture = metadata.picture;
+        accounts: matches.map((match: any) => {
+          const metadata = match;
+          let name: string;
+          let picture: string | null = null;
+
+          switch (base.id) {
+            case "gmail":
+              name = metadata.metadata.email || "Unknown";
+              picture = metadata.metadata.picture || null;
+              break;
+            case "slack":
+              name = metadata.email || "Unknown";
+              picture = metadata.picture || null;
+              break;
+            case "facebook":
+              name = metadata.page_name || "Unknown";
+              picture = metadata.picture || null;
+              break;
+            case "instagram":
+              name = metadata.username ? `@${metadata.username}` : "Unknown";
+              picture = metadata.profile_picture;
+              break;
+            default:
+              name = metadata.email || metadata.name || "Unknown";
+              picture = metadata.picture || null;
           }
 
           return {
             id: match.id,
-            name: name,
-            picture: picture,
-            workspaces: metadata.workspaces, // for Slack
+            name,
+            picture,
+            workspaces: metadata.workspaces || [],
           };
         }),
       };
@@ -162,7 +173,7 @@ export default function Integrations() {
       url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${MESSENGER_REDIRECT_URI}&scope=pages_messaging,pages_show_list,pages_read_engagement,public_profile`;
     } else if (integrationId === "instagram") {
       // Add business_management scope
-      url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${INSTAGRAM_REDIRECT_URI}&scope=pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_messages,business_management&response_type=code`;
+      url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${INSTAGRAM_REDIRECT_URI}&scope=pages_show_list,pages_read_engagement,pages_manage_metadata,instagram_basic,instagram_manage_messages,business_management&response_type=code`;
     }
 
     if (url) {
@@ -208,9 +219,9 @@ export default function Integrations() {
     }
   };
 
-  const handleRemoveAccount = async (accountId: string) => {
+  const handleRemoveAccount = async (accountId: string, provider: string) => {
     try {
-      await toast.promise(removeIntegration(accountId), {
+      await toast.promise(removeIntegration(accountId, provider), {
         loading: "Removing account...",
         success: <p>Account removed successfully</p>,
         error: (err) => <p>{err.message || "Could not save."}</p>,
@@ -222,8 +233,8 @@ export default function Integrations() {
   };
 
   // This would be a state function in a real app
-  const removeAccount = (accountId: string) => {
-    handleRemoveAccount(accountId);
+  const removeAccount = (accountId: string, provider: string) => {
+    handleRemoveAccount(accountId, provider);
   };
 
   // This would be a state function in a real app
@@ -286,6 +297,7 @@ export default function Integrations() {
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
                     {integration.accounts.map((account, index) => {
+                      console.log("Account:", account);
                       const contrastColor = getContrastColor(
                         integration.color,
                         index
@@ -296,15 +308,24 @@ export default function Integrations() {
                             <TooltipTrigger asChild>
                               <div className="group relative">
                                 <div
-                                  className="flex items-center rounded-full py-1 px-3 text-sm transition-all"
+                                  className="flex items-center rounded-full py-1 px-3 text-sm transition-all gap-2"
                                   style={{
                                     backgroundColor: contrastColor.bg,
                                     color: contrastColor.text,
                                   }}
                                 >
+                                  {/* Circle account picture */}
+                                  {account.picture && (
+                                    <img
+                                      src={account.picture}
+                                      alt={account.name}
+                                      className="h-5 w-5 rounded-full object-cover"
+                                    />
+                                  )}
                                   <span className="max-w-[120px] truncate">
                                     {account.name}
                                   </span>
+
                                   {/* Show channels only for Slack */}
                                   {integration.id === "slack" &&
                                     account.workspaces &&
@@ -316,8 +337,11 @@ export default function Integrations() {
                                           .join(", ")}
                                       </div>
                                     )}
+
                                   <button
-                                    onClick={() => removeAccount(account.id)}
+                                    onClick={() =>
+                                      removeAccount(account.id, integration.id)
+                                    }
                                     className="ml-1.5 rounded-full bg-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
                                     <X

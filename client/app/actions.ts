@@ -153,28 +153,47 @@ export const getUserIntegrations = async () => {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
+    if (!user) throw new Error("User not authenticated");
 
-    const { data, error } = await supabase
+    const { data: gmailAccounts, error: gmailError } = await supabase
       .from("user_integrations")
-      .select("id,provider,metadata")
+      .select("id,metadata")
+      .eq("user_id", user.id)
+      .eq("provider", "gmail");
+
+    if (gmailError) throw new Error("Failed to fetch Gmail accounts");
+
+    // Fetch Facebook Pages (only name)
+    const { data: fbPages, error: fbError } = await supabase
+      .from("facebook_pages")
+      .select("id, page_name")
       .eq("user_id", user.id);
 
-    if (error) {
-      console.error("Error fetching integrations:", error);
-      throw new Error("Failed to fetch user integrations");
-    }
+    if (fbError) throw new Error("Failed to fetch Facebook Pages");
 
-    return data;
+    // Fetch Instagram Accounts (only username)
+    const { data: igAccounts, error: igError } = await supabase
+      .from("instagram_accounts")
+      .select("id, username, fb_page_id ,profile_picture")
+      .in("fb_page_id", fbPages?.map((page) => page.id) || []);
+
+    if (igError) throw new Error("Failed to fetch Instagram Accounts");
+
+    return {
+      facebook: fbPages || [],
+      instagram: igAccounts || [],
+      gmail: gmailAccounts || [],
+    };
   } catch (error) {
-    console.error("An error occurred in getUserIntegrations:", error);
-    throw error; // Re-throw the error to propagate it if needed
+    console.error("Error in getUserIntegrations:", error);
+    throw error;
   }
 };
 
-export const removeIntegration = async (integrationId: string) => {
+export const removeIntegration = async (
+  integrationId: string,
+  provider: string
+) => {
   const headersList = await headers();
   const cookie = headersList.get("cookie") || "";
 
@@ -183,7 +202,7 @@ export const removeIntegration = async (integrationId: string) => {
     headers: {
       cookie, // manually forward cookie header
     },
-    // credentials not needed here, because fetch is server-side
+    body: JSON.stringify({ provider }),
   });
 
   if (!res.ok) {

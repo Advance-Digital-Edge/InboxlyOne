@@ -9,38 +9,25 @@ import {
   use,
 } from "react";
 import { getUser, getUserIntegrations } from "../actions";
-import { get } from "http";
-import { set } from "react-hook-form";
 
 type AuthContextType = {
   user: any;
   setUser: (user: any) => void;
   loading: boolean;
   loadingIntegrations: boolean;
-  userIntegrations: Integrations[] | null;
+  userIntegrations: any | null;
   fetchUserIntegrations?: () => Promise<void>;
-};
-
-type Integrations = {
-  id: string;
-  provider: string;
-  metadata: {
-    email?: string;
-    name?: string;
-    picture?: string;
-    workspaces?: any;
-  };
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any>(null);
-  const [userIntegrations, setUserIntegrations] = useState<
-    Integrations[] | null
-  >(null);
+  const [userIntegrations, setUserIntegrations] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingIntegrations, setLoadingIntegrations] = useState(true);
+
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Function to fetch user integrations
   const fetchUserIntegrations = async () => {
     try {
-      const res: Integrations[] = await getUserIntegrations();
+      const res: any = await getUserIntegrations();
       setUserIntegrations(res);
       setLoadingIntegrations(false);
     } catch (error) {

@@ -1,4 +1,5 @@
 export type IntegrationMetadata = {
+  page_name: any;
   channels?: any;
   email?: string;
   name?: string;
