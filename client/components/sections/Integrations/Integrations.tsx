@@ -25,6 +25,7 @@ import { IntegrationMetadata } from "@/types/integration";
 import SocialAccountSelector from "@/components/modals/social-account-selector";
 import { IntegrationDisconnectModal } from "@/components/modals/integration-disconnect-modal";
 import { AccountInfo } from "@/components/modals/integration-disconnect-modal";
+import { set } from "react-hook-form";
 
 interface UserIntegration {
   id: string;
@@ -248,15 +249,17 @@ export default function Integrations() {
   };
 
   const handleRemoveAccount = async (accountId: string, provider: string) => {
-    console.log("Removing integration:", accountId, provider);
     try {
       await toast.promise(removeIntegration(accountId, provider), {
         loading: "Removing account...",
         success: <p>Account removed successfully</p>,
         error: (err) => <p>{err.message || "Could not save."}</p>,
       });
-      fetchUserIntegrations?.();
       setShowDisconnectModal(false);
+      if (provider === "instagram") {
+        setLinkedInstagram(null); // Reset linked Instagram if removed
+      }
+      fetchUserIntegrations?.();
     } catch (error) {
       console.error("Error removing integration:", error);
     }
