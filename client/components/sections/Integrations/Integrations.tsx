@@ -94,6 +94,7 @@ const INSTAGRAM_REDIRECT_URI = process.env.NEXT_PUBLIC_INSTAGRAM_REDIRECT_URI;
 export default function Integrations() {
   const { userIntegrations, fetchUserIntegrations, user } = useAuth();
   const userId = user?.id;
+  console.log("User integrations:", userIntegrations);
 
   const integrations = useMemo(() => {
     return BASE_INTEGRATIONS.map((base) => {
@@ -107,7 +108,7 @@ export default function Integrations() {
           const metadata = match;
           let name: string;
           let picture: string | null = null;
-
+          let username: string | null = null;
           switch (base.id) {
             case "gmail":
               name = metadata.metadata.email || "Unknown";
@@ -118,8 +119,9 @@ export default function Integrations() {
               picture = metadata.picture || null;
               break;
             case "facebook":
-              name = metadata.page_name || "Unknown";
-              picture = metadata.picture || null;
+              name = metadata.page.name || "Unknown";
+              username = metadata.user.name || null;
+              picture = metadata.user.picture || null;
               break;
             case "instagram":
               name = metadata.username ? `@${metadata.username}` : "Unknown";
@@ -132,6 +134,7 @@ export default function Integrations() {
 
           return {
             id: match.id,
+            username,
             name,
             picture,
             workspaces: metadata.workspaces || [],
@@ -220,6 +223,7 @@ export default function Integrations() {
   };
 
   const handleRemoveAccount = async (accountId: string, provider: string) => {
+    console.log("Removing integration:", accountId, provider);
     try {
       await toast.promise(removeIntegration(accountId, provider), {
         loading: "Removing account...",
@@ -263,7 +267,7 @@ export default function Integrations() {
             )}
           >
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center  justify-between">
                 <div className="flex items-center space-x-3">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-full"
@@ -291,13 +295,13 @@ export default function Integrations() {
               </div>
             </CardHeader>
 
-            <CardContent className="px-5 pb-3">
+            <CardContent className="px-5  pb-3">
               {/* Connected accounts as bubbles */}
               {integration.accounts.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
                     {integration.accounts.map((account, index) => {
-                      console.log("Account:", account);
+                      console.log(account);
                       const contrastColor = getContrastColor(
                         integration.color,
                         index
@@ -308,7 +312,7 @@ export default function Integrations() {
                             <TooltipTrigger asChild>
                               <div className="group relative">
                                 <div
-                                  className="flex items-center rounded-full py-1 px-3 text-sm transition-all gap-2"
+                                  className="flex items-center rounded-full py-1 px-3 md:text-xs lg:text-sm transition-all gap-2"
                                   style={{
                                     backgroundColor: contrastColor.bg,
                                     color: contrastColor.text,
@@ -319,13 +323,17 @@ export default function Integrations() {
                                     <img
                                       src={account.picture}
                                       alt={account.name}
-                                      className="h-5 w-5 rounded-full object-cover"
+                                      className="h-5 w-5 rounded-full  object-cover"
                                     />
+                                  )}
+                                  {integration.id === "facebook" && (
+                                    <span className="max-w-[120px] truncate">
+                                      {account.username} -{" "}
+                                    </span>
                                   )}
                                   <span className="max-w-[120px] truncate">
                                     {account.name}
                                   </span>
-
                                   {/* Show channels only for Slack */}
                                   {integration.id === "slack" &&
                                     account.workspaces &&
@@ -337,7 +345,6 @@ export default function Integrations() {
                                           .join(", ")}
                                       </div>
                                     )}
-
                                   <button
                                     onClick={() =>
                                       removeAccount(account.id, integration.id)
@@ -361,7 +368,7 @@ export default function Integrations() {
                     })}
 
                     {/* Add account bubble if below max */}
-                    {integration.accounts.length < integration.maxAccounts && (
+                    {integration.accounts.length > 1 && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>

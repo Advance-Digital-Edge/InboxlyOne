@@ -155,6 +155,7 @@ export const getUserIntegrations = async () => {
 
     if (!user) throw new Error("User not authenticated");
 
+    // Gmail integrations
     const { data: gmailAccounts, error: gmailError } = await supabase
       .from("user_integrations")
       .select("id,metadata")
@@ -163,25 +164,62 @@ export const getUserIntegrations = async () => {
 
     if (gmailError) throw new Error("Failed to fetch Gmail accounts");
 
-    // Fetch Facebook Pages (only name)
-    const { data: fbPages, error: fbError } = await supabase
+    // Facebook Page
+    const { data: fbPage, error: fbError } = await supabase
       .from("facebook_pages")
-      .select("id, page_name")
-      .eq("user_id", user.id);
+      .select("id,page_name")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     if (fbError) throw new Error("Failed to fetch Facebook Pages");
 
-    // Fetch Instagram Accounts (only username)
-    const { data: igAccounts, error: igError } = await supabase
+    // Facebook User Integration
+    const { data: fbUser, error: fbUserError } = await supabase
+      .from("user_integrations")
+      .select("id,metadata,access_token")
+      .eq("user_id", user.id)
+      .eq("provider", "facebook")
+      .maybeSingle();
+
+    if (fbUserError) throw new Error("Failed to fetch Facebook User");
+
+    // If either fbUser or fbPage is missing → no Facebook + no Instagram
+    if (!fbUser || !fbPage) {
+      return {
+        facebook: [],
+        instagram: [],
+        gmail: gmailAccounts || [],
+      };
+    }
+
+    // Construct FB data
+    const fullFbData = [
+      {
+        id: fbUser.id,
+        user: {
+          name: fbUser.metadata?.name,
+          picture: fbUser.metadata?.picture,
+          accessToken: fbUser.access_token,
+        },
+        page: {
+          id: fbPage.id,
+          name: fbPage.page_name,
+        },
+      },
+    ];
+
+    // Instagram (linked to FB page)
+    const { data: igAccount, error: igError } = await supabase
       .from("instagram_accounts")
-      .select("id, username, fb_page_id ,profile_picture")
-      .in("fb_page_id", fbPages?.map((page) => page.id) || []);
+      .select("id, username, fb_page_id, profile_picture")
+      .eq("fb_page_id", fbPage.id)
+      .maybeSingle();
 
     if (igError) throw new Error("Failed to fetch Instagram Accounts");
 
     return {
-      facebook: fbPages || [],
-      instagram: igAccounts || [],
+      facebook: fullFbData,
+      instagram: igAccount ? [igAccount] : [],
       gmail: gmailAccounts || [],
     };
   } catch (error) {

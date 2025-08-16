@@ -74,7 +74,6 @@ export async function DELETE(request: Request, context: any) {
         .delete()
         .eq("id", id);
 
-
       if (deleteError) {
         console.error("❌ Failed to delete integration:", deleteError);
         return new Response("Failed to delete integration", { status: 500 });
@@ -162,6 +161,54 @@ export async function DELETE(request: Request, context: any) {
     } catch (err) {
       console.error("❌ Failed to remove Instagram integration:", err);
     }
+  }
+
+  if (provider === "facebook") {
+    const { error: fbError } = await supabase
+      .from("user_integrations")
+      .delete()
+      .eq("id", id);
+
+    if (fbError) {
+      return new Response("Failed to delete Facebook integration", {
+        status: 500,
+      });
+    }
+
+    // try {
+    //   // 1. Try to revoke the page token
+    //   const revokeRes = await fetch(
+    //     `https://graph.facebook.com/${page.page_id}/permissions?access_token=${page.access_token}`,
+    //     {
+    //       method: "DELETE",
+    //     }
+    //   );
+
+    //   const revokeData = await revokeRes.json();
+    //   if (!revokeData.success) {
+    //     console.error("❌ Failed to revoke Facebook Page token:", revokeData);
+    //     return new Response("Failed to revoke page token", { status: 500 });
+    //   }
+
+    //   console.log(`✅ Facebook Page token revoked: ${page.page_name}`);
+
+    //   // 2. Delete from DB after successful revoke
+    //   const { error: deleteError } = await supabase
+    //     .from("facebook_pages")
+    //     .delete()
+    //     .eq("id", id);
+
+    //   if (deleteError) {
+    //     console.error("❌ Failed to delete Facebook page:", deleteError);
+    //     return new Response("Failed to delete page", { status: 500 });
+    //   }
+
+    //   console.log(`🗑️ Facebook Page deleted: ${page.page_name}`);
+    //   return new Response("Facebook Page removed", { status: 200 });
+    // } catch (err) {
+    //   console.error("❌ Error removing Facebook Page:", err);
+    //   return new Response("Internal server error", { status: 500 });
+    // }
   }
 
   return new Response("Integration deleted", { status: 200 });
