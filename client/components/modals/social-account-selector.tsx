@@ -15,7 +15,7 @@ interface SocialAccount {
   username?: string
 }
 
-type Platform = "facebook" | "instagram"
+type Platform = "messenger" | "instagram"
 
 interface SocialAccountSelectorProps {
   accounts: SocialAccount[]
@@ -27,8 +27,8 @@ interface SocialAccountSelectorProps {
 }
 
 const platformConfig = {
-  facebook: {
-    name: "Facebook",
+  messenger: {
+    name: "Messenger",
     accountType: "Page",
     accountTypePlural: "Pages",
     icon: Facebook,

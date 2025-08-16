@@ -23,6 +23,8 @@ import { toast } from "react-hot-toast";
 import { removeIntegration } from "@/app/actions";
 import { IntegrationMetadata } from "@/types/integration";
 import SocialAccountSelector from "@/components/modals/social-account-selector";
+import { IntegrationDisconnectModal } from "@/components/modals/integration-disconnect-modal";
+import { AccountInfo } from "@/components/modals/integration-disconnect-modal";
 
 interface UserIntegration {
   id: string;
@@ -39,7 +41,7 @@ const BASE_INTEGRATIONS = [
     connected: false,
     accounts: [],
     color: "#D44638",
-    maxAccounts: 2,
+    maxAccounts: 1,
   },
   {
     id: "slack",
@@ -48,16 +50,16 @@ const BASE_INTEGRATIONS = [
     connected: false,
     accounts: [],
     color: "#4A154B",
-    maxAccounts: 2,
+    maxAccounts: 1,
   },
   {
-    id: "facebook",
+    id: "messenger",
     name: "Messenger",
     icon: <Facebook className="h-6 w-6" />,
     connected: false,
     accounts: [],
     color: "#0084FF",
-    maxAccounts: 2,
+    maxAccounts: 1,
   },
   {
     id: "instagram",
@@ -66,7 +68,7 @@ const BASE_INTEGRATIONS = [
     connected: false,
     accounts: [],
     color: "#E1306C",
-    maxAccounts: 2,
+    maxAccounts: 1,
   },
 ];
 
@@ -96,6 +98,11 @@ export default function Integrations() {
   const { userIntegrations, fetchUserIntegrations, user } = useAuth();
   const userId = user?.id;
   const [showMessengerPageModal, setShowMessengerPageModal] = useState(false);
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<AccountInfo | null>(
+    null
+  );
+  const [linkedInstagram, setLinkedInstagram] = useState<any | null>(null);
   const [messengerPages, setMessengerPages] = useState<{
     integrationId: string;
     pages: any[];
@@ -125,7 +132,7 @@ export default function Integrations() {
               name = metadata.email || "Unknown";
               picture = metadata.picture || null;
               break;
-            case "facebook":
+            case "messenger":
               name = metadata.page.name || "Unknown";
               username = metadata.user.name || null;
               picture = metadata.user.picture || null;
@@ -133,6 +140,7 @@ export default function Integrations() {
             case "instagram":
               name = metadata.username ? `@${metadata.username}` : "Unknown";
               picture = metadata.profile_picture;
+              setLinkedInstagram({ name, picture });
               break;
             default:
               name = metadata.email || metadata.name || "Unknown";
@@ -142,6 +150,7 @@ export default function Integrations() {
           return {
             id: match.id,
             username,
+            type: base.id as AccountInfo["type"],
             name,
             picture,
             workspaces: metadata.workspaces || [],
@@ -173,7 +182,7 @@ export default function Integrations() {
       url = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_CLIENT_ID}&scope=...&redirect_uri=${TEMP_URL}/api/slack/oauth/callback&state=${userId}&force_scope=1&force_reinstall=1`;
     } else if (integrationId === "gmail") {
       url = "/api/oauth/login";
-    } else if (integrationId === "facebook") {
+    } else if (integrationId === "messenger") {
       url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${MESSENGER_APP_ID}&redirect_uri=${MESSENGER_REDIRECT_URI}&scope=pages_messaging,pages_show_list,pages_read_engagement,public_profile`;
     } else if (integrationId === "instagram") {
       // Add business_management scope
@@ -230,6 +239,14 @@ export default function Integrations() {
     }
   };
 
+  const handleDisconnectClick = (
+    account: AccountInfo,
+    linkedInstagramAccount?: AccountInfo
+  ) => {
+    setSelectedAccount(account);
+    setShowDisconnectModal(true);
+  };
+
   const handleRemoveAccount = async (accountId: string, provider: string) => {
     console.log("Removing integration:", accountId, provider);
     try {
@@ -239,14 +256,10 @@ export default function Integrations() {
         error: (err) => <p>{err.message || "Could not save."}</p>,
       });
       fetchUserIntegrations?.();
+      setShowDisconnectModal(false);
     } catch (error) {
       console.error("Error removing integration:", error);
     }
-  };
-
-  // This would be a state function in a real app
-  const removeAccount = (accountId: string, provider: string) => {
-    handleRemoveAccount(accountId, provider);
   };
 
   // This would be a state function in a real app
@@ -304,7 +317,7 @@ export default function Integrations() {
           error={null} // or actual error string if any
           onClose={() => setShowMessengerPageModal(false)}
           onSelectAccount={handleSelectPage} // use the correct callback name
-          platform="facebook"
+          platform="messenger"
         />
       )}
 
@@ -360,7 +373,6 @@ export default function Integrations() {
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
                     {integration.accounts.map((account, index) => {
-                      console.log(account);
                       const contrastColor = getContrastColor(
                         integration.color,
                         index
@@ -385,7 +397,7 @@ export default function Integrations() {
                                       className="h-5 w-5 rounded-full  object-cover"
                                     />
                                   )}
-                                  {integration.id === "facebook" && (
+                                  {integration.id === "messenger" && (
                                     <span className="max-w-[120px] truncate">
                                       {account.username} -{" "}
                                     </span>
@@ -406,7 +418,7 @@ export default function Integrations() {
                                     )}
                                   <button
                                     onClick={() =>
-                                      removeAccount(account.id, integration.id)
+                                      handleDisconnectClick(account)
                                     }
                                     className="ml-1.5 rounded-full bg-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
@@ -463,6 +475,18 @@ export default function Integrations() {
             </CardFooter>
           </Card>
         ))}
+
+        {selectedAccount && (
+          <IntegrationDisconnectModal
+            isOpen={showDisconnectModal}
+            account={selectedAccount}
+            linkedInstagram={linkedInstagram}
+            onClose={() => setShowDisconnectModal(false)}
+            onDisconnect={() =>
+              handleRemoveAccount(selectedAccount.id, selectedAccount.type)
+            }
+          />
+        )}
       </div>
     </div>
   );
