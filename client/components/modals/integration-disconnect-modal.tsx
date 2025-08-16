@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Trash2, Facebook, Mail, Slack, Instagram } from "lucide-react";
+import { X, Trash2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlatformIcon } from "@/lib/platformUtils";
 
@@ -18,28 +18,27 @@ interface DisconnectModalProps {
   onClose: () => void;
   onDisconnect: () => void;
   account: AccountInfo;
-  linkedInstagram?: any; // For Facebook pages with linked Instagram
+  linkedInstagram?: any;
+  isLoading?: boolean;
+  isSuccess?: boolean;
 }
 
 export function IntegrationDisconnectModal({
   isOpen,
   onClose,
   onDisconnect,
+  isLoading,
+  isSuccess,
   account,
   linkedInstagram,
 }: DisconnectModalProps) {
   if (!isOpen) return null;
 
-  console.log("Disconnecting account:", account);
-  console.log(linkedInstagram, "Linked Instagram account");
 
   const isFacebookPage = account.type === "messenger" && linkedInstagram;
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50  "
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50  ">
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4">
@@ -106,20 +105,38 @@ export function IntegrationDisconnectModal({
 
         {/* Footer */}
         <div className="border-t border-gray-200 p-6 flex gap-3">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="flex-1 text-gray-700 border-gray-300 hover:bg-gray-50 bg-transparent"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={onDisconnect}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Disconnect
-          </Button>
+          {!isLoading && !isSuccess && (
+            <>
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="flex-1 text-gray-700 border-gray-300 hover:bg-gray-50 bg-transparent"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={onDisconnect}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Disconnect
+              </Button>
+            </>
+          )}
+
+          {isLoading && (
+            <div className="flex-1 flex items-center justify-center gap-2">
+              <span>Disconnecting...</span>
+              <span className="animate-spin border-2 border-white border-t-red-600 rounded-full w-5 h-5"></span>
+            </div>
+          )}
+
+          {isSuccess && (
+            <div className="flex-1 flex items-center  gap-2 rounded-lg bg-white justify-center text-green-600/70 font-medium">
+              Your account has been safely disconnected
+              <Check className="w-6 h-6 mr-2 text-" />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -100,6 +100,8 @@ export default function Integrations() {
   const userId = user?.id;
   const [showMessengerPageModal, setShowMessengerPageModal] = useState(false);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [disconnectSuccess, setDisconnectSuccess] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<AccountInfo | null>(
     null
   );
@@ -109,7 +111,7 @@ export default function Integrations() {
     pages: any[];
     userProfile: any;
   } | null>(null);
-  console.log("User integrations:", userIntegrations);
+
 
   const integrations = useMemo(() => {
     return BASE_INTEGRATIONS.map((base) => {
@@ -224,7 +226,6 @@ export default function Integrations() {
 
       const { type, integrationId, pages, userProfile } = data || {};
       if (type === "messenger-pages") {
-        console.log("Received message data:", data);
         setMessengerPages({ pages, integrationId, userProfile });
         setShowMessengerPageModal(true);
         window.removeEventListener("message", receiveMessage);
@@ -249,19 +250,26 @@ export default function Integrations() {
   };
 
   const handleRemoveAccount = async (accountId: string, provider: string) => {
+    setIsDisconnecting(true);
     try {
-      await toast.promise(removeIntegration(accountId, provider), {
-        loading: "Removing account...",
-        success: <p>Account removed successfully</p>,
-        error: (err) => <p>{err.message || "Could not save."}</p>,
-      });
-      setShowDisconnectModal(false);
+      await removeIntegration(accountId, provider);
+
       if (provider === "instagram") {
-        setLinkedInstagram(null); // Reset linked Instagram if removed
+        setLinkedInstagram(null);
       }
       fetchUserIntegrations?.();
-    } catch (error) {
-      console.error("Error removing integration:", error);
+
+      setIsDisconnecting(false);
+      setDisconnectSuccess(true);
+
+      // Auto-close modal after showing success
+      setTimeout(() => {
+        setDisconnectSuccess(false);
+        setShowDisconnectModal(false);
+      }, 500);
+    } catch (err: any) {
+      setIsDisconnecting(false);
+      toast.error(err.message || "Could not remove account.");
     }
   };
 
@@ -484,6 +492,8 @@ export default function Integrations() {
             isOpen={showDisconnectModal}
             account={selectedAccount}
             linkedInstagram={linkedInstagram}
+            isLoading={isDisconnecting}
+            isSuccess={disconnectSuccess}
             onClose={() => setShowDisconnectModal(false)}
             onDisconnect={() =>
               handleRemoveAccount(selectedAccount.id, selectedAccount.type)

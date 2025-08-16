@@ -45,11 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserIntegrations = async () => {
     try {
       const res: any = await getUserIntegrations();
-      console.log(
-        res
-          ? "User integrations fetched successfully"
-          : "No user integrations found"
-      );
       setUserIntegrations(res);
       setLoadingIntegrations(false);
     } catch (error) {
