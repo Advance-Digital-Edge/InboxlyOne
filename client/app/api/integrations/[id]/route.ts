@@ -1,28 +1,22 @@
 import { google } from "googleapis";
 import { createClient } from "@/utils/supabase/server";
 
-
 export async function DELETE(request: Request, context: any) {
   const { id } = await context.params;
+  const { provider } = await request.json();
   const supabase = await createClient();
 
+  if (provider === "gmail") {
+    const { data: integration, error } = await supabase
+      .from("user_integrations")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-  // Your code here, e.g. read cookie, etc.
-  const { data: integration, error } = await supabase
-    .from("user_integrations")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error || !integration) {
-    console.log("❌ Integration not found or error:", error);
-    console.log(integration, "Integration data");
-    return new Response("Integration not found", { status: 404 });
-  }
-
-  console.log("Deleting integration:", integration.provider, integration.id);
-
-  if (integration.provider === "gmail") {
+    if (error || !integration) {
+      console.error("❌ Failed to fetch integration:", error);
+      return new Response("Integration not found", { status: 404 });
+    }
     try {
       const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
@@ -75,14 +69,36 @@ export async function DELETE(request: Request, context: any) {
           await revokeRes.text()
         );
       }
+      const { error: deleteError } = await supabase
+        .from("user_integrations")
+        .delete()
+        .eq("id", id);
+
+      if (deleteError) {
+        console.error("❌ Failed to delete integration:", deleteError);
+        return new Response("Failed to delete integration", { status: 500 });
+      }
+
+      console.log("🗑️ Integration deleted successfully");
+      return new Response("Integration removed", { status: 200 });
     } catch (err) {
       console.error("❌ Failed to stop Gmail watch or revoke token:", err);
       // Optionally handle errors here (maybe return 500 or continue)
     }
   }
 
-  // 👉 Add Slack integration removal
-  if (integration.provider === "slack") {
+  // 👉 Add Slack   removal
+  if (provider === "slack") {
+    const { data: integration, error } = await supabase
+      .from("user_integrations")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error || !integration) {
+      console.error("❌ Failed to fetch integration:", error);
+      return new Response("Integration not found", { status: 404 });
+    }
     try {
       // 1. Revoke the Slack access token
       const revokeRes = await fetch("https://slack.com/api/auth.revoke", {
@@ -128,18 +144,72 @@ export async function DELETE(request: Request, context: any) {
   }
 
   // 👉 Add Instagram integration removal
-  if (integration.provider === "instagram") {
+  if (provider === "instagram") {
     try {
       // Instagram long-lived tokens can't be revoked via API, they expire naturally
       // We just need to remove from our database
-      console.log("✅ Instagram integration removed for:", integration.metadata?.username);
+      console.log("Removing Instagram integration for ID:", id);
+      const { error: igError } = await supabase
+        .from("instagram_accounts")
+        .delete()
+        .eq("id", id);
+
+      if (igError) {
+        console.log(igError, "BROO");
+        throw new Error("❌ Failed to delete Instagram account:", igError);
+      }
     } catch (err) {
       console.error("❌ Failed to remove Instagram integration:", err);
     }
   }
 
-  // Delete integration from DB
-  await supabase.from("user_integrations").delete().eq("id", id);
+  if (provider === "facebook") {
+    const { error: fbError } = await supabase
+      .from("user_integrations")
+      .delete()
+      .eq("id", id);
+
+    if (fbError) {
+      return new Response("Failed to delete Facebook integration", {
+        status: 500,
+      });
+    }
+
+    // try {
+    //   // 1. Try to revoke the page token
+    //   const revokeRes = await fetch(
+    //     `https://graph.facebook.com/${page.page_id}/permissions?access_token=${page.access_token}`,
+    //     {
+    //       method: "DELETE",
+    //     }
+    //   );
+
+    //   const revokeData = await revokeRes.json();
+    //   if (!revokeData.success) {
+    //     console.error("❌ Failed to revoke Facebook Page token:", revokeData);
+    //     return new Response("Failed to revoke page token", { status: 500 });
+    //   }
+
+    //   console.log(`✅ Facebook Page token revoked: ${page.page_name}`);
+
+    //   // 2. Delete from DB after successful revoke
+    //   const { error: deleteError } = await supabase
+    //     .from("facebook_pages")
+    //     .delete()
+    //     .eq("id", id);
+
+    //   if (deleteError) {
+    //     console.error("❌ Failed to delete Facebook page:", deleteError);
+    //     return new Response("Failed to delete page", { status: 500 });
+    //   }
+
+    //   console.log(`🗑️ Facebook Page deleted: ${page.page_name}`);
+    //   return new Response("Facebook Page removed", { status: 200 });
+    // } catch (err) {
+    //   console.error("❌ Error removing Facebook Page:", err);
+    //   return new Response("Internal server error", { status: 500 });
+    // }
+  }
 
   return new Response("Integration deleted", { status: 200 });
 }

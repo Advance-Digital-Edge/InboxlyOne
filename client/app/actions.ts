@@ -153,28 +153,85 @@ export const getUserIntegrations = async () => {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
+    if (!user) throw new Error("User not authenticated");
 
-    const { data, error } = await supabase
+    // Gmail integrations
+    const { data: gmailAccounts, error: gmailError } = await supabase
       .from("user_integrations")
-      .select("id,provider,metadata")
-      .eq("user_id", user.id);
+      .select("id,metadata")
+      .eq("user_id", user.id)
+      .eq("provider", "gmail");
 
-    if (error) {
-      console.error("Error fetching integrations:", error);
-      throw new Error("Failed to fetch user integrations");
+    if (gmailError) throw new Error("Failed to fetch Gmail accounts");
+
+    // Facebook Page
+    const { data: fbPage, error: fbError } = await supabase
+      .from("facebook_pages")
+      .select("id,page_name")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (fbError) throw new Error("Failed to fetch Facebook Pages");
+
+    // Facebook User Integration
+    const { data: fbUser, error: fbUserError } = await supabase
+      .from("user_integrations")
+      .select("id,metadata,access_token")
+      .eq("user_id", user.id)
+      .eq("provider", "facebook")
+      .maybeSingle();
+
+    if (fbUserError) throw new Error("Failed to fetch Facebook User");
+
+    // If either fbUser or fbPage is missing → no Facebook + no Instagram
+    if (!fbUser || !fbPage) {
+      return {
+        facebook: [],
+        instagram: [],
+        gmail: gmailAccounts || [],
+      };
     }
 
-    return data;
+    // Construct FB data
+    const fullFbData = [
+      {
+        id: fbUser.id,
+        user: {
+          name: fbUser.metadata?.name,
+          picture: fbUser.metadata?.picture,
+          accessToken: fbUser.access_token,
+        },
+        page: {
+          id: fbPage.id,
+          name: fbPage.page_name,
+        },
+      },
+    ];
+
+    // Instagram (linked to FB page)
+    const { data: igAccount, error: igError } = await supabase
+      .from("instagram_accounts")
+      .select("id, username, fb_page_id, profile_picture")
+      .eq("fb_page_id", fbPage.id)
+      .maybeSingle();
+
+    if (igError) throw new Error("Failed to fetch Instagram Accounts");
+
+    return {
+      facebook: fullFbData,
+      instagram: igAccount ? [igAccount] : [],
+      gmail: gmailAccounts || [],
+    };
   } catch (error) {
-    console.error("An error occurred in getUserIntegrations:", error);
-    throw error; // Re-throw the error to propagate it if needed
+    console.error("Error in getUserIntegrations:", error);
+    throw error;
   }
 };
 
-export const removeIntegration = async (integrationId: string) => {
+export const removeIntegration = async (
+  integrationId: string,
+  provider: string
+) => {
   const headersList = await headers();
   const cookie = headersList.get("cookie") || "";
 
@@ -183,7 +240,7 @@ export const removeIntegration = async (integrationId: string) => {
     headers: {
       cookie, // manually forward cookie header
     },
-    // credentials not needed here, because fetch is server-side
+    body: JSON.stringify({ provider }),
   });
 
   if (!res.ok) {
