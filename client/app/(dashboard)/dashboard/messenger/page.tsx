@@ -76,6 +76,7 @@ export default function MessengerPage() {
 
     return res.json();
   };
+
   useConnectSocket("facebook_message", (event) => {
     const currentUserId = user?.id;
 
@@ -377,6 +378,12 @@ export default function MessengerPage() {
   }, [searchParams, data?.conversations]);
 
   if (isLoading) return <MessageListSkeleton />;
+
+  if (error) {
+    console.error("Error fetching Messenger messages:", error);
+    toast.error("Failed to load Messenger messages");
+    return <div>Error loading messages</div>;
+  }
   return (
     <PlatformInbox
       platform="messenger"
