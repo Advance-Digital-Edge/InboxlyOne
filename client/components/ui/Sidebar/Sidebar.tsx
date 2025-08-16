@@ -89,6 +89,14 @@ export default function Sidebar({
             </h2>
             <ul className="space-y-1">
               {platforms.map((platform, index) => {
+                console.log(
+                  "Active platform:",
+                  activePlatform,
+                  "Clicked platform:",
+                  platform.id,
+                  "Platform name:",
+                  platform.name
+                );
                 const hasNew = platformStatus[platform.id]?.hasNew;
                 return (
                   <li key={index}>
@@ -96,7 +104,7 @@ export default function Sidebar({
                       className={cn(
                         "flex gap-2 justify-between w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                         activePlatform === platform.id
-                          ? `bg-slate-200 ${getPlatformColor(platform.name)}`
+                          ? `bg-slate-200 ${getPlatformColor(platform.name.toLowerCase())}`
                           : "text-gray-800 hover:bg-gray-100 hover:text-gray-900"
                       )}
                       onClick={() => handlePlatformClick(platform.id)}

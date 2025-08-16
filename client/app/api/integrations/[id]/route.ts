@@ -163,7 +163,7 @@ export async function DELETE(request: Request, context: any) {
     }
   }
 
-  if (provider === "facebook") {
+  if (provider === "messenger") {
     const { error: fbError } = await supabase
       .from("user_integrations")
       .delete()
