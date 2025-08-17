@@ -2,11 +2,12 @@
 
 import { X, Trash2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getPlatformIcon } from "@/lib/platformUtils";
+import { getPlatformIcon, getPlatformColor } from "@/lib/platformUtils";
+import React from "react";
 
 export interface AccountInfo {
   id: any;
-  type: "messenger" | "instagram" | "gmail" | "slack";
+  type: "Messenger" | "Instagram" | "Gmail" | "Slack";
   name: string;
   username: string | null;
   picture: string | null;
@@ -34,8 +35,8 @@ export function IntegrationDisconnectModal({
 }: DisconnectModalProps) {
   if (!isOpen) return null;
 
-
-  const isFacebookPage = account.type === "messenger" && linkedInstagram;
+  const isFacebookPage = account.type === "Messenger" && linkedInstagram;
+  console.log("ACCOUNT", account.type);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50  ">
@@ -43,7 +44,7 @@ export function IntegrationDisconnectModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4">
           <div>
-            <p className="text-sm text-center text-black mt-1  tracking-wider">
+            <p className="text-sm text-center mt-1  tracking-wider">
               The following accounts will be disconnected:
             </p>
           </div>
@@ -69,10 +70,13 @@ export function IntegrationDisconnectModal({
 
           {/* Account Details */}
           {/* Primary Account */}
-          <div className="flex items-center border gap-3 p-3 bg-gray-50 rounded-lg">
-            <span className=" rounded-full border ">
+          <div className="flex items-center border gap-3 p-3 rounded-lg">
+            <span
+              className={`rounded-full border p-2 flex items-center justify-center ${getPlatformColor(account.type)}`}
+            >
               {getPlatformIcon(account.type)}
             </span>
+
             <img
               src={account.picture || "/placeholder.svg"}
               alt={account.name}
@@ -86,9 +90,14 @@ export function IntegrationDisconnectModal({
           </div>
 
           {/* Linked Instagram Account */}
-          {linkedInstagram && account.type === "messenger" && (
+          {linkedInstagram && account.type === "Messenger" && (
             <div className="flex items-center border  gap-3 p-3 bg-gray-50 rounded-lg">
-              {getPlatformIcon("instagram")}
+              <span
+                className={`rounded-full border p-2 flex items-center justify-center ${getPlatformColor("Instagram")}`}
+              >
+                {getPlatformIcon("Instagram")}
+              </span>
+
               <img
                 src={linkedInstagram.picture || "/placeholder.svg"}
                 alt={linkedInstagram.name}

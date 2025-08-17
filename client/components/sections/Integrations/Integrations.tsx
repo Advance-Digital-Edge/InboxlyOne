@@ -25,7 +25,6 @@ import { IntegrationMetadata } from "@/types/integration";
 import SocialAccountSelector from "@/components/modals/social-account-selector";
 import { IntegrationDisconnectModal } from "@/components/modals/integration-disconnect-modal";
 import { AccountInfo } from "@/components/modals/integration-disconnect-modal";
-import { set } from "react-hook-form";
 
 interface UserIntegration {
   id: string;
@@ -112,7 +111,6 @@ export default function Integrations() {
     userProfile: any;
   } | null>(null);
 
-
   const integrations = useMemo(() => {
     return BASE_INTEGRATIONS.map((base) => {
       // Get the array of integrations for this provider
@@ -126,21 +124,21 @@ export default function Integrations() {
           let name: string;
           let picture: string | null = null;
           let username: string | null = null;
-          switch (base.id) {
-            case "gmail":
+          switch (base.name) {
+            case "Gmail":
               name = metadata.metadata.email || "Unknown";
               picture = metadata.metadata.picture || null;
               break;
-            case "slack":
+            case "Slack":
               name = metadata.email || "Unknown";
               picture = metadata.picture || null;
               break;
-            case "messenger":
+            case "Messenger":
               name = metadata.page.name || "Unknown";
               username = metadata.user.name || null;
               picture = metadata.user.picture || null;
               break;
-            case "instagram":
+            case "Instagram":
               name = metadata.username ? `@${metadata.username}` : "Unknown";
               picture = metadata.profile_picture;
               setLinkedInstagram({ name, picture });
@@ -153,7 +151,7 @@ export default function Integrations() {
           return {
             id: match.id,
             username,
-            type: base.id as AccountInfo["type"],
+            type: base.name as AccountInfo["type"],
             name,
             picture,
             workspaces: metadata.workspaces || [],
@@ -250,11 +248,12 @@ export default function Integrations() {
   };
 
   const handleRemoveAccount = async (accountId: string, provider: string) => {
+    console.log("Removing account", accountId, provider);
     setIsDisconnecting(true);
     try {
       await removeIntegration(accountId, provider);
 
-      if (provider === "instagram") {
+      if (provider === "Instagram") {
         setLinkedInstagram(null);
       }
       fetchUserIntegrations?.();
