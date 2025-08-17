@@ -89,14 +89,6 @@ export default function Sidebar({
             </h2>
             <ul className="space-y-1">
               {platforms.map((platform, index) => {
-                console.log(
-                  "Active platform:",
-                  activePlatform,
-                  "Clicked platform:",
-                  platform.id,
-                  "Platform name:",
-                  platform.name
-                );
                 const hasNew = platformStatus[platform.id]?.hasNew;
                 return (
                   <li key={index}>
