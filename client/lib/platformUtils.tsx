@@ -2,13 +2,13 @@ import { Mail, Facebook, Instagram, Slack } from "lucide-react";
 
 export const getPlatformIcon = (platform: string) => {
   switch (platform) {
-    case "gmail":
+    case "Gmail":
       return <Mail className="h-4 w-4" />;
-    case "messenger":
+    case "Messenger":
       return <Facebook className="h-4 w-4" />;
-    case "instagram":
+    case "Instagram":
       return <Instagram className="h-4 w-4" />;
-    case "slack":
+    case "Slack":
       return <Slack className="h-4 w-4" />;
     default:
       return <Mail className="h-4 w-4" />;
