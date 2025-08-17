@@ -17,13 +17,13 @@ export const getPlatformIcon = (platform: string) => {
 
 export const getPlatformColor = (platform: string) => {
   switch (platform) {
-    case "gmail":
+    case "Gmail":
       return "text-red-700 border-red-100";
-    case "messenger":
+    case "Messenger":
       return "text-blue-600 border-blue-100";
-    case "instagram":
+    case "Instagram":
       return "text-pink-600 border-pink-100";
-    case "slack":
+    case "Slack":
       return "text-purple-600 border-purple-100";
     default:
       return "text-gray-500 border-gray-100";
