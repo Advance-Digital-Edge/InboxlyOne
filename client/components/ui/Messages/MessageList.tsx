@@ -59,7 +59,6 @@ export default function MessageList({
                   );
                 }
               );
-              console.log("MESSAGES", messages);
 
               // Get the sending status for visual feedback
               const sendingTempMessage = temporaryMessagesArray.find(
