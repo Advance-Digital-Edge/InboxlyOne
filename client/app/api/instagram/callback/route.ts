@@ -383,7 +383,7 @@ export async function GET(req: NextRequest) {
                 <body>
                     <script>
                         if (window.opener) {
-                            window.opener.postMessage("instagram-connected", window.origin);
+                            window.opener.postMessage("instagram-connected", "*");
                             window.close();
                         } else {
                             document.body.innerText = "Instagram connected successfully! You can close this window.";

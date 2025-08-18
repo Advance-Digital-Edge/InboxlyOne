@@ -98,6 +98,11 @@ export default function Integrations() {
   const { userIntegrations, fetchUserIntegrations, user } = useAuth();
   const userId = user?.id;
   const [showMessengerPageModal, setShowMessengerPageModal] = useState(false);
+  const [instagramAccounts, setInstagramAccounts] = useState<any[] | null>(
+    null
+  );
+  const [showInstagramAccountsModal, setShowInstagramAccountsModal] =
+    useState(false);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [disconnectSuccess, setDisconnectSuccess] = useState(false);
@@ -195,7 +200,7 @@ export default function Integrations() {
       return;
     }
 
-    // ✅ Добави event listener само веднъж
+
     const receiveMessage = (event: MessageEvent) => {
       const { data } = event;
       if (data === "gmail-connected") {
@@ -248,7 +253,6 @@ export default function Integrations() {
   };
 
   const handleRemoveAccount = async (accountId: string, provider: string) => {
-    console.log("Removing account", accountId, provider);
     setIsDisconnecting(true);
     try {
       await removeIntegration(accountId, provider);
