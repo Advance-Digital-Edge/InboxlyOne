@@ -36,8 +36,7 @@ export function IntegrationDisconnectModal({
   if (!isOpen) return null;
 
   const isFacebookPage = account.type === "Messenger" && linkedInstagram;
-  console.log("ACCOUNT", account.type);
-
+  
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50  ">
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
