@@ -173,7 +173,10 @@ export function transformMessengerRawConversations(
 
 // Update the transformInstagramData function to handle the new data structure:
 
-export function transformInstagramData(data: any[], currentUserId: string) {
+export function transformInstagramData(data: any[], currentPageId: string, pageName?: string) {
+  console.log("📱 Transform Instagram data with page ID:", currentPageId);
+  console.log("📱 Page name:", pageName);
+  
   return data
     .map((thread, threadIndex) => {
       const allMessages = thread.messages || [];
@@ -201,18 +204,36 @@ export function transformInstagramData(data: any[], currentUserId: string) {
       }
       
       const otherParticipant = Array.isArray(participants) 
-        ? participants.find((p: any) => p.id !== currentUserId)
+        ? participants.find((p: any) => p.id !== currentPageId) // Use page ID instead of user ID
         : null;
         
-      const senderName = otherParticipant?.name 
+      // Enhanced name extraction with multiple fallbacks
+      const recipientName = otherParticipant?.name 
         || otherParticipant?.username 
-        || (otherParticipant?.id ? `User ${otherParticipant.id.slice(-4)}` : "Instagram User");
+        || (otherParticipant?.id ? `Instagram User ${otherParticipant.id.slice(-4)}` : "Instagram User");
       const senderId = otherParticipant?.id || "unknown";
+      
+      // Enhanced avatar extraction
+      const recipientAvatar = otherParticipant?.picture?.data?.url || 
+                             otherParticipant?.picture_url || 
+                             otherParticipant?.picture || 
+                             "";
 
       const conversation = allMessages.map((msg: any, index: number) => {
         const ts = new Date(msg.created_time).getTime().toString();
         const messageSenderId = msg.from?.id || senderId;
-        const messageSenderName = msg.from?.name || senderName;
+        
+        // Determine sender name based on who sent the message with enhanced data
+        let messageSenderName;
+        if (messageSenderId === currentPageId) {
+          // Message sent by the page/business account (outgoing)
+          messageSenderName = pageName || "Instagram Business";
+        } else {
+          // Message sent by the recipient (incoming) - use enhanced from data
+          messageSenderName = msg.from?.name || 
+                             msg.from?.username || 
+                             recipientName;
+        }
         
         return {
           id: index,
@@ -225,7 +246,7 @@ export function transformInstagramData(data: any[], currentUserId: string) {
             hour12: false,
           }),
           ts,
-          isIncoming: messageSenderId !== currentUserId,
+          isIncoming: messageSenderId !== currentPageId, // Use page ID to determine incoming
           unread: false,
         };
       });
@@ -235,10 +256,10 @@ export function transformInstagramData(data: any[], currentUserId: string) {
 
       return {
         id: threadIndex,
-        sender: senderName,
+        sender: recipientName, // Show recipient name for the conversation summary
         senderId: senderId,
         channelId: thread.id,
-        avatar: "", // Pages API doesn't provide profile pictures
+        avatar: recipientAvatar, // Use participant's profile picture
         preview: lastMsg?.message || "No messages yet",
         timestamp: new Date(lastTimestamp).toLocaleTimeString("en-US", {
           hour: "2-digit",
@@ -281,7 +302,9 @@ export function transformInstagramNewMessage(
 }
 
 // Transform function for Instagram conversations following Messenger pattern
-export function transformInstagramMetaData(data: any[], currentUserId: string) {
+export function transformInstagramMetaData(data: any[], currentPageId: string) {
+  console.log("📱 Transform function called with page ID:", currentPageId);
+  
   return data
     .map((thread, index) => {
       const allMessages = thread.messages || [];
@@ -297,63 +320,60 @@ export function transformInstagramMetaData(data: any[], currentUserId: string) {
           new Date(a.created_time).getTime()
       );
 
-      // Get participants (exclude the page itself) - handle different formats
+      // Simplified participant handling to avoid errors
       let participants = [];
       
-      // Handle different possible participant structures
-      if (thread.participants?.data) {
+      if (thread.participants?.data && Array.isArray(thread.participants.data)) {
         participants = thread.participants.data;
       } else if (Array.isArray(thread.participants)) {
         participants = thread.participants;
-      } else if (thread.participants) {
-        // If participants is an object, try to extract data
-        participants = Object.values(thread.participants);
       }
       
-      console.log("📱 Thread participants structure:", {
-        original: thread.participants,
-        processed: participants,
-        isArray: Array.isArray(participants)
+      console.log("📱 Processing participants:", participants.length, "for thread:", thread.id);
+      console.log("📱 Page ID to exclude:", currentPageId);
+      console.log("📱 All participant IDs:", participants.map((p: any) => p.id));
+      console.log("📱 All participants data:", participants);
+      
+      // Exclude the page/business account from participants
+      const otherParticipant = participants.find((p: any) => p && p.id && p.id !== currentPageId);
+      
+      console.log("📱 Found other participant:", otherParticipant);
+      console.log("📱 Participant filtering result:", {
+        totalParticipants: participants.length,
+        pageIdToExclude: currentPageId,
+        participantIds: participants.map((p: any) => p.id),
+        foundOtherParticipant: !!otherParticipant,
+        otherParticipantData: otherParticipant
       });
       
-      const otherParticipant = Array.isArray(participants) 
-        ? participants.find((p: any) => p.id !== currentUserId)
-        : null;
-        
-      // Enhanced name handling with message sender fallback
+      // Enhanced name and ID extraction with better fallbacks
       let senderName = "Instagram User";
       let senderId = "unknown";
       let avatar = "";
       
       if (otherParticipant) {
-        senderId = otherParticipant.id || "unknown";
-        
-        // Try multiple name sources
-        senderName = otherParticipant.name 
-          || otherParticipant.username 
-          || otherParticipant.display_name
-          || (senderId !== "unknown" ? `User ${senderId.slice(-4)}` : "Instagram User");
-          
-        // Try multiple avatar sources
-        avatar = otherParticipant.picture?.data?.url 
-          || otherParticipant.profile_picture_url 
-          || otherParticipant.avatar_url 
-          || "";
+        senderId = otherParticipant.id;
+        // Try different name fields from the enhanced participant data
+        senderName = otherParticipant.name || 
+                    otherParticipant.username || 
+                    `Instagram User ${senderId.slice(-4)}`;
+        // Enhanced avatar extraction
+        avatar = otherParticipant.picture?.data?.url || 
+                otherParticipant.picture_url || 
+                otherParticipant.picture || 
+                "";
       } else if (allMessages.length > 0) {
-        // Fallback: try to get user info from message senders
-        const firstMessage = allMessages.find((msg: any) => msg.from?.id !== currentUserId);
+        // Enhanced fallback from messages - exclude page messages and try multiple name fields
+        const firstMessage = allMessages.find((msg: any) => msg.from && msg.from.id !== currentPageId);
         if (firstMessage?.from) {
-          senderId = firstMessage.from.id || "unknown";
-          senderName = firstMessage.from.name 
-            || firstMessage.from.username
-            || (senderId !== "unknown" ? `User ${senderId.slice(-4)}` : "Instagram User");
-          avatar = firstMessage.from.picture?.data?.url 
-            || firstMessage.from.profile_picture_url 
-            || "";
+          senderId = firstMessage.from.id;
+          senderName = firstMessage.from.name || 
+                      firstMessage.from.username || 
+                      `Instagram User ${senderId.slice(-4)}`;
         }
       }
 
-      console.log("📱 Final participant data:", { senderName, senderId, avatar });
+      console.log("📱 Final user data:", { senderName, senderId });
 
       const lastMsg = allMessages[0]; // Latest message
       const lastTimestamp = new Date(lastMsg?.created_time || Date.now()).getTime();
