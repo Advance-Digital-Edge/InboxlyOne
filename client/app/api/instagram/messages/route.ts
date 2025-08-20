@@ -37,13 +37,23 @@ export async function GET(req: NextRequest) {
     const pageId = metadata?.page_id;
     const pageAccessToken = metadata?.page_access_token || access_token;
     
+    // Get the page name from Facebook pages
+    const { data: pages, error: pagesError } = await supabase
+      .from("facebook_pages")
+      .select("page_name")
+      .eq("user_id", user.id)
+      .eq("page_id", pageId);
+    
+    const pageName = pages?.[0]?.page_name || "Instagram Business";
+    
     console.log("📱 Fetching Instagram conversations...");
     console.log("📱 Instagram Business Account ID:", external_account_id);
     console.log("📱 Facebook Page ID:", pageId);
+    console.log("📱 Page Name:", pageName);
 
     // 2️⃣ Fetch Instagram conversations directly from Meta Graph API
-    // Using Page-level conversations with Instagram platform filter
-    const conversationsUrl = `https://graph.facebook.com/v19.0/${pageId}/conversations?platform=instagram&fields=id,participants{name,id,email,picture},updated_time&access_token=${pageAccessToken}`;
+    // Using Page-level conversations with Instagram platform filter (enhanced participant fields)
+    const conversationsUrl = `https://graph.facebook.com/v19.0/${pageId}/conversations?platform=instagram&fields=id,participants{id,name,username,picture},updated_time&access_token=${pageAccessToken}`;
     
     console.log("📱 Instagram Conversations URL:", conversationsUrl.replace(pageAccessToken, "***TOKEN***"));
 
@@ -78,79 +88,65 @@ export async function GET(req: NextRequest) {
 
     console.log(`📱 Found ${conversationsData.data.length} Instagram conversations`);
 
-    // 3️⃣ Get messages for each conversation and enhance user info
-    const conversationsWithMessages = await Promise.all(
-      conversationsData.data.map(async (conversation: any) => {
-        console.log(`📱 Fetching messages for Instagram conversation: ${conversation.id}`);
-        
-        const messagesUrl = `https://graph.facebook.com/v19.0/${conversation.id}/messages?fields=id,message,from{id,name,username,picture},to{id,name,username,picture},created_time,attachments&access_token=${pageAccessToken}`;
+    // 3️⃣ Get messages for each conversation (simplified to avoid timeouts)
+    const conversationsWithMessages = [];
+    
+    // Process conversations sequentially to avoid rate limits
+    for (const conversation of conversationsData.data.slice(0, 5)) { // Limit to first 5 conversations
+      console.log(`📱 Fetching messages for Instagram conversation: ${conversation.id}`);
+      
+      try {
+        // Enhanced message request to get sender names
+        const messagesUrl = `https://graph.facebook.com/v19.0/${conversation.id}/messages?fields=id,message,from{id,name,username},created_time&limit=3&access_token=${pageAccessToken}`;
         
         const messagesRes = await fetch(messagesUrl);
         const messagesData = await messagesRes.json();
         
-        console.log(`📱 Messages for ${conversation.id}:`, JSON.stringify(messagesData, null, 2));
-        
         if (messagesData.error) {
           console.error(`❌ Error fetching messages for ${conversation.id}:`, messagesData.error);
-          return {
+          conversationsWithMessages.push({
             ...conversation,
             messages: []
-          };
+          });
+        } else {
+          conversationsWithMessages.push({
+            ...conversation,
+            messages: messagesData.data || []
+          });
         }
-
-        // 🔍 Enhance participant information by getting user details from Instagram
-        const enhancedParticipants = await Promise.all(
-          (conversation.participants?.data || []).map(async (participant: any) => {
-            if (participant.id === user.id || participant.id === pageId) {
-              return participant; // Skip business account/page
-            }
-
-            try {
-              // Try to get more user info from Instagram Basic Display API
-              const userInfoUrl = `https://graph.facebook.com/v19.0/${participant.id}?fields=id,name,username,profile_picture_url&access_token=${pageAccessToken}`;
-              const userInfoRes = await fetch(userInfoUrl);
-              const userInfo = await userInfoRes.json();
-
-              if (!userInfo.error) {
-                console.log(`📱 Enhanced user info for ${participant.id}:`, userInfo);
-                return {
-                  ...participant,
-                  name: userInfo.name || participant.name,
-                  username: userInfo.username || participant.username,
-                  profile_picture_url: userInfo.profile_picture_url,
-                  picture: userInfo.profile_picture_url ? { data: { url: userInfo.profile_picture_url } } : participant.picture
-                };
-              }
-            } catch (error) {
-              console.log(`📱 Could not enhance user info for ${participant.id}:`, error);
-            }
-
-            return participant;
-          })
-        );
         
-        return {
+        // Add small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+      } catch (error) {
+        console.error(`❌ Error processing conversation ${conversation.id}:`, error);
+        conversationsWithMessages.push({
           ...conversation,
-          participants: { data: enhancedParticipants },
-          messages: messagesData.data || []
-        };
-      })
-    );
+          messages: []
+        });
+      }
+    }
 
     // 4️⃣ Transform data to match PlatformInbox format (following Messenger pattern)
-    const transformed = transformInstagramMetaData(conversationsWithMessages, user.id);
+    // Use Instagram Business Account ID for participant filtering, not Page ID
+    const transformed = transformInstagramMetaData(conversationsWithMessages, external_account_id);
     
+    console.log("📱 Using Instagram Business Account ID for filtering:", external_account_id);
+    console.log("📱 Page ID (Facebook):", pageId);
     console.log("📱 Transformed Instagram conversations:", JSON.stringify(transformed, null, 2));
 
-    // 5️⃣ Structure response like Messenger (with conversations array)
+    // 5️⃣ Structure response like Messenger (with conversations array and page name)
     return new Response(
       JSON.stringify({
         success: true,
         conversations: transformed,
+        page_name: pageName,
         debug: {
           raw_conversations_count: conversationsWithMessages.length,
           transformed_count: transformed.length,
-          sample_conversation_ids: conversationsWithMessages.slice(0, 2).map(c => c.id)
+          sample_conversation_ids: conversationsWithMessages.slice(0, 2).map(c => c.id),
+          page_id: pageId,
+          business_account_id: external_account_id
         },
         note: `Found ${conversationsWithMessages.length} Instagram conversations`
       }),
