@@ -42,11 +42,21 @@ export default function InstagramPage() {
     // Handle the new response structure - API returns { conversations: [...] }
     if (response.success && response.conversations && response.conversations.length > 0) {
       console.log("📱 Instagram conversations data:", response.conversations);
+      
+      // Debug: Log each conversation's sender info
+      response.conversations.forEach((conv: any, index: number) => {
+        console.log(`📱 Conversation ${index}:`, {
+          sender: conv.sender,
+          senderId: conv.senderId,
+          avatar: conv.avatar,
+          preview: conv.preview
+        });
+      });
 
       return {
         success: true,
         conversations: response.conversations, // Direct use, already transformed
-        page_name: "Instagram Business",
+        page_name: response.page_name || "Instagram Business",
       };
     }
 
@@ -80,6 +90,17 @@ export default function InstagramPage() {
 
   const pageName = data?.page_name;
   const messages = data?.conversations ?? [];
+
+  // Debug: Log the messages data to see what names are being displayed
+  console.log("📱 Instagram messages for PlatformInbox:", messages);
+  messages.forEach((msg: any, index: number) => {
+    console.log(`📱 Message card ${index}:`, {
+      sender: msg.sender,
+      senderId: msg.senderId,
+      preview: msg.preview,
+      avatar: msg.avatar
+    });
+  });
 
   const sendInstagramMessage = async (recipientId: string, message: string) => {
     const res = await fetch("/api/instagram/sendmessage", {
