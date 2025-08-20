@@ -50,13 +50,24 @@ export async function GET(
       );
     }
 
-    const { access_token, metadata } = integration;
+    const { access_token, external_account_id, metadata } = integration;
     const pageAccessToken = metadata?.page_access_token || access_token;
+    const pageId = metadata?.page_id;
+    
+    // Get the page name from Facebook pages
+    const { data: pages, error: pagesError } = await supabase
+      .from("facebook_pages")
+      .select("page_name")
+      .eq("user_id", user.id)
+      .eq("page_id", pageId);
+    
+    const pageName = pages?.[0]?.page_name || "Instagram Business";
     
     console.log(`📱 Fetching Instagram conversation details for: ${conversationId}`);
+    console.log(`📱 Page name: ${pageName}`);
 
-    // 2️⃣ Get conversation details
-    const conversationUrl = `https://graph.facebook.com/v19.0/${conversationId}?fields=id,participants{name,id,email,picture},updated_time&access_token=${pageAccessToken}`;
+    // 2️⃣ Get conversation details with enhanced participant fields
+    const conversationUrl = `https://graph.facebook.com/v19.0/${conversationId}?fields=id,participants{id,name,username,picture},updated_time&access_token=${pageAccessToken}`;
     
     const conversationRes = await fetch(conversationUrl);
     const conversationData = await conversationRes.json();
@@ -72,8 +83,8 @@ export async function GET(
       );
     }
 
-    // 3️⃣ Get all messages for this conversation
-    const messagesUrl = `https://graph.facebook.com/v19.0/${conversationId}/messages?fields=id,message,from{id,name,username,picture},to{id,name,username,picture},created_time,attachments&limit=50&access_token=${pageAccessToken}`;
+    // 3️⃣ Get all messages for this conversation with enhanced sender info
+    const messagesUrl = `https://graph.facebook.com/v19.0/${conversationId}/messages?fields=id,message,from{id,name,username},created_time&limit=20&access_token=${pageAccessToken}`;
     
     const messagesRes = await fetch(messagesUrl);
     const messagesData = await messagesRes.json();
@@ -97,8 +108,11 @@ export async function GET(
       messages: messagesData.data || []
     };
 
-    // 5️⃣ Transform data using the existing function
-    const transformed = transformInstagramData([conversationWithMessages], user.id);
+    // 5️⃣ Transform data using the existing function with Instagram Business Account ID
+    const transformed = transformInstagramData([conversationWithMessages], external_account_id, pageName); // Use Instagram Business Account ID
+
+    console.log("📱 Using Instagram Business Account ID for filtering:", external_account_id);
+    console.log("📱 Page ID (Facebook):", pageId);
 
     return new Response(
       JSON.stringify({
