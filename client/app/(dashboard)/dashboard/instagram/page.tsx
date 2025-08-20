@@ -11,7 +11,6 @@ import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setHasNew } from "@/lib/features/platformStatusSlice";
 import { useRouter, useSearchParams } from "next/navigation";
-import { transformInstagramData } from "@/lib/utils";
 
 export default function InstagramPage() {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
@@ -40,18 +39,14 @@ export default function InstagramPage() {
     const response = await res.json();
     console.log("📱 Raw Instagram API response:", response);
 
-    // Handle the correct response structure - API returns { data: [...] }
-    if (response.success && response.data && response.data.length > 0) {
-      const transformedData = transformInstagramData(
-        response.data, // Changed from response.conversations to response.data
-        user?.id || ""
-      );
-      console.log("📱 Transformed Instagram data:", transformedData);
+    // Handle the new response structure - API returns { conversations: [...] }
+    if (response.success && response.conversations && response.conversations.length > 0) {
+      console.log("📱 Instagram conversations data:", response.conversations);
 
       return {
         success: true,
-        conversations: transformedData, // Keep this as conversations for your page
-        page_name: response.page_name || "Instagram Business",
+        conversations: response.conversations, // Direct use, already transformed
+        page_name: "Instagram Business",
       };
     }
 
@@ -63,13 +58,18 @@ export default function InstagramPage() {
   };
 
   const fetchFullConversation = async (conversationId: string) => {
+    console.log("📱 Fetching conversation details for ID:", conversationId);
     const res = await fetch(`/api/instagram/conversations/${conversationId}`);
 
     if (!res.ok) {
+      const errorData = await res.json();
+      console.error("📱 Failed to fetch conversation details:", errorData);
       throw new Error("Failed to fetch conversation details");
     }
 
-    return res.json();
+    const result = await res.json();
+    console.log("📱 Conversation details response:", result);
+    return result.conversation?.conversation || result.messages || [];
   };
 
   const { data, isLoading, error } = useQuery({
@@ -264,10 +264,26 @@ export default function InstagramPage() {
   });
 
   const selectMessageHandler = async (message: any) => {
+    console.log("📱 Selecting Instagram message:", message);
+    console.log("📱 Available IDs:", { 
+      channelId: message.channelId, 
+      conversationId: message.conversationId,
+      id: message.id 
+    });
+    
+    // Use channelId if available, otherwise fall back to conversationId
+    const conversationId = message.channelId || message.conversationId;
+    
+    if (!conversationId) {
+      toast.error("No conversation ID found. Cannot open chat.");
+      console.error("❌ No conversation ID available:", message);
+      return;
+    }
+    
+    console.log("📱 Using conversation ID:", conversationId);
+    
     try {
-      const freshConversation = await fetchFullConversation(
-        message.channelId
-      );
+      const freshConversation = await fetchFullConversation(conversationId);
       const pendingForThisSender = pendingMessages[message.senderId] || [];
       const mergedConversation = [
         ...freshConversation,
@@ -289,7 +305,7 @@ export default function InstagramPage() {
         return {
           ...oldData,
           conversations: oldData.conversations.map((thread: any) =>
-            thread.channelId === message.channelId
+            thread.channelId === conversationId || thread.conversationId === conversationId
               ? {
                   ...thread,
                   conversation: freshConversation,
@@ -312,7 +328,7 @@ export default function InstagramPage() {
       toast.error("Could not load conversation details.");
       console.error(error);
     }
-    router.push(`/dashboard/instagram?msg=${message.channelId}`);
+    router.push(`/dashboard/instagram?msg=${conversationId}`);
   };
 
   // Close right panel and clear selected message
@@ -322,8 +338,8 @@ export default function InstagramPage() {
   };
 
   useEffect(() => {
-    if (data?.conversations?.length > 0) {
-      const hasUnread = data.conversations.some((msg: any) => msg.unread);
+    if (data && data.conversations && data.conversations.length > 0) {
+      const hasUnread = data.conversations.some((msg: any) => msg.unread) || false;
       dispatch(setHasNew({ platformId: "instagram", hasNew: hasUnread }));
     }
   }, [data, dispatch]);
