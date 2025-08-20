@@ -189,10 +189,24 @@ export function transformInstagramData(data: any[], currentUserId: string) {
           new Date(b.created_time).getTime()
       );
 
-      // Get participants (exclude the page itself)
-      const participants = thread.participants || [];
-      const otherParticipant = participants.find((p: any) => p.id !== currentUserId);
-      const senderName = otherParticipant?.name || otherParticipant?.id || "Instagram User";
+      // Get participants (exclude the page itself) - handle different formats
+      let participants = [];
+      
+      if (thread.participants?.data) {
+        participants = thread.participants.data;
+      } else if (Array.isArray(thread.participants)) {
+        participants = thread.participants;
+      } else if (thread.participants) {
+        participants = Object.values(thread.participants);
+      }
+      
+      const otherParticipant = Array.isArray(participants) 
+        ? participants.find((p: any) => p.id !== currentUserId)
+        : null;
+        
+      const senderName = otherParticipant?.name 
+        || otherParticipant?.username 
+        || (otherParticipant?.id ? `User ${otherParticipant.id.slice(-4)}` : "Instagram User");
       const senderId = otherParticipant?.id || "unknown";
 
       const conversation = allMessages.map((msg: any, index: number) => {
@@ -238,7 +252,7 @@ export function transformInstagramData(data: any[], currentUserId: string) {
         conversation,
       };
     })
-    .filter(Boolean) // Remove null entries
+    .filter((item): item is NonNullable<typeof item> => item !== null) // Remove null entries with type guard
     .sort((a, b) => parseFloat(b.ts) - parseFloat(a.ts));
 }
 
@@ -264,4 +278,102 @@ export function transformInstagramNewMessage(
     isIncoming: event.senderId !== currentUserId,
     unread: false,
   };
+}
+
+// Transform function for Instagram conversations following Messenger pattern
+export function transformInstagramMetaData(data: any[], currentUserId: string) {
+  return data
+    .map((thread, index) => {
+      const allMessages = thread.messages || [];
+
+      if (allMessages.length === 0) {
+        return null; // Skip conversations with no messages
+      }
+
+      // Sort messages by created_time descending to get latest message
+      allMessages.sort(
+        (a: any, b: any) =>
+          new Date(b.created_time).getTime() -
+          new Date(a.created_time).getTime()
+      );
+
+      // Get participants (exclude the page itself) - handle different formats
+      let participants = [];
+      
+      // Handle different possible participant structures
+      if (thread.participants?.data) {
+        participants = thread.participants.data;
+      } else if (Array.isArray(thread.participants)) {
+        participants = thread.participants;
+      } else if (thread.participants) {
+        // If participants is an object, try to extract data
+        participants = Object.values(thread.participants);
+      }
+      
+      console.log("📱 Thread participants structure:", {
+        original: thread.participants,
+        processed: participants,
+        isArray: Array.isArray(participants)
+      });
+      
+      const otherParticipant = Array.isArray(participants) 
+        ? participants.find((p: any) => p.id !== currentUserId)
+        : null;
+        
+      // Enhanced name handling with message sender fallback
+      let senderName = "Instagram User";
+      let senderId = "unknown";
+      let avatar = "";
+      
+      if (otherParticipant) {
+        senderId = otherParticipant.id || "unknown";
+        
+        // Try multiple name sources
+        senderName = otherParticipant.name 
+          || otherParticipant.username 
+          || otherParticipant.display_name
+          || (senderId !== "unknown" ? `User ${senderId.slice(-4)}` : "Instagram User");
+          
+        // Try multiple avatar sources
+        avatar = otherParticipant.picture?.data?.url 
+          || otherParticipant.profile_picture_url 
+          || otherParticipant.avatar_url 
+          || "";
+      } else if (allMessages.length > 0) {
+        // Fallback: try to get user info from message senders
+        const firstMessage = allMessages.find((msg: any) => msg.from?.id !== currentUserId);
+        if (firstMessage?.from) {
+          senderId = firstMessage.from.id || "unknown";
+          senderName = firstMessage.from.name 
+            || firstMessage.from.username
+            || (senderId !== "unknown" ? `User ${senderId.slice(-4)}` : "Instagram User");
+          avatar = firstMessage.from.picture?.data?.url 
+            || firstMessage.from.profile_picture_url 
+            || "";
+        }
+      }
+
+      console.log("📱 Final participant data:", { senderName, senderId, avatar });
+
+      const lastMsg = allMessages[0]; // Latest message
+      const lastTimestamp = new Date(lastMsg?.created_time || Date.now()).getTime();
+
+      return {
+        id: index,
+        sender: senderName,
+        senderId: senderId,
+        conversationId: thread.id,
+        channelId: thread.id, // Add channelId for compatibility with dashboard
+        avatar: avatar, // Use participant avatar if available
+        preview: lastMsg?.message || "No messages yet",
+        timestamp: getDisplayTime(lastMsg?.created_time || new Date().toISOString()),
+        ts: lastTimestamp.toString(),
+        platform: "Instagram",
+        unread: false, // Instagram API doesn't provide unread count in conversations endpoint
+        tags: [],
+        conversation: [], // Will be populated when conversation is selected
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null) // Remove null entries with type guard
+    .sort((a, b) => parseFloat(b.ts) - parseFloat(a.ts));
 }
