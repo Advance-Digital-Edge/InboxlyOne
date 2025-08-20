@@ -1,18 +1,24 @@
 // app/api/instagram/messages/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { transformInstagramMetaData } from "@/lib/utils";
 
 export async function GET(req: NextRequest) {
-  try {
-    const supabase = await createClient();
-    
-    // Get authenticated user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const supabase = await createClient();
 
-    // Get Instagram integration
+  // 🔐 Get current Supabase user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+    });
+  }
+
+  try {
+    // 1️⃣ Get the user's Instagram integration
     const { data: integration, error: integrationError } = await supabase
       .from("user_integrations")
       .select("*")
@@ -21,95 +27,63 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (integrationError || !integration) {
-      return NextResponse.json({
-        success: false,
-        data: [],
-        messages: null,
-        note: "Instagram integration not found. Please connect your Instagram account first."
-      });
+      return new Response(
+        JSON.stringify({ error: "No Instagram integration found for this user." }),
+        { status: 400 }
+      );
     }
 
     const { access_token, external_account_id, metadata } = integration;
     const pageId = metadata?.page_id;
     const pageAccessToken = metadata?.page_access_token || access_token;
     
-    console.log("📱 Fetching Instagram DMs - CORRECT FLOW...");
+    console.log("📱 Fetching Instagram conversations...");
     console.log("📱 Instagram Business Account ID:", external_account_id);
     console.log("📱 Facebook Page ID:", pageId);
 
-    // STEP 1: Get Instagram conversations through the INSTAGRAM BUSINESS ACCOUNT
-    // This is the CORRECT endpoint for Instagram DMs
-    const instagramConversationsUrl = `https://graph.facebook.com/v19.0/${external_account_id}/conversations?fields=id,participants,updated_time&access_token=${pageAccessToken}`;
+    // 2️⃣ Fetch Instagram conversations directly from Meta Graph API
+    // Using Page-level conversations with Instagram platform filter
+    const conversationsUrl = `https://graph.facebook.com/v19.0/${pageId}/conversations?platform=instagram&fields=id,participants{name,id,email,picture},updated_time&access_token=${pageAccessToken}`;
     
-    console.log("📱 Instagram Conversations URL:", instagramConversationsUrl.replace(pageAccessToken, "***TOKEN***"));
+    console.log("📱 Instagram Conversations URL:", conversationsUrl.replace(pageAccessToken, "***TOKEN***"));
 
-    const conversationsRes = await fetch(instagramConversationsUrl);
+    const conversationsRes = await fetch(conversationsUrl);
     const conversationsData = await conversationsRes.json();
 
     console.log("📱 Instagram Conversations response:", JSON.stringify(conversationsData, null, 2));
 
     if (conversationsData.error) {
-      // If error code 3 = App doesn't have capability
-      if (conversationsData.error.code === 3) {
-        console.log("❌ App in development mode - Instagram messaging not available");
-        console.log("📱 Using mock Instagram DM data for development");
-        
-        const mockInstagramConversations = [
-          {
-            id: "ig_mock_conv_1",
-            participants: {
-              data: [
-                { name: "Test Instagram User", id: "ig_test_user_123" },
-                { name: "Supergemhere", id: external_account_id }
-              ]
-            },
-            updated_time: new Date().toISOString(),
-            messages: [
-              {
-                id: "ig_mock_msg_1",
-                message: "Hey! Love your recent post. Are you selling this item?",
-                from: { name: "Test Instagram User", id: "ig_test_user_123" },
-                to: { data: [{ name: "Supergemhere", id: external_account_id }] },
-                created_time: new Date(Date.now() - 1000 * 60 * 10).toISOString()
-              },
-              {
-                id: "ig_mock_msg_2", 
-                message: "Hi! Thanks for reaching out. Yes, it's available. Would you like more details?",
-                from: { name: "Supergemhere", id: external_account_id },
-                to: { data: [{ name: "Test Instagram User", id: "ig_test_user_123" }] },
-                created_time: new Date(Date.now() - 1000 * 60 * 5).toISOString()
-              }
-            ]
-          }
-        ];
-
-        return NextResponse.json({
-          success: true,
-          data: mockInstagramConversations,
-          note: "Mock Instagram DM data - Real DMs require Meta app review approval"
-        });
-      }
-      
-      throw new Error(`Instagram API Error: ${conversationsData.error.message}`);
+      console.error("❌ Instagram conversations API error:", conversationsData.error);
+      return new Response(
+        JSON.stringify({
+          error: true,
+          message: conversationsData.error.message || "Failed to fetch Instagram conversations.",
+          details: conversationsData.error,
+        }),
+        { status: 500 }
+      );
     }
 
     if (!conversationsData.data || conversationsData.data.length === 0) {
       console.log("📱 No Instagram conversations found");
-      return NextResponse.json({
-        success: true,
-        data: [],
-        note: "No Instagram DM conversations found. Make sure you have Instagram DMs in your business account."
-      });
+      return new Response(
+        JSON.stringify({
+          success: true,
+          conversations: [],
+          note: "No Instagram conversations found. Make sure you have Instagram DMs with app testers."
+        }),
+        { status: 200 }
+      );
     }
 
     console.log(`📱 Found ${conversationsData.data.length} Instagram conversations`);
 
-    // STEP 2: Get messages for each conversation
+    // 3️⃣ Get messages for each conversation and enhance user info
     const conversationsWithMessages = await Promise.all(
       conversationsData.data.map(async (conversation: any) => {
         console.log(`📱 Fetching messages for Instagram conversation: ${conversation.id}`);
         
-        const messagesUrl = `https://graph.facebook.com/v19.0/${conversation.id}/messages?fields=id,message,from,to,created_time,attachments&access_token=${pageAccessToken}`;
+        const messagesUrl = `https://graph.facebook.com/v19.0/${conversation.id}/messages?fields=id,message,from{id,name,username,picture},to{id,name,username,picture},created_time,attachments&access_token=${pageAccessToken}`;
         
         const messagesRes = await fetch(messagesUrl);
         const messagesData = await messagesRes.json();
@@ -123,109 +97,74 @@ export async function GET(req: NextRequest) {
             messages: []
           };
         }
+
+        // 🔍 Enhance participant information by getting user details from Instagram
+        const enhancedParticipants = await Promise.all(
+          (conversation.participants?.data || []).map(async (participant: any) => {
+            if (participant.id === user.id || participant.id === pageId) {
+              return participant; // Skip business account/page
+            }
+
+            try {
+              // Try to get more user info from Instagram Basic Display API
+              const userInfoUrl = `https://graph.facebook.com/v19.0/${participant.id}?fields=id,name,username,profile_picture_url&access_token=${pageAccessToken}`;
+              const userInfoRes = await fetch(userInfoUrl);
+              const userInfo = await userInfoRes.json();
+
+              if (!userInfo.error) {
+                console.log(`📱 Enhanced user info for ${participant.id}:`, userInfo);
+                return {
+                  ...participant,
+                  name: userInfo.name || participant.name,
+                  username: userInfo.username || participant.username,
+                  profile_picture_url: userInfo.profile_picture_url,
+                  picture: userInfo.profile_picture_url ? { data: { url: userInfo.profile_picture_url } } : participant.picture
+                };
+              }
+            } catch (error) {
+              console.log(`📱 Could not enhance user info for ${participant.id}:`, error);
+            }
+
+            return participant;
+          })
+        );
         
         return {
           ...conversation,
+          participants: { data: enhancedParticipants },
           messages: messagesData.data || []
         };
       })
     );
 
-    return NextResponse.json({
-      success: true,
-      data: conversationsWithMessages,
-      note: `Found ${conversationsWithMessages.length} Instagram DM conversations`
-    });
+    // 4️⃣ Transform data to match PlatformInbox format (following Messenger pattern)
+    const transformed = transformInstagramMetaData(conversationsWithMessages, user.id);
+    
+    console.log("📱 Transformed Instagram conversations:", JSON.stringify(transformed, null, 2));
 
-  } catch (error) {
-    console.error("❌ Instagram DM error:", error);
-    return NextResponse.json({
-      success: false,
-      data: [],
-      error: error.message || "Failed to fetch Instagram DMs"
-    }, { status: 500 });
-  }
-}
+    // 5️⃣ Structure response like Messenger (with conversations array)
+    return new Response(
+      JSON.stringify({
+        success: true,
+        conversations: transformed,
+        debug: {
+          raw_conversations_count: conversationsWithMessages.length,
+          transformed_count: transformed.length,
+          sample_conversation_ids: conversationsWithMessages.slice(0, 2).map(c => c.id)
+        },
+        note: `Found ${conversationsWithMessages.length} Instagram conversations`
+      }),
+      { status: 200 }
+    );
 
-// FALLBACK: Try to get Instagram DMs through Page when direct access fails
-async function getInstagramDMsThroughPage(pageId: string, pageAccessToken: string, igAccountId: string) {
-  console.log("🎯 FALLBACK: Trying to get Instagram DMs through Page...");
-  
-  // Get Page conversations and filter for Instagram
-  const pageConversationsUrl = `https://graph.facebook.com/v19.0/${pageId}/conversations?fields=id,participants,messages.limit(5){id,message,from,created_time},platform&access_token=${pageAccessToken}`;
-  
-  const pageConversationsRes = await fetch(pageConversationsUrl);
-  const pageConversationsData = await pageConversationsRes.json();
-  
-  console.log("📱 Page conversations (filtering for Instagram):", JSON.stringify(pageConversationsData, null, 2));
-  
-  if (pageConversationsData.error) {
-    return NextResponse.json({
-      success: false,
-      data: [],
-      error: `Page conversations failed: ${pageConversationsData.error.message}`
-    });
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({
+        error: true,
+        message: err?.message || "Unexpected error while fetching Instagram conversations",
+        details: err,
+      }),
+      { status: 500 }
+    );
   }
-  
-  // Filter conversations that might be from Instagram
-  const conversations = pageConversationsData.data || [];
-  
-  // Try to identify Instagram conversations by checking participants or message content
-  const possibleInstagramConversations = conversations.filter((conv: any) => {
-    // Check if any participant is the Instagram account
-    const participants = conv.participants?.data || [];
-    const hasInstagramAccount = participants.some((p: any) => p.id === igAccountId);
-    
-    // Or check if platform field indicates Instagram (if available)
-    const isInstagramPlatform = conv.platform === 'instagram';
-    
-    console.log(`🔍 Conversation ${conv.id}: hasInstagramAccount=${hasInstagramAccount}, platform=${conv.platform}`);
-    
-    return hasInstagramAccount || isInstagramPlatform;
-  });
-  
-  console.log(`📱 Found ${possibleInstagramConversations.length} possible Instagram conversations out of ${conversations.length} total`);
-  
-  if (possibleInstagramConversations.length === 0) {
-    return NextResponse.json({
-      success: true,
-      data: [],
-      note: "No Instagram conversations found in Page conversations. You may need actual Instagram DMs or app review approval."
-    });
-  }
-  
-  // Get full messages for filtered conversations
-  const conversationsWithMessages = await Promise.all(
-    possibleInstagramConversations.map(async (conversation: any) => {
-      if (conversation.messages?.data) {
-        // Already has messages from the initial query
-        return conversation;
-      }
-      
-      // Fetch full messages
-      const messagesUrl = `https://graph.facebook.com/v19.0/${conversation.id}/messages?fields=id,message,from,to,created_time&access_token=${pageAccessToken}`;
-      
-      const messagesRes = await fetch(messagesUrl);
-      const messagesData = await messagesRes.json();
-      
-      if (messagesData.error) {
-        console.error(`❌ Error fetching messages for ${conversation.id}:`, messagesData.error);
-        return {
-          ...conversation,
-          messages: []
-        };
-      }
-      
-      return {
-        ...conversation,
-        messages: messagesData.data || []
-      };
-    })
-  );
-  
-  return NextResponse.json({
-    success: true,
-    data: conversationsWithMessages,
-    note: `Found ${conversationsWithMessages.length} Instagram conversations (via Page fallback method)`
-  });
 }
