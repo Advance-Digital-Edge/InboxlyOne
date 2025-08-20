@@ -111,7 +111,7 @@ export default function FAQ() {
                   openItem === faq.id ? "max-h-96 pb-4" : "max-h-0"
                 }`}
               >
-                <div className="text-white text-sm leading-relaxed rounded-lg bg-gradient-to-r from-purple-600 to-indigo-900 p-4">
+                <div className="text-white text-sm leading-relaxed rounded-lg bg-gradient-to-r from-purple-600/80 to-indigo-900/50 p-4">
                   {faq.answer}
                 </div>
               </div>
