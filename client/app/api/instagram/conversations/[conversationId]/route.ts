@@ -1,20 +1,41 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { transformInstagramData } from "@/lib/utils";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { conversationId: string } }
 ) {
+  const supabase = await createClient();
+
+  // 🔐 Get current Supabase user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+    });
+  }
+
   try {
-    const supabase = await createClient();
+    const { conversationId } = params;
     
-    // Get authenticated user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    console.log("📱 Instagram conversation API called with ID:", conversationId);
+    
+    if (!conversationId || conversationId === 'undefined') {
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid conversation ID",
+          received_id: conversationId,
+          debug: "Conversation ID is missing or undefined"
+        }),
+        { status: 400 }
+      );
     }
 
-    // Get Instagram integration
+    // 1️⃣ Get the user's Instagram integration
     const { data: integration, error: integrationError } = await supabase
       .from("user_integrations")
       .select("*")
@@ -23,40 +44,79 @@ export async function GET(
       .single();
 
     if (integrationError || !integration) {
-      return NextResponse.json({ error: "Instagram integration not found" }, { status: 404 });
+      return new Response(
+        JSON.stringify({ error: "No Instagram integration found for this user." }),
+        { status: 400 }
+      );
     }
 
-    const { access_token } = integration;
-    const { conversationId } = params;
+    const { access_token, metadata } = integration;
+    const pageAccessToken = metadata?.page_access_token || access_token;
     
-    console.log("📱 Fetching Instagram conversation messages for:", conversationId);
+    console.log(`📱 Fetching Instagram conversation details for: ${conversationId}`);
 
-    // Get messages for specific conversation
-    const messagesUrl = `https://graph.facebook.com/v19.0/${conversationId}/messages?fields=id,from,to,message,created_time&access_token=${access_token}`;
-    console.log("📱 Messages URL:", messagesUrl.replace(access_token, "***TOKEN***"));
+    // 2️⃣ Get conversation details
+    const conversationUrl = `https://graph.facebook.com/v19.0/${conversationId}?fields=id,participants{name,id,email,picture},updated_time&access_token=${pageAccessToken}`;
+    
+    const conversationRes = await fetch(conversationUrl);
+    const conversationData = await conversationRes.json();
 
+    if (conversationData.error) {
+      return new Response(
+        JSON.stringify({
+          error: true,
+          message: conversationData.error.message || "Failed to fetch conversation details.",
+          details: conversationData.error,
+        }),
+        { status: 500 }
+      );
+    }
+
+    // 3️⃣ Get all messages for this conversation
+    const messagesUrl = `https://graph.facebook.com/v19.0/${conversationId}/messages?fields=id,message,from{id,name,username,picture},to{id,name,username,picture},created_time,attachments&limit=50&access_token=${pageAccessToken}`;
+    
     const messagesRes = await fetch(messagesUrl);
     const messagesData = await messagesRes.json();
 
-    console.log("📱 Messages response status:", messagesRes.status);
-    console.log("📱 Messages response:", JSON.stringify(messagesData, null, 2));
+    console.log(`📱 Messages for conversation ${conversationId}:`, JSON.stringify(messagesData, null, 2));
 
     if (messagesData.error) {
-      console.error("❌ Instagram messages API error:", messagesData.error);
-      return NextResponse.json({ error: messagesData.error }, { status: 400 });
+      return new Response(
+        JSON.stringify({
+          error: true,
+          message: messagesData.error.message || "Failed to fetch conversation messages.",
+          details: messagesData.error,
+        }),
+        { status: 500 }
+      );
     }
 
-    const messages = messagesData.data || [];
-    console.log("📱 Found", messages.length, "messages in conversation");
+    // 4️⃣ Combine conversation and messages data
+    const conversationWithMessages = {
+      ...conversationData,
+      messages: messagesData.data || []
+    };
 
-    return NextResponse.json({
-      success: true,
-      messages,
-      conversationId
-    });
+    // 5️⃣ Transform data using the existing function
+    const transformed = transformInstagramData([conversationWithMessages], user.id);
 
-  } catch (error) {
-    console.error("❌ Instagram conversation messages error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        conversation: transformed[0] || null,
+        note: `Loaded conversation with ${messagesData.data?.length || 0} messages`
+      }),
+      { status: 200 }
+    );
+
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({
+        error: true,
+        message: err?.message || "Unexpected error while fetching conversation details",
+        details: err,
+      }),
+      { status: 500 }
+    );
   }
 }
