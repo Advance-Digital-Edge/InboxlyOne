@@ -40,8 +40,8 @@ export async function GET(req: NextRequest) {
     const pageId = metadata?.page_id;
     const pageAccessToken = metadata?.page_access_token || access_token;
     
-    // Test: Get one conversation with full details
-    const conversationsUrl = `https://graph.facebook.com/v19.0/${pageId}/conversations?platform=instagram&fields=id,participants{name,id,email,picture,username,profile_picture_url},updated_time&limit=1&access_token=${pageAccessToken}`;
+    // Test: Get one conversation with minimal details to avoid timeout
+    const conversationsUrl = `https://graph.facebook.com/v19.0/${pageId}/conversations?platform=instagram&fields=id,participants,updated_time&limit=1&access_token=${pageAccessToken}`;
     const conversationsRes = await fetch(conversationsUrl);
     const conversationsData = await conversationsRes.json();
 
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
     let messagesSample = null;
     if (conversationsData.data && conversationsData.data.length > 0) {
       const firstConvId = conversationsData.data[0].id;
-      const messagesUrl = `https://graph.facebook.com/v19.0/${firstConvId}/messages?fields=id,message,from{id,name,username,picture},to{id,name,username,picture},created_time&limit=3&access_token=${pageAccessToken}`;
+      const messagesUrl = `https://graph.facebook.com/v19.0/${firstConvId}/messages?fields=id,message,from,created_time&limit=2&access_token=${pageAccessToken}`;
       const messagesRes = await fetch(messagesUrl);
       messagesSample = await messagesRes.json();
     }
