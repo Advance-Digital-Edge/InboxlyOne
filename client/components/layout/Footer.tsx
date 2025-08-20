@@ -43,19 +43,20 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Desktop Layout */}
-        <div className="hidden md:grid md:grid-cols-4 gap-8">
-          {/* Product Info */}
-          <div className="col-span-1">
-            <h3 className="flex items-baseline text-2xl  text-purple-900 font-medium mb-4">
+    <footer className="w-full bg-gray-50 border-t border-gray-300">
+      {/* Full-width container with responsive side padding */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+        {/* Desktop / Tablet (md+) */}
+        <div className="hidden md:grid grid-cols-12 gap-8">
+          {/* Brand */}
+          <div className="col-span-4">
+            <h3 className="flex items-center text-2xl text-purple-900 font-medium mb-4">
               <Image
                 src="/assets/inboxlyone.png"
-                alt="Inboxlyone"
-                width={40} // adjust size
-                height={40} // adjust size
-                className="object-contain mb-4 mx-2"
+                alt="Inboxlyone logo"
+                width={40}
+                height={40}
+                className="object-contain mr-2"
               />
               Inboxlyone
             </h3>
@@ -64,50 +65,52 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Navigation Links */}
-          <div className="col-span-1">
+          {/* Navigation */}
+          <nav className="col-span-3" aria-label="Footer navigation">
             <h4 className="font-semibold text-gray-900 mb-4">Navigation</h4>
             <ul className="space-y-3">
               {navigationLinks.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                    className="text-gray-600 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded transition-colors"
                   >
                     {link.name}
                   </a>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          {/* Legal Links */}
-          <div className="col-span-1">
+          {/* Legal */}
+          <nav className="col-span-3" aria-label="Legal links">
             <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
             <ul className="space-y-3">
               {legalLinks.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                    className="text-gray-600 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded transition-colors"
                   >
                     {link.name}
                   </a>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          {/* Social Links */}
-          <div className="col-span-1">
+          {/* Social */}
+          <div className="col-span-2">
             <h4 className="font-semibold text-gray-900 mb-4">Follow Us</h4>
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   aria-label={social.ariaLabel}
-                  className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-600 hover:text-purple-900 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 bg-white rounded-xl flex items-center justify-center text-gray-600 hover:text-purple-900 hover:shadow-md focus:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 transition-all"
                 >
                   <social.icon className="w-5 h-5" />
                 </a>
@@ -116,66 +119,82 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Mobile Layout */}
-        <div className="md:hidden space-y-8 text-center">
-          {/* Product Info */}
-          <div>
-            <h3 className="flex items-basline text-2xl  font-medium text-purple-900 mb-4">
+        {/* Mobile (sm and down) */}
+        <div className="md:hidden space-y-8">
+          {/* Brand */}
+          <div className="text-center">
+            <h3 className="flex items-center justify-center text-2xl font-medium text-purple-900 mb-3">
               <Image
                 src="/assets/inboxlyone.png"
-                alt="Inboxlyone"
-                width={40} // adjust size
-                height={40} // adjust size
-                className="object-contain mb-4 mx-2"
+                alt="Inboxlyone logo"
+                width={36}
+                height={36}
+                className="object-contain mr-2"
               />
               Inboxlyone
             </h3>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600">
               One inbox. Every message. Zero chaos.
             </p>
           </div>
 
-          {/* Navigation Links */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Navigation</h4>
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-              {navigationLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
+          {/* Collapsible groups for smaller screens */}
+          <div className="space-y-4">
+            <details className="group rounded-xl bg-white shadow-sm p-4">
+              <summary className="flex items-center justify-between cursor-pointer list-none">
+                <span className="font-semibold text-gray-900">Navigation</span>
+                <span className="text-gray-500 group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
+              </summary>
+              <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-left">
+                {navigationLinks.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      className="block py-1 text-gray-600 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+
+            <details className="group rounded-xl bg-white shadow-sm p-4">
+              <summary className="flex items-center justify-between cursor-pointer list-none">
+                <span className="font-semibold text-gray-900">Legal</span>
+                <span className="text-gray-500 group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
+              </summary>
+              <ul className="mt-3 space-y-2 text-left">
+                {legalLinks.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      className="block py-1 text-gray-600 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
           </div>
 
-          {/* Legal Links */}
-          <div>
-            <div className="flex justify-center space-x-6">
-              {legalLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Social Links */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Follow Us</h4>
-            <div className="flex justify-center space-x-4">
+          {/* Social */}
+          <div className="text-center">
+            <h4 className="font-semibold text-gray-900 mb-3">Follow Us</h4>
+            <div className="flex justify-center flex-wrap gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   aria-label={social.ariaLabel}
-                  className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-600 hover:text-purple-900 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-gray-600 hover:text-purple-900 hover:shadow-md focus:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 transition-all"
                 >
                   <social.icon className="w-5 h-5" />
                 </a>
@@ -187,7 +206,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-gray-200 text-center">
           <p className="text-gray-600">
-            © 2025 InboxlyOne. All rights reserved.
+            © 2025 Inboxlyone. All rights reserved.
           </p>
         </div>
       </div>

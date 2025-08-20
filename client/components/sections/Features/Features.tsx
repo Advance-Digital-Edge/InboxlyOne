@@ -1,31 +1,25 @@
-import { Card } from "@/components/ui/card"
+import { Card } from "@/components/ui/card";
+import Image from "next/image";
 
 export default function Features() {
   const features = [
     {
       title: "Never Lose Another Message",
       description:
-        "Transform the chaos of scattered conversations into organized peace of mind. Every message finds its home.",
-      beforeIcon: (
-        <div className="relative">
-          {/* Stressed/chaotic state */}
-          <div className="absolute inset-0 opacity-30">
-            <div className="w-8 h-8 bg-red-200 rounded-lg rotate-12 absolute top-0 left-0"></div>
-            <div className="w-6 h-6 bg-orange-200 rounded-lg -rotate-6 absolute top-2 right-1"></div>
-            <div className="w-7 h-7 bg-yellow-200 rounded-lg rotate-45 absolute bottom-0 left-2"></div>
-          </div>
-          {/* Arrow showing transformation */}
-          <div className="w-12 h-8 flex items-center justify-center">
-            <div className="w-6 h-0.5 bg-gradient-to-r from-red-300 to-green-300 rounded-full relative">
-              <div className="absolute right-0 top-0 w-0 h-0 border-l-2 border-l-green-300 border-t border-t-transparent border-b border-b-transparent transform -translate-y-0.5"></div>
-            </div>
-          </div>
-        </div>
-      ),
-      afterIcon: (
-        <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center">
-          <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center">
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        "Important emails and DMs vanish in the chaos of tabs and apps. Bring them all together, so every message gets seen and answered.",
+      icon: (
+        <div className="relative w-20 h-20 mx-auto mb-6 float-animation transform-gpu">
+          {/* Animated background glow */}
+          <div className="absolute inset-0  rounded-full pulse-glow pointer-events-none"></div>
+
+          {/* Main icon container (no float here) */}
+          <div className="relative w-full h-full bg-gradient-to-r from-green-500/50 to-green-800 rounded-full flex items-center justify-center shadow-lg">
+            <svg
+              className="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -36,119 +30,112 @@ export default function Features() {
           </div>
         </div>
       ),
-      color: "from-green-50 to-emerald-50",
     },
     {
-      title: "One Inbox, Zero Stress",
-      description: "Say goodbye to platform juggling. Manage all your conversations from one place.",
-      beforeIcon: (
-        <div className="relative">
-          {/* Multiple scattered platforms */}
-          <div className="absolute inset-0 opacity-40">
-            <div className="w-4 h-4 bg-blue-300 rounded absolute top-0 left-0"></div>
-            <div className="w-4 h-4 bg-purple-300 rounded absolute top-0 right-0"></div>
-            <div className="w-4 h-4 bg-pink-300 rounded absolute bottom-0 left-0"></div>
-            <div className="w-4 h-4 bg-indigo-300 rounded absolute bottom-0 right-0"></div>
-          </div>
-          {/* Transformation arrow */}
-          <div className="w-12 h-8 flex items-center justify-center">
-            <div className="w-6 h-0.5 bg-gradient-to-r from-purple-300 to-blue-300 rounded-full relative">
-              <div className="absolute right-0 top-0 w-0 h-0 border-l-2 border-l-blue-300 border-t border-t-transparent border-b border-b-transparent transform -translate-y-0.5"></div>
-            </div>
+      title: "One Inbox. Fewer Distractions",
+      description:
+        "Constant app-switching steals your focus and time. Cut the noise. Keep your Gmail, Instagram, and Facebook side by side in one clean hub.",
+      icon: (
+        <div className="relative w-20 h-20 mx-auto mb-6 float-animation transform-gpu">
+          {/* Animated background glow */}
+          <div className="absolute inset-0   rounded-2xl pulse-glow pointer-events-none"></div>
+
+          {/* Main icon container (no float here) */}
+          <div className="relative w-full h-full bg-blue-600/80  rounded-2xl flex items-center justify-center shadow-lg">
+            <Image
+              src="/assets/inboxlyone.png"
+              alt="Inboxlyone"
+              width={40} // adjust size
+              height={40} // adjust size
+              className="object-contain  mx-2"
+            />
           </div>
         </div>
       ),
-      afterIcon: (
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center">
-          <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center">
-            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    },
+    {
+      title: "Stay on top of every conversation",
+      description:
+        "Slow replies frustrate clients and make them more likely to walk away. Reply faster, stay organized, and keep clients smiling — all from one place.",
+      icon: (
+        <div className="relative w-20 h-20 mx-auto mb-6 float-animation transform-gpu">
+          {/* Animated background glow */}
+          <div className="absolute inset-0  rounded-xl pulse-glow pointer-events-none"></div>
+
+          {/* Main icon container (no float here) */}
+          <div className="relative w-full h-full bg-gradient-to-r from-yellow-500/50 to-orange-900 rounded-xl flex items-center justify-center shadow-lg">
+            <svg
+              className="w-10 h-10 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
               />
             </svg>
           </div>
         </div>
       ),
-      color: "from-blue-50 to-indigo-50",
     },
-    {
-      title: "Lightning-Fast Responses",
-      description: "Turn customer wait time into wow time. Respond instantly.",
-      beforeIcon: (
-        <div className="relative">
-          {/* Slow/delayed state */}
-          <div className="absolute inset-0 opacity-30">
-            <div className="w-8 h-2 bg-red-200 rounded-full animate-pulse"></div>
-            <div
-              className="w-6 h-2 bg-orange-200 rounded-full mt-2 animate-pulse"
-              style={{ animationDelay: "0.5s" }}
-            ></div>
-            <div
-              className="w-4 h-2 bg-yellow-200 rounded-full mt-2 animate-pulse"
-              style={{ animationDelay: "1s" }}
-            ></div>
-          </div>
-          {/* Speed transformation */}
-          <div className="w-12 h-8 flex items-center justify-center">
-            <div className="w-6 h-0.5 bg-gradient-to-r from-orange-300 to-purple-300 rounded-full relative">
-              <div className="absolute right-0 top-0 w-0 h-0 border-l-2 border-l-purple-300 border-t border-t-transparent border-b border-b-transparent transform -translate-y-0.5"></div>
-            </div>
-          </div>
-        </div>
-      ),
-      afterIcon: (
-        <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center">
-          <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center">
-            <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-        </div>
-      ),
-      color: "from-purple-50 to-pink-50",
-    },
-  ]
+  ];
 
   return (
-    <section className=" px-4 bg-gradient-to-b from-slate-50 to-white">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-24 px-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-100/30 via-transparent to-purple-600/5"></div>
+
+      <div className="max-w-7xl mx-auto relative">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4 font-sans">Transform Your Customer Communication</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Experience the relief of organized, efficient customer conversations. Say goodbye to stress and hello to
-            clarity.
+        <div className="text-center mb-20">
+          <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-sans leading-tight">
+            Lost Messages ={" "}
+            <span className="bg-gradient-to-r from-purple-600 to-indigo-900 bg-clip-text text-transparent">
+              Lost Clients
+            </span>
+          </h2>
+
+          <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-light">
+            Every missed DM or email is a missed opportunity.
+            <span className="text-gray-900 font-medium">
+              {" "}
+              Stop letting chaos cost you business.
+            </span>
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8 md:gap-12">
           {features.map((feature, index) => (
             <Card
               key={index}
-              className={`p-8 border-0 shadow-lg bg-gradient-to-br ${feature.color} hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-3xl`}
+              className="group relative p-8 md:p-10 border-none  hover:shadow-xl transition-all duration-500 hover:-translate-y-2 rounded-2xl overflow-hidden backdrop-blur-sm"
             >
-              {/* Transformation Visual */}
-              <div className="flex items-center justify-center mb-6 space-x-4">
-                {feature.beforeIcon}
-                {feature.afterIcon}
-              </div>
+              {/* Hover glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-indigo-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
               {/* Content */}
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3 font-sans">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+              <div className="relative z-10">
+                {feature.icon}
+                <div className="text-center">
+                  <h3 className="text-2xl md:text-3xl font-black text-card-foreground mb-4 font-sans group-hover:text-purple-900 transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed text-lg font-light">
+                    {feature.description}
+                  </p>
+                </div>
+                <div className="mt-8 flex justify-center">
+                  <div className="h-1 w-16 bg-gradient-to-r from-purple-600 to-indigo-900 rounded-full group-hover:w-24 transition-all duration-300"></div>
+                </div>
               </div>
-
-              {/* Subtle bottom accent */}
-              <div className="mt-6 h-1 bg-white/50 rounded-full mx-auto w-12"></div>
             </Card>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }

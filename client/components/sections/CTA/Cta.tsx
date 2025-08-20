@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 export default function CTA({ id }: { id?: string }) {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
- 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +21,7 @@ export default function CTA({ id }: { id?: string }) {
   };
 
   return (
-    <section id={id}  className="py-24 px-4  to-slate-50">
+    <section id={id} className="py-24 px-4 ">
       <div className="max-w-4xl mx-auto">
         {/* Main CTA Card */}
         <Card className="p-12 border-0  bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-3xl relative overflow-hidden">
@@ -88,15 +87,16 @@ export default function CTA({ id }: { id?: string }) {
 
             {/* Headlines */}
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-sans">
-              No noise , Just what matters
+              No noise. Just what matters.
             </h2>
+
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
               Join the waitlist and never miss another opportunity
             </p>
 
             {/* Email Signup Form */}
             {!isSubmitted ? (
-              <form  onSubmit={handleSubmit} className="max-w-md mx-auto">
+              <form onSubmit={handleSubmit} className="max-w-md mx-auto">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Input
                     type="email"
@@ -104,7 +104,7 @@ export default function CTA({ id }: { id?: string }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="flex-1 h-12 px-4 rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-md focus:shadow-lg transition-all duration-300 text-gray-900 placeholder:text-gray-500"
+                    className="flex-1 h-12 px-4 shadow-purple-900 shadow-md rounded-2xl border-0 bg-white/80 backdrop-blur-sm  focus:shadow-lg transition-all duration-300 text-gray-900 placeholder:text-gray-500"
                   />
                   <Button
                     type="submit"

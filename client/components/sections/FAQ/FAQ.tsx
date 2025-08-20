@@ -7,46 +7,70 @@ const faqData = [
     id: "item-1",
     question: "What is Inboxlyone?",
     answer:
-      "Inboxlyone is  all-in-one inbox that brings messages from Gmail, Instagram, Facebook into a single organized hub - while keeping each platform neatly separated",
+      "Inboxlyone is an all-in-one inbox that pulls messages from Gmail, Instagram, and Facebook into one clean hub - while still keeping each platform neatly separated.",
   },
   {
     id: "item-2",
     question: "How is this different from just checking my apps?",
     answer:
-      "Instead of bouncing between tabs and apps, Inboxlyone centralizes everything. You see every message in one place, stay organized, and never miss something important",
+      "Checking each app might sound fine, but in practice it’s chaos - too many tabs, too many distractions, and missed messages. Inboxlyone pulls it all into one inbox. Checking one app is always easier than five.",
+  },
+  {
+    id: "item-3",
+    question: "Which platforms can I connect?",
+    answer:
+      "Right now, Gmail, Facebook Pages, and Instagram Business or Creator accounts linked to a Facebook Page. More platforms will be added soon based on feedback.",
   },
   {
     id: "item-4",
-    question: "Will my data be safe?",
+    question: "How many accounts can I connect?",
     answer:
-      "Yes. Security and privacy are top priorities. Inboxlyone doesn’t hold your messages - they remain securely in their respective platforms. We only access the data needed to display and let you reply inside your inbox. Nothing is stored, sold, or shared.",
+      "For now, you can connect 1 account per platform. Multiple accounts per platform are coming soon.",
   },
-
   {
     id: "item-5",
-    question: "Does it mix all my messages together?",
+    question: "Can I reply from Inboxlyone?",
     answer:
-      "No. Everything flows into one inbox, but it’s clearly separated by platform so you always know where each message came from",
+      "Yes! You can reply to regular Instagram and Facebook messages directly inside Inboxlyone. For advanced features like reels, file uploads, or GIFs, we’ll open the native app. For Gmail, clicking reply takes you straight to your mail client so you can send the message there.",
   },
   {
     id: "item-6",
-    question: "Which platforms can I connect?",
+    question: "Will my data be safe?",
     answer:
-      "We support Facebook Pages and Instagram Business or Creator accounts that are connected to a Facebook Page. Gmail is also supported.. More platforms will be added soon based on user feedback and demand.",
+      "Yes. Your messages stay on their original platforms. Inboxlyone only requests the permissions needed to display and send messages in one place. We never sell or share your data.",
   },
   {
     id: "item-7",
-    question: "Is it free?",
+    question: "Does it mix all my messages together?",
     answer:
-      "Early access is free. Later, we’ll introduce flexible plans — but joining now guarantees you free early access",
+      "No. Everything flows into one inbox, but it’s clearly separated by platform so you always know where each message came from.",
   },
   {
     id: "item-8",
+    question: "How much does Inboxlyone cost?",
+    answer:
+      "Inboxlyone will be free during early access. Later, we’ll introduce simple pricing plans so you only pay for what you need.",
+  },
+  {
+    id: "item-9",
     question: "When can I start using it?",
     answer:
-      "Launching soon. Waitlist members get in first before public launch",
+      "Launching soon. Waitlist members get in first before public launch.",
+  },
+  {
+    id: "item-10",
+    question: "Do I need to install anything?",
+    answer:
+      "Nope. Inboxlyone runs right in your browser. Just log in, connect your accounts, and you’re set up in minutes.",
+  },
+  {
+    id: "item-11",
+    question: "Will you add more platforms?",
+    answer:
+      "Yes! We’re starting with Gmail, Instagram, and Facebook, but more channels are on the way.",
   },
 ];
+
 
 export default function FAQ() {
   const [openItem, setOpenItem] = useState<string | null>(null);
@@ -56,7 +80,7 @@ export default function FAQ() {
   };
 
   return (
-    <section className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-white">
+    <section className="w-full py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Section Title */}
         <div className="text-center mb-12">

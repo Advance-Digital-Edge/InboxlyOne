@@ -9,7 +9,7 @@ export default function HomePage({ id }: { id?: string }) {
   return (
     <div
       id={id}
-      className="min-h-32 w-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
+      className="min-h-32 w-full"
     >
       {/* Hero Section */}
       <section className="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8">
@@ -17,28 +17,31 @@ export default function HomePage({ id }: { id?: string }) {
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
             {/* Left Column - Content */}
             <div className="space-y-8 text-center lg:text-left">
-              <div className="space-y-4 ">
-                <motion.h1
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="text-5xl sm:text-6xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight"
-                >
-                  <span className="block">All your messages,</span>
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6, duration: 0.5 }}
-                    className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-900"
+              <div className="w-full">
+                {/* Shared width + left alignment (responsive) */}
+                <div className="max-w-[68ch] md:max-w-[72ch] lg:max-w-[80ch] text-left">
+                  <motion.h1
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="text-5xl sm:text-6xl lg:text-6xl font-bold tracking-wide text-gray-900 leading-tight"
                   >
-                    one inbox, no chaos
-                  </motion.span>
-                </motion.h1>
+                    <span className="block">All your messages</span>
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6, duration: 0.5 }}
+                      className="block whitespace-nowrap text-transparent bg-clip-text tracking-tighter bg-gradient-to-r  from-purple-600 to-indigo-900"
+                    >
+                      One inbox. Zero chaos.
+                    </motion.span>
+                  </motion.h1>
 
-                <p className="text-lg text-gray-600 leading-relaxed sm:text-xl max-w-2xl mx-auto">
-                  Stay calm and in control. All your conversations in one inbox
-                  no missed messages, no lost clients.
-                </p>
+                  <p className="mt-4 text-lg sm:text-xl text-gray-600 leading-relaxed">
+                    Stay calm and in control. All your conversations in one
+                    inbox — no missed messages, no lost clients.
+                  </p>
+                </div>
               </div>
 
               {/* Email Signup Form */}
@@ -58,7 +61,7 @@ export default function HomePage({ id }: { id?: string }) {
                     name="email"
                     required
                     placeholder="Enter your email"
-                    className="flex-1 rounded-xl border-gray-200 bg-white/80 backdrop-blur-sm px-4 py-3 text-base focus:border-blue-400 focus:ring-blue-400"
+                    className="flex-1 h-12 px-4 shadow-purple-900 shadow-md rounded-2xl border-0 bg-white/80 backdrop-blur-sm  focus:shadow-lg transition-all duration-300 text-gray-900 placeholder:text-gray-500"
                   />
                   <Button
                     type="submit"

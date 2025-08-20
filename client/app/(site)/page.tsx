@@ -9,13 +9,15 @@ import CTA from "@/components/sections/CTA/Cta";
 import { JSX } from "react";
 import FAQ from "@/components/sections/FAQ/FAQ";
 import ScrollCTA from "@/components/sections/ScrollCTA/ScrollCTA";
+import BuiltForYou from "@/components/sections/BuiltForYou/BuiltForYou";
 
 export default function Home(): JSX.Element {
   return (
-    <main className="flex-1 flex flex-col ">
+    <main className="flex-1  flex flex-col ">
       <Hero id="hero" />
       <Features />
       <HowItWorks />
+      <BuiltForYou />
       {/* <Pricing />
       <Testimonials /> */}
       <CTA id="primary-cta-form" />

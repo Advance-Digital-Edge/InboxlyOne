@@ -127,7 +127,7 @@ export function LiveMessagesFeed() {
   }, []);
 
   return (
-    <div className="w-full max-w-[600px] border-l rounded-lg bg-slate-600/10 border-border p-2 h-[420px] sm:h-[420px] overflow-hidden mx-auto">
+    <div className="w-full max-w-[600px]  rounded-lg bg-slate-600/10 p-2 h-[420px] sm:h-[420px] overflow-hidden mx-auto">
       <div className="flex items-baseline justify-between">
         <h2 className="flex items-baseline font-bold">
           <Image

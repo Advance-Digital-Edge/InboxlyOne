@@ -32,7 +32,7 @@ export default function HowItWorks() {
                   height={600}
                   className="object-contain mb-4 mx-1"
                 />
-                <p className="text-sm   mt-4 max-w-xs mx-auto">
+                <p className="text-gray-600   mt-4  mx-auto">
                   Too many apps. Too many tabs. Not enough focus.
                 </p>
               </div>
@@ -69,7 +69,7 @@ export default function HowItWorks() {
                 <div className="relative mx-auto w-full max-w-md">
                   <OrbitingIcons height={420} className="mx-auto" />
                 </div>
-                <p className="text-sm mt-2 max-w-xs mx-auto">
+                <p className=" text-gray-600  mt-8 mx-auto">
                   All your conversations. Zero chaos
                 </p>
               </div>
