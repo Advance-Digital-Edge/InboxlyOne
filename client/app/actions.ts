@@ -186,7 +186,7 @@ export const getUserIntegrations = async () => {
     // If either fbUser or fbPage is missing → no Facebook + no Instagram
     if (!fbUser || !fbPage) {
       return {
-        facebook: [],
+        messenger: [],
         instagram: [],
         gmail: gmailAccounts || [],
       };
@@ -218,7 +218,7 @@ export const getUserIntegrations = async () => {
     if (igError) throw new Error("Failed to fetch Instagram Accounts");
 
     return {
-      facebook: fullFbData,
+      messenger: fullFbData,
       instagram: igAccount ? [igAccount] : [],
       gmail: gmailAccounts || [],
     };
