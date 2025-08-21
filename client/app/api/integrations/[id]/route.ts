@@ -6,7 +6,7 @@ export async function DELETE(request: Request, context: any) {
   const { provider } = await request.json();
   const supabase = await createClient();
 
-  if (provider === "gmail") {
+  if (provider === "Gmail") {
     const { data: integration, error } = await supabase
       .from("user_integrations")
       .select("*")
@@ -88,7 +88,7 @@ export async function DELETE(request: Request, context: any) {
   }
 
   // 👉 Add Slack   removal
-  if (provider === "slack") {
+  if (provider === "Slack") {
     const { data: integration, error } = await supabase
       .from("user_integrations")
       .select("*")
@@ -144,7 +144,7 @@ export async function DELETE(request: Request, context: any) {
   }
 
   // 👉 Add Instagram integration removal
-  if (provider === "instagram") {
+  if (provider === "Instagram") {
     try {
       // Instagram long-lived tokens can't be revoked via API, they expire naturally
       // We just need to remove from our database
@@ -163,7 +163,7 @@ export async function DELETE(request: Request, context: any) {
     }
   }
 
-  if (provider === "facebook") {
+  if (provider === "Messenger") {
     const { error: fbError } = await supabase
       .from("user_integrations")
       .delete()
