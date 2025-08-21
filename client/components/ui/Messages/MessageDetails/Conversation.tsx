@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import DOMPurify from "dompurify";
-import styles from "./Conversation.module.css";
+import styles from "./conversation.module.css";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect, useRef } from "react";
 import { Check, CheckCheck, Clock, X } from "lucide-react";
