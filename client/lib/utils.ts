@@ -173,9 +173,10 @@ export function transformMessengerRawConversations(
 
 // Update the transformInstagramData function to handle the new data structure:
 
-export function transformInstagramData(data: any[], currentPageId: string, instagramUsername?: string) {
+export function transformInstagramData(data: any[], currentPageId: string, instagramUsername?: string, instagramAvatar?: string) {
   console.log("📱 Transform Instagram data with page ID:", currentPageId);
   console.log("📱 Instagram username for outgoing messages:", instagramUsername);
+  console.log("📱 Instagram avatar for outgoing messages:", instagramAvatar);
   
   return data
     .map((thread, threadIndex) => {
@@ -213,32 +214,50 @@ export function transformInstagramData(data: any[], currentPageId: string, insta
         || (otherParticipant?.id ? `Instagram User ${otherParticipant.id.slice(-4)}` : "Instagram User");
       const senderId = otherParticipant?.id || "unknown";
       
-      // Enhanced avatar extraction
+      // Enhanced avatar extraction with simple Facebook Graph API URL
       const recipientAvatar = otherParticipant?.picture?.data?.url || 
                              otherParticipant?.picture_url || 
                              otherParticipant?.picture || 
-                             "";
+                             (otherParticipant?.id ? `https://graph.facebook.com/${otherParticipant.id}/picture?type=normal` : "");
+      
+      console.log("📱 Avatar extraction debug:", {
+        otherParticipantId: otherParticipant?.id,
+        otherParticipantName: otherParticipant?.name,
+        pictureStructure: otherParticipant?.picture,
+        extractedAvatar: recipientAvatar,
+        avatarSources: {
+          pictureDataUrl: otherParticipant?.picture?.data?.url,
+          pictureUrl: otherParticipant?.picture_url,
+          picture: otherParticipant?.picture,
+          fallbackUrl: otherParticipant?.id ? `https://graph.facebook.com/${otherParticipant.id}/picture?type=normal` : ""
+        }
+      });
 
       const conversation = allMessages.map((msg: any, index: number) => {
         const ts = new Date(msg.created_time).getTime().toString();
         const messageSenderId = msg.from?.id || senderId;
         
-        // Determine sender name based on who sent the message with enhanced data
+        // Determine sender name and avatar based on who sent the message with enhanced data
         let messageSenderName;
+        let messageAvatar;
+        
         if (messageSenderId === currentPageId) {
           // Message sent by the page/business account (outgoing)
           messageSenderName = instagramUsername || "Instagram Business";
+          messageAvatar = instagramAvatar || "";
         } else {
           // Message sent by the recipient (incoming) - use enhanced from data
           messageSenderName = msg.from?.name || 
                              msg.from?.username || 
                              recipientName;
+          messageAvatar = recipientAvatar;
         }
         
         return {
           id: index,
           senderId: messageSenderId,
           sender: messageSenderName,
+          avatar: messageAvatar, // Include avatar for each message
           content: msg.message || "",
           timestamp: new Date(msg.created_time).toLocaleTimeString("en-US", {
             hour: "2-digit",
@@ -357,11 +376,19 @@ export function transformInstagramMetaData(data: any[], currentPageId: string) {
         senderName = otherParticipant.name || 
                     otherParticipant.username || 
                     `Instagram User ${senderId.slice(-4)}`;
-        // Enhanced avatar extraction
+        // Enhanced avatar extraction with simple Facebook Graph API URL
         avatar = otherParticipant.picture?.data?.url || 
                 otherParticipant.picture_url || 
                 otherParticipant.picture || 
-                "";
+                (otherParticipant.id ? `https://graph.facebook.com/${otherParticipant.id}/picture?type=normal` : "");
+        
+        console.log("📱 MetaData avatar extraction:", {
+          participantId: otherParticipant.id,
+          participantName: otherParticipant.name,
+          pictureStructure: otherParticipant.picture,
+          extractedAvatar: avatar,
+          fallbackUrl: `https://graph.facebook.com/${otherParticipant.id}/picture?type=normal`
+        });
       } else if (allMessages.length > 0) {
         // Enhanced fallback from messages - exclude page messages and try multiple name fields
         const firstMessage = allMessages.find((msg: any) => msg.from && msg.from.id !== currentPageId);

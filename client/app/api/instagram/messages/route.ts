@@ -54,8 +54,8 @@ export async function GET(req: NextRequest) {
     console.log("📱 Facebook Page ID:", pageId);
 
     // 2️⃣ Fetch Instagram conversations directly from Meta Graph API
-    // Using Page-level conversations with Instagram platform filter (enhanced participant fields)
-    const conversationsUrl = `https://graph.facebook.com/v19.0/${pageId}/conversations?platform=instagram&fields=id,participants{id,name,username,picture},updated_time&access_token=${pageAccessToken}`;
+    // Using Page-level conversations with Instagram platform filter (enhanced participant fields including pictures)
+    const conversationsUrl = `https://graph.facebook.com/v19.0/${pageId}/conversations?platform=instagram&fields=id,participants{id,name,username,picture{data{url}}},updated_time&access_token=${pageAccessToken}`;
     
     console.log("📱 Instagram Conversations URL:", conversationsUrl.replace(pageAccessToken, "***TOKEN***"));
 
@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
 
     console.log(`📱 Found ${conversationsData.data.length} Instagram conversations`);
 
-    // 3️⃣ Get messages for each conversation (simplified to avoid timeouts)
+    // Get messages for each conversation (simplified to avoid timeouts)
     const conversationsWithMessages = [];
     
     // Process conversations sequentially to avoid rate limits

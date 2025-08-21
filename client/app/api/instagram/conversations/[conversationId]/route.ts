@@ -67,11 +67,25 @@ export async function GET(
     console.log(`📱 Fetching Instagram conversation details for: ${conversationId}`);
     console.log(`📱 Instagram Username: ${instagramUsername}`);
 
-    // 2️⃣ Get conversation details with enhanced participant fields
-    const conversationUrl = `https://graph.facebook.com/v19.0/${conversationId}?fields=id,participants{id,name,username,picture},updated_time&access_token=${pageAccessToken}`;
+    // 2️⃣ Get conversation details with enhanced participant fields including detailed pictures
+    const conversationUrl = `https://graph.facebook.com/v19.0/${conversationId}?fields=id,participants{id,name,username,picture{data{url}}},updated_time&access_token=${pageAccessToken}`;
     
     const conversationRes = await fetch(conversationUrl);
     const conversationData = await conversationRes.json();
+
+    console.log("📱 Instagram API conversation response:", JSON.stringify(conversationData, null, 2));
+    
+    if (conversationData.participants) {
+      console.log("📱 Participants data structure:");
+      conversationData.participants.data?.forEach((participant: any, index: number) => {
+        console.log(`📱 Participant ${index}:`, {
+          id: participant.id,
+          name: participant.name,
+          username: participant.username,
+          picture: participant.picture
+        });
+      });
+    }
 
     if (conversationData.error) {
       return new Response(
@@ -110,7 +124,7 @@ export async function GET(
     };
 
     // 5️⃣ Transform data using the existing function with Instagram Business Account ID
-    const transformed = transformInstagramData([conversationWithMessages], external_account_id, instagramUsername); // Use Instagram username
+    const transformed = transformInstagramData([conversationWithMessages], external_account_id, instagramUsername, instagramAvatar); // Use Instagram username and avatar
 
     console.log("📱 Using Instagram Business Account ID for filtering:", external_account_id);
     console.log("📱 Page ID (Facebook):", pageId);
@@ -120,6 +134,8 @@ export async function GET(
       JSON.stringify({
         success: true,
         conversation: transformed[0] || null,
+        page_name: instagramUsername, // Use Instagram username for outgoing messages
+        instagram_avatar: instagramAvatar, // Include Instagram profile picture
         note: `Loaded conversation with ${messagesData.data?.length || 0} messages`
       }),
       { status: 200 }

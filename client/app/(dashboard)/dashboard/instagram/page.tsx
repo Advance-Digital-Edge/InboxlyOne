@@ -89,6 +89,7 @@ export default function InstagramPage() {
   });
 
   const pageName = data?.page_name;
+  const pageAvatar = (data as any)?.instagram_avatar;
   const messages = data?.conversations ?? [];
 
   // Debug: Log the messages data to see what names are being displayed
