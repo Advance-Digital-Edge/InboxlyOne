@@ -54,17 +54,18 @@ export async function GET(
     const pageAccessToken = metadata?.page_access_token || access_token;
     const pageId = metadata?.page_id;
     
-    // Get the page name from Facebook pages
-    const { data: pages, error: pagesError } = await supabase
-      .from("facebook_pages")
-      .select("page_name")
-      .eq("user_id", user.id)
-      .eq("page_id", pageId);
-    
-    const pageName = pages?.[0]?.page_name || "Instagram Business";
+    // Get Instagram account details from instagram_accounts table
+    const { data: instagramAccount, error: igError } = await supabase
+      .from("instagram_accounts")
+      .select("username, profile_picture")
+      .eq("instagram_id", external_account_id)
+      .single();
+
+    const instagramUsername = instagramAccount?.username || "Instagram Business";
+    const instagramAvatar = instagramAccount?.profile_picture || "";
     
     console.log(`📱 Fetching Instagram conversation details for: ${conversationId}`);
-    console.log(`📱 Page name: ${pageName}`);
+    console.log(`📱 Instagram Username: ${instagramUsername}`);
 
     // 2️⃣ Get conversation details with enhanced participant fields
     const conversationUrl = `https://graph.facebook.com/v19.0/${conversationId}?fields=id,participants{id,name,username,picture},updated_time&access_token=${pageAccessToken}`;
@@ -109,10 +110,11 @@ export async function GET(
     };
 
     // 5️⃣ Transform data using the existing function with Instagram Business Account ID
-    const transformed = transformInstagramData([conversationWithMessages], external_account_id, pageName); // Use Instagram Business Account ID
+    const transformed = transformInstagramData([conversationWithMessages], external_account_id, instagramUsername); // Use Instagram username
 
     console.log("📱 Using Instagram Business Account ID for filtering:", external_account_id);
     console.log("📱 Page ID (Facebook):", pageId);
+    console.log("📱 Instagram Username:", instagramUsername);
 
     return new Response(
       JSON.stringify({
