@@ -175,7 +175,7 @@ export default function Conversation({
                       {message.isIncoming && (
                         <Avatar className="h-10 w-10 border border-blue-900">
                           <AvatarImage
-                            src={selectedMessage.avatar || "/placeholder.svg"}
+                            src={message.avatar || selectedMessage.avatar || "/placeholder.svg"}
                             alt={message.sender}
                           />
                           <AvatarFallback>

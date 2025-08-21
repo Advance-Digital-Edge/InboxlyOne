@@ -173,7 +173,11 @@ export function transformMessengerRawConversations(
 
 // Update the transformInstagramData function to handle the new data structure:
 
-export function transformInstagramData(data: any[], currentUserId: string) {
+export function transformInstagramData(data: any[], currentPageId: string, instagramUsername?: string, instagramAvatar?: string) {
+  console.log("📱 Transform Instagram data with page ID:", currentPageId);
+  console.log("📱 Instagram username for outgoing messages:", instagramUsername);
+  console.log("📱 Instagram avatar for outgoing messages:", instagramAvatar);
+  
   return data
     .map((thread, threadIndex) => {
       const allMessages = thread.messages || [];
@@ -189,21 +193,71 @@ export function transformInstagramData(data: any[], currentUserId: string) {
           new Date(b.created_time).getTime()
       );
 
-      // Get participants (exclude the page itself)
-      const participants = thread.participants || [];
-      const otherParticipant = participants.find((p: any) => p.id !== currentUserId);
-      const senderName = otherParticipant?.name || otherParticipant?.id || "Instagram User";
+      // Get participants (exclude the page itself) - handle different formats
+      let participants = [];
+      
+      if (thread.participants?.data) {
+        participants = thread.participants.data;
+      } else if (Array.isArray(thread.participants)) {
+        participants = thread.participants;
+      } else if (thread.participants) {
+        participants = Object.values(thread.participants);
+      }
+      
+      const otherParticipant = Array.isArray(participants) 
+        ? participants.find((p: any) => p.id !== currentPageId) // Use page ID instead of user ID
+        : null;
+        
+      // Enhanced name extraction with multiple fallbacks
+      const recipientName = otherParticipant?.name 
+        || otherParticipant?.username 
+        || (otherParticipant?.id ? `Instagram User ${otherParticipant.id.slice(-4)}` : "Instagram User");
       const senderId = otherParticipant?.id || "unknown";
+      
+      // Enhanced avatar extraction with simple Facebook Graph API URL
+      const recipientAvatar = otherParticipant?.picture?.data?.url || 
+                             otherParticipant?.picture_url || 
+                             otherParticipant?.picture || 
+                             (otherParticipant?.id ? `https://graph.facebook.com/${otherParticipant.id}/picture?type=normal` : "");
+      
+      console.log("📱 Avatar extraction debug:", {
+        otherParticipantId: otherParticipant?.id,
+        otherParticipantName: otherParticipant?.name,
+        pictureStructure: otherParticipant?.picture,
+        extractedAvatar: recipientAvatar,
+        avatarSources: {
+          pictureDataUrl: otherParticipant?.picture?.data?.url,
+          pictureUrl: otherParticipant?.picture_url,
+          picture: otherParticipant?.picture,
+          fallbackUrl: otherParticipant?.id ? `https://graph.facebook.com/${otherParticipant.id}/picture?type=normal` : ""
+        }
+      });
 
       const conversation = allMessages.map((msg: any, index: number) => {
         const ts = new Date(msg.created_time).getTime().toString();
         const messageSenderId = msg.from?.id || senderId;
-        const messageSenderName = msg.from?.name || senderName;
+        
+        // Determine sender name and avatar based on who sent the message with enhanced data
+        let messageSenderName;
+        let messageAvatar;
+        
+        if (messageSenderId === currentPageId) {
+          // Message sent by the page/business account (outgoing)
+          messageSenderName = instagramUsername || "Instagram Business";
+          messageAvatar = instagramAvatar || "";
+        } else {
+          // Message sent by the recipient (incoming) - use enhanced from data
+          messageSenderName = msg.from?.name || 
+                             msg.from?.username || 
+                             recipientName;
+          messageAvatar = recipientAvatar;
+        }
         
         return {
           id: index,
           senderId: messageSenderId,
           sender: messageSenderName,
+          avatar: messageAvatar, // Include avatar for each message
           content: msg.message || "",
           timestamp: new Date(msg.created_time).toLocaleTimeString("en-US", {
             hour: "2-digit",
@@ -211,7 +265,7 @@ export function transformInstagramData(data: any[], currentUserId: string) {
             hour12: false,
           }),
           ts,
-          isIncoming: messageSenderId !== currentUserId,
+          isIncoming: messageSenderId !== currentPageId, // Use page ID to determine incoming
           unread: false,
         };
       });
@@ -221,10 +275,10 @@ export function transformInstagramData(data: any[], currentUserId: string) {
 
       return {
         id: threadIndex,
-        sender: senderName,
+        sender: recipientName, // Show recipient name for the conversation summary
         senderId: senderId,
         channelId: thread.id,
-        avatar: "", // Pages API doesn't provide profile pictures
+        avatar: recipientAvatar, // Use participant's profile picture
         preview: lastMsg?.message || "No messages yet",
         timestamp: new Date(lastTimestamp).toLocaleTimeString("en-US", {
           hour: "2-digit",
@@ -238,7 +292,7 @@ export function transformInstagramData(data: any[], currentUserId: string) {
         conversation,
       };
     })
-    .filter(Boolean) // Remove null entries
+    .filter((item): item is NonNullable<typeof item> => item !== null) // Remove null entries with type guard
     .sort((a, b) => parseFloat(b.ts) - parseFloat(a.ts));
 }
 
@@ -264,4 +318,109 @@ export function transformInstagramNewMessage(
     isIncoming: event.senderId !== currentUserId,
     unread: false,
   };
+}
+
+// Transform function for Instagram conversations following Messenger pattern
+export function transformInstagramMetaData(data: any[], currentPageId: string) {
+  console.log("📱 Transform function called with page ID:", currentPageId);
+  
+  return data
+    .map((thread, index) => {
+      const allMessages = thread.messages || [];
+
+      if (allMessages.length === 0) {
+        return null; // Skip conversations with no messages
+      }
+
+      // Sort messages by created_time descending to get latest message
+      allMessages.sort(
+        (a: any, b: any) =>
+          new Date(b.created_time).getTime() -
+          new Date(a.created_time).getTime()
+      );
+
+      // Simplified participant handling to avoid errors
+      let participants = [];
+      
+      if (thread.participants?.data && Array.isArray(thread.participants.data)) {
+        participants = thread.participants.data;
+      } else if (Array.isArray(thread.participants)) {
+        participants = thread.participants;
+      }
+      
+      console.log("📱 Processing participants:", participants.length, "for thread:", thread.id);
+      console.log("📱 Page ID to exclude:", currentPageId);
+      console.log("📱 All participant IDs:", participants.map((p: any) => p.id));
+      console.log("📱 All participants data:", participants);
+      
+      // Exclude the page/business account from participants
+      const otherParticipant = participants.find((p: any) => p && p.id && p.id !== currentPageId);
+      
+      console.log("📱 Found other participant:", otherParticipant);
+      console.log("📱 Participant filtering result:", {
+        totalParticipants: participants.length,
+        pageIdToExclude: currentPageId,
+        participantIds: participants.map((p: any) => p.id),
+        foundOtherParticipant: !!otherParticipant,
+        otherParticipantData: otherParticipant
+      });
+      
+      // Enhanced name and ID extraction with better fallbacks
+      let senderName = "Instagram User";
+      let senderId = "unknown";
+      let avatar = "";
+      
+      if (otherParticipant) {
+        senderId = otherParticipant.id;
+        // Try different name fields from the enhanced participant data
+        senderName = otherParticipant.name || 
+                    otherParticipant.username || 
+                    `Instagram User ${senderId.slice(-4)}`;
+        // Enhanced avatar extraction with simple Facebook Graph API URL
+        avatar = otherParticipant.picture?.data?.url || 
+                otherParticipant.picture_url || 
+                otherParticipant.picture || 
+                (otherParticipant.id ? `https://graph.facebook.com/${otherParticipant.id}/picture?type=normal` : "");
+        
+        console.log("📱 MetaData avatar extraction:", {
+          participantId: otherParticipant.id,
+          participantName: otherParticipant.name,
+          pictureStructure: otherParticipant.picture,
+          extractedAvatar: avatar,
+          fallbackUrl: `https://graph.facebook.com/${otherParticipant.id}/picture?type=normal`
+        });
+      } else if (allMessages.length > 0) {
+        // Enhanced fallback from messages - exclude page messages and try multiple name fields
+        const firstMessage = allMessages.find((msg: any) => msg.from && msg.from.id !== currentPageId);
+        if (firstMessage?.from) {
+          senderId = firstMessage.from.id;
+          senderName = firstMessage.from.name || 
+                      firstMessage.from.username || 
+                      `Instagram User ${senderId.slice(-4)}`;
+        }
+      }
+
+      console.log("📱 Final user data:", { senderName, senderId });
+
+      const lastMsg = allMessages[0]; // Latest message
+      const lastTimestamp = new Date(lastMsg?.created_time || Date.now()).getTime();
+
+      return {
+        id: index,
+        sender: senderName,
+        senderId: senderId,
+        conversationId: thread.id,
+        channelId: thread.id, // Add channelId for compatibility with dashboard
+        avatar: avatar, // Use participant avatar if available
+        preview: lastMsg?.message || "No messages yet",
+        timestamp: getDisplayTime(lastMsg?.created_time || new Date().toISOString()),
+        ts: lastTimestamp.toString(),
+        platform: "Instagram",
+        unread: false, // Instagram API doesn't provide unread count in conversations endpoint
+        tags: [],
+        conversation: [], // Will be populated when conversation is selected
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null) // Remove null entries with type guard
+    .sort((a, b) => parseFloat(b.ts) - parseFloat(a.ts));
 }
