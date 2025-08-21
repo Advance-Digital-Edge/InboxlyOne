@@ -173,9 +173,9 @@ export function transformMessengerRawConversations(
 
 // Update the transformInstagramData function to handle the new data structure:
 
-export function transformInstagramData(data: any[], currentPageId: string, pageName?: string) {
+export function transformInstagramData(data: any[], currentPageId: string, instagramUsername?: string) {
   console.log("📱 Transform Instagram data with page ID:", currentPageId);
-  console.log("📱 Page name:", pageName);
+  console.log("📱 Instagram username for outgoing messages:", instagramUsername);
   
   return data
     .map((thread, threadIndex) => {
@@ -227,7 +227,7 @@ export function transformInstagramData(data: any[], currentPageId: string, pageN
         let messageSenderName;
         if (messageSenderId === currentPageId) {
           // Message sent by the page/business account (outgoing)
-          messageSenderName = pageName || "Instagram Business";
+          messageSenderName = instagramUsername || "Instagram Business";
         } else {
           // Message sent by the recipient (incoming) - use enhanced from data
           messageSenderName = msg.from?.name || 
