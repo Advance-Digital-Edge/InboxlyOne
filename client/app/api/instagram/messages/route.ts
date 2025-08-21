@@ -37,19 +37,21 @@ export async function GET(req: NextRequest) {
     const pageId = metadata?.page_id;
     const pageAccessToken = metadata?.page_access_token || access_token;
     
-    // Get the page name from Facebook pages
-    const { data: pages, error: pagesError } = await supabase
-      .from("facebook_pages")
-      .select("page_name")
-      .eq("user_id", user.id)
-      .eq("page_id", pageId);
-    
-    const pageName = pages?.[0]?.page_name || "Instagram Business";
+    // Get Instagram account details from instagram_accounts table
+    const { data: instagramAccount, error: igError } = await supabase
+      .from("instagram_accounts")
+      .select("username, profile_picture")
+      .eq("instagram_id", external_account_id)
+      .single();
+
+    const instagramUsername = instagramAccount?.username || "Instagram Business";
+    const instagramAvatar = instagramAccount?.profile_picture || "";
     
     console.log("📱 Fetching Instagram conversations...");
     console.log("📱 Instagram Business Account ID:", external_account_id);
+    console.log("📱 Instagram Username:", instagramUsername);
+    console.log("📱 Instagram Avatar:", instagramAvatar);
     console.log("📱 Facebook Page ID:", pageId);
-    console.log("📱 Page Name:", pageName);
 
     // 2️⃣ Fetch Instagram conversations directly from Meta Graph API
     // Using Page-level conversations with Instagram platform filter (enhanced participant fields)
@@ -135,12 +137,13 @@ export async function GET(req: NextRequest) {
     console.log("📱 Page ID (Facebook):", pageId);
     console.log("📱 Transformed Instagram conversations:", JSON.stringify(transformed, null, 2));
 
-    // 5️⃣ Structure response like Messenger (with conversations array and page name)
+    // 5️⃣ Structure response like Messenger (with conversations array and Instagram username)
     return new Response(
       JSON.stringify({
         success: true,
         conversations: transformed,
-        page_name: pageName,
+        page_name: instagramUsername, // Use Instagram username for outgoing messages
+        instagram_avatar: instagramAvatar, // Include Instagram profile picture
         debug: {
           raw_conversations_count: conversationsWithMessages.length,
           transformed_count: transformed.length,
