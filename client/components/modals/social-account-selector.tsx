@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Facebook, Instagram, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,20 +16,20 @@ interface SocialAccount {
   username?: string
 }
 
-type Platform = "facebook" | "instagram"
+type Platform = "messenger" | "instagram"
 
 interface SocialAccountSelectorProps {
   accounts: SocialAccount[]
   isLoading: boolean
   error: string | null
-  onSelectAccount: (accountId: string) => void
+  onSelectAccount: (accountId: string) => Promise<void> // async now
   onClose: () => void
   platform: Platform
 }
 
 const platformConfig = {
-  facebook: {
-    name: "Facebook",
+  messenger: {
+    name: "Messenger",
     accountType: "Page",
     accountTypePlural: "Pages",
     icon: Facebook,
@@ -55,9 +56,9 @@ export default function SocialAccountSelector({
   onClose,
   platform,
 }: SocialAccountSelectorProps) {
+  const [connectingId, setConnectingId] = useState<string | null>(null)
   const config = platformConfig[platform]
   const PlatformIcon = config.icon
-
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.95 },
@@ -76,8 +77,6 @@ export default function SocialAccountSelector({
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   }
-
-
 
   return (
     <AnimatePresence>
@@ -187,10 +186,25 @@ export default function SocialAccountSelector({
                         </div>
                       </div>
                       <Button
-                        onClick={() => onSelectAccount(account.id)}
+                        onClick={async () => {
+                          setConnectingId(account.id)
+                          try {
+                            await onSelectAccount(account.id)
+                          } finally {
+                            setConnectingId(null) // reset if error or after success
+                          }
+                        }}
+                        disabled={!!connectingId && connectingId !== account.id}
                         className={`w-full text-white ${config.color}`}
                       >
-                        Select {config.accountType}
+                        {connectingId === account.id ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin " />
+                            Hang on! We're connecting…
+                          </div>
+                        ) : (
+                          `Select ${config.accountType}`
+                        )}
                       </Button>
                     </CardContent>
                   </Card>
