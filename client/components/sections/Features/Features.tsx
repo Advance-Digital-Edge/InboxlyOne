@@ -90,10 +90,10 @@ export default function Features() {
 
       <div className="max-w-7xl mx-auto relative">
         {/* Section Header */}
-        <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-sans leading-tight">
+        <div className="text-center  mb-20">
+          <h2 className="text-5xl  font-sans font-black uppercase  mb-6  leading-tight">
             Lost Messages ={" "}
-            <span className="bg-gradient-to-r from-purple-600 to-indigo-900 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent">
               Lost Clients
             </span>
           </h2>

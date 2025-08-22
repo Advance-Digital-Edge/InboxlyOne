@@ -127,109 +127,115 @@ export function LiveMessagesFeed() {
   }, []);
 
   return (
-    <div className="w-full max-w-[600px]  rounded-lg bg-slate-600/10 p-2 h-[420px] sm:h-[420px] overflow-hidden mx-auto">
-      <div className="flex items-baseline justify-between">
-        <h2 className="flex items-baseline font-bold">
-          <Image
-            src="/assets/inboxlyone.png"
-            alt="Inboxlyone"
-            width={30}
-            height={30}
-            className="object-contain mb-4 mx-2"
-          />
-          Inboxlyone
-        </h2>
-        <h2 className="text-xs sm:text-sm font-mono text-foreground mb-4 flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          Synced
-        </h2>
-      </div>
-
-      <div className="space-y-3">
-        {messages.map((message, index) => {
-          const PlatformIcon = platformIcons[message.platform];
-          const platformColor = platformColors[message.platform];
-          const isNewest = message.id === newestMessageId;
-
-          return (
-            <Card
-              key={message.id}
-              className={`p-3 transition-all duration-700 ease-out transform ${
-                isNewest
-                  ? "animate-in slide-in-from-top-4 fade-in-0 scale-in-95 ring-2 ring-purple-900 ring-opacity-50 shadow-lg"
-                  : index === 2
-                    ? "animate-out slide-out-to-bottom-4 fade-out-0 scale-out-95"
-                    : "hover:shadow-md"
-              }`}
-              style={{
-                animationDuration: isNewest
-                  ? "1000ms"
-                  : index === 2
-                    ? "500ms"
-                    : "300ms",
-                animationDelay: isNewest ? "0ms" : `${index * 2000}ms`,
-                backgroundColor: isNewest
-                  ? "hsl(var(--accent) / 0.1)"
-                  : undefined,
-              }}
-            >
-              <div className="flex items-start gap-3">
-                <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarImage
-                    src={message.avatar || "/placeholder.svg"}
-                    alt={message.userName}
-                  />
-                  <AvatarFallback className="text-xs">
-                    {message.userName
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium text-gray-600/50 truncate">
-                      {message.userName}
-                    </span>
-                    <PlatformIcon
-                      className={`w-4 h-4 flex-shrink-0 ${platformColor}`}
-                    />
-                    {isNewest && (
-                      <span className="text-xs  bg-purple-900 text-white px-1.5 py-0.5 rounded-full font-mono animate-pulse">
-                        NEW
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-sm text-black text-muted-foreground line-clamp-2 leading-relaxed">
-                    {message.message}
-                  </p>
-
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-muted-foreground">
-                      {message.platform}
-                    </span>
-                    <span
-                      className={`text-xs ${isNewest ? "text-blue-500 font-medium" : "text-muted-foreground"}`}
-                    >
-                      {isNewest ? "just now" : "now"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-
-        {messages.length === 0 && (
-          <div className="text-center text-muted-foreground text-sm py-8">
-            <p>No new messages yet. Stay tuned!</p>
-            <p className="text-xs text-gray-500">
-              Messages will appear here as they come in.
-            </p>
+    <div className="w-full px-4 sm:px-6 lg:px-0">
+      <div className="mx-auto flex justify-center">
+        <div className="w-full max-w-[600px] rounded-lg bg-slate-600/10 p-2 sm:p-3 h-[420px] sm:h-[420px] overflow-hidden">
+          {/* Header */}
+          <div className="flex items-baseline justify-between">
+            <h2 className="flex items-baseline font-bold">
+              <Image
+                src="/assets/inboxlyone.png"
+                alt="Inboxlyone"
+                width={30}
+                height={30}
+                className="object-contain mb-4 mx-2"
+              />
+              Inboxlyone
+            </h2>
+            <h2 className="text-xs sm:text-sm font-mono text-foreground mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              Synced
+            </h2>
           </div>
-        )}
+
+          {/* Feed */}
+          <div className="space-y-3">
+            {messages.map((message, index) => {
+              const PlatformIcon = platformIcons[message.platform];
+              const platformColor = platformColors[message.platform];
+              const isNewest = message.id === newestMessageId;
+
+              return (
+                <Card
+                  key={message.id}
+                  className={`p-3 transition-all duration-700 ease-out transform ${
+                    isNewest
+                      ? "animate-in slide-in-from-top-4 fade-in-0 scale-in-95 ring-2 ring-purple-900/50 shadow-lg"
+                      : index === 2
+                        ? "animate-out slide-out-to-bottom-4 fade-out-0 scale-out-95"
+                        : "hover:shadow-md"
+                  }`}
+                  style={{
+                    animationDuration: isNewest
+                      ? "1000ms"
+                      : index === 2
+                        ? "500ms"
+                        : "300ms",
+                    animationDelay: isNewest ? "0ms" : `${index * 2000}ms`,
+                    backgroundColor: isNewest
+                      ? "hsl(var(--accent) / 0.1)"
+                      : undefined,
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <Avatar className="w-8 h-8 flex-shrink-0">
+                      <AvatarImage
+                        src={message.avatar || "/placeholder.svg"}
+                        alt={message.userName}
+                      />
+                      <AvatarFallback className="text-xs">
+                        {message.userName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-600/50 truncate">
+                          {message.userName}
+                        </span>
+                        <PlatformIcon
+                          className={`w-4 h-4 flex-shrink-0 ${platformColor}`}
+                        />
+                        {isNewest && (
+                          <span className="text-xs bg-purple-900 text-white px-1.5 py-0.5 rounded-full font-mono animate-pulse">
+                            NEW
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-sm text-black line-clamp-2 leading-relaxed">
+                        {message.message}
+                      </p>
+
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-xs text-muted-foreground">
+                          {message.platform}
+                        </span>
+                        <span
+                          className={`text-xs ${isNewest ? "text-blue-500 font-medium" : "text-muted-foreground"}`}
+                        >
+                          {isNewest ? "just now" : "now"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+
+            {messages.length === 0 && (
+              <div className="text-center text-muted-foreground text-sm py-8">
+                <p>No new messages yet. Stay tuned!</p>
+                <p className="text-xs text-gray-500">
+                  Messages will appear here as they come in.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

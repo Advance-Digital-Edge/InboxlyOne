@@ -1,120 +1,176 @@
 "use client";
 import { Card } from "@/components/ui/card";
 import OrbitingIcons from "@/components/ui/OrbitingIcons/OrbitingIcons";
-import { Facebook, Instagram, Mail } from "lucide-react";
+import {
+  ArrowRight,
+  Zap,
+  Target,
+  Shield,
+  Clock,
+  ShieldCheck,
+  ArrowDown,
+} from "lucide-react";
 import Image from "next/image";
 
 export default function HowItWorks() {
   return (
-    <section className="py-24 px-4 ">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-12 mx-auto md:py-16 lg:py-24 px-4 bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4 font-sans">
-            How It Works
+        <div className="text-center  uppercase mb-12 md:mb-16 lg:mb-20">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4 md:mb-6 leading-tight">
+            From Messy to{" "}
+            <span className="bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent">
+              Easy
+            </span>{" "}
+            in 3 Steps
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            See how chaos turns into clarity - all your conversations in one
-            organized inbox
+          <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-medium max-w-2xl mx-auto">
+            No more app-hopping. Everything’s right here{" "}
           </p>
         </div>
 
-        {/* Main Transformation Visual */}
-        <div className="relative mb-16">
-          <Card className="p-12  border-0 rounded-3xl">
-            <div className="flex w-full flex-col lg:flex-row items-center justify-around space-y-8 lg:space-y-0 lg:space-x-12">
-              {/* Before: Scattered Platforms */}
-              <div className="flex-1 text-center">
-                <Image
-                  src="/assets/overwhelmed.jpg"
-                  alt="overwhelmed"
-                  width={600}
-                  height={600}
-                  className="object-contain mb-4 mx-1"
-                />
-                <p className="text-gray-600   mt-4  mx-auto">
-                  Too many apps. Too many tabs. Not enough focus.
+        {/* Horizontal Layout */}
+        <div className="flex  flex-col lg:flex-row items-start gap-8 lg:gap-16">
+          {/* Steps on the Left */}
+          <div className="flex-1 space-y-6 md:space-y-8">
+            {/* Step 1 */}
+            <div className="relative bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <div className="absolute -left-4 top-6 w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-xl font-black text-white">1</span>
+              </div>
+              <div className="ml-10">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Connect Everything
+                </h3>
+                <p className="text-gray-600 font-medium leading-relaxed">
+                  Link Gmail, Instagram, Facebook, and more platforms in
+                  seconds.
+                  <span className="font-bold text-gray-900">
+                    {" "}
+                    No technical setup required.
+                  </span>
                 </p>
               </div>
+            </div>
 
-              {/* Transformation Arrow */}
-              <div className="flex-shrink-0">
-                <div className="relative">
-                  <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-full flex items-center justify-center shadow-lg">
-                    <svg
-                      className="w-10 h-10 text-emerald-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 7l5 5m0 0l-5 5m5-5H6"
-                      />
-                    </svg>
+            {/* Step 2 */}
+            <div className="relative bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <div className="absolute -left-4 top-6 w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-xl font-black text-white">2</span>
+              </div>
+              <div className="ml-10">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Auto-Organization
+                </h3>
+                <p className="text-gray-600 font-medium leading-relaxed">
+                  Messages flow into one unified inbox, automatically sorted by
+                  platform.
+                  <span className="font-bold text-gray-900">
+                    {" "}
+                    Zero manual work.
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <div className="absolute -left-4 top-6 w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-xl font-black text-white">3</span>
+              </div>
+              <div className="ml-10">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Total Control
+                </h3>
+                <p className="text-gray-600 font-medium leading-relaxed">
+                  Respond faster, stay organized, and never miss important
+                  messages.
+                  <span className="font-bold text-gray-900">
+                    {" "}
+                    Pure productivity.
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Visual + Stats on the Right */}
+          <div className="flex-1 hidden lg:block">
+            <Card className="w-[900px] bg-gradient-to-br from-white via-purple-50 to-blue-50 border border-gray-100 rounded-3xl shadow-xl">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+                {/* Before */}
+                <div className="flex-1 text-center">
+                  <Image
+                    src="/assets/overwhelmed.jpg"
+                    alt="Overwhelmed"
+                    width={400}
+                    height={400}
+                    className="rounded-2xl mx-auto mb-4"
+                  />
+                </div>
+
+                {/* Arrow */}
+                <ArrowRight className="w-12 h-12 text-purple-600 hidden lg:block" />
+                <ArrowDown className="w-12 h-12 text-purple-600 lg:hidden mb-4" />
+
+                {/* After */}
+                <div className="flex-1 text-center">
+                  <OrbitingIcons className="mx-auto h-full w-full" />
+                </div>
+              </div>
+            </Card>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+              {/* Saved Time */}
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="block text-sm text-gray-500">
+                      Saved Time
+                    </span>
+                    <span className="text-3xl font-extrabold text-emerald-700">
+                      10h+
+                    </span>
+                    <p className="block text-sm text-gray-500">per week</p>
                   </div>
-                  {/* Magical sparkles */}
-                  <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-300 rounded-full animate-pulse"></div>
-                  <div
-                    className="absolute -bottom-2 -left-2 w-3 h-3 bg-pink-300 rounded-full animate-pulse"
-                    style={{ animationDelay: "0.5s" }}
-                  ></div>
+                  <Clock className="w-8 h-8 text-emerald-600" />
                 </div>
               </div>
 
-              {/* After: Unified Hub */}
-              <div className="flex-1 text-center">
-                <div className="relative mx-auto w-full max-w-md">
-                  <OrbitingIcons height={420} className="mx-auto" />
+              {/* Faster Replies */}
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="block text-sm text-gray-500">
+                      Faster Replies
+                    </span>
+                    <span className="text-3xl font-extrabold text-blue-700">
+                      10x
+                    </span>
+                       <p className="block text-sm text-gray-500">quicker</p>
+                  </div>
+                  <Zap className="w-8 h-8 text-blue-600" />
                 </div>
-                <p className=" text-gray-600  mt-8 mx-auto">
-                  All your conversations. Zero chaos
-                </p>
+              </div>
+
+              {/* Peace of Mind */}
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="block text-sm text-gray-500">
+                      Peace of Mind
+                    </span>
+                    <span className="text-3xl font-extrabold text-purple-700">
+                      100%
+                    </span>
+                    <p className="block text-sm text-gray-500">everyday</p>
+                  </div>
+                  <ShieldCheck className="w-8 h-8 text-purple-600" />
+                </div>
               </div>
             </div>
-          </Card>
-        </div>
-
-        {/* Steps */}
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-blue-600">1</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2 font-sans">
-              Connect in Seconds
-            </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Link Gmail, Instagram, Facebook, and more with just a few clicks
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-emerald-600">2</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2 font-sans">
-              Everything, Finally Organized
-            </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              All your messages flow into one organized inbox — neatly separated
-              by platform
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-purple-600">3</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2 font-sans">
-              Peace of Mind, Every Day
-            </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Respond faster, stay organized, and never miss another important
-              message
-            </p>
           </div>
         </div>
       </div>

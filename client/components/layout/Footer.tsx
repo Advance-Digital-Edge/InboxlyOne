@@ -73,7 +73,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-gray-600 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded transition-colors"
+                    className="text-gray-600 hover:text-purple-900 focus:text-purple-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded transition-colors"
                   >
                     {link.name}
                   </a>
@@ -90,7 +90,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-gray-600 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded transition-colors"
+                    className="text-gray-600 hover:text-purple-900 focus:text-purple-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded transition-colors"
                   >
                     {link.name}
                   </a>

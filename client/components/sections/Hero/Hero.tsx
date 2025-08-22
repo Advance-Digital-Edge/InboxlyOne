@@ -7,31 +7,30 @@ import { Mail, Instagram, Facebook, MessageCircle } from "lucide-react";
 
 export default function HomePage({ id }: { id?: string }) {
   return (
-    <div
-      id={id}
-      className="min-h-32 w-full"
-    >
+    <div id={id} className="min-h-32 w-full">
       {/* Hero Section */}
-      <section className="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+      <section className="relative px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-screen-3xl">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 justify-between">
             {/* Left Column - Content */}
-            <div className="space-y-8 text-center lg:text-left">
+            <div className="space-y-8 px-8 text-center lg:text-left">
               <div className="w-full">
                 {/* Shared width + left alignment (responsive) */}
-                <div className="max-w-[68ch] md:max-w-[72ch] lg:max-w-[80ch] text-left">
+                <div className="md:text-left">
                   <motion.h1
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="text-5xl sm:text-6xl lg:text-6xl font-bold tracking-wide text-gray-900 leading-tight"
+                    className="text-3xl sm:text-6xl lg:text-5xl 2xl:text-6xl font-bold tracking-wide text-gray-900 leading-tight"
                   >
-                    <span className="block">All your messages</span>
+                    <span className="block whitespace-nowrap">
+                      All your messages
+                    </span>
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.6, duration: 0.5 }}
-                      className="block whitespace-nowrap text-transparent bg-clip-text tracking-tighter bg-gradient-to-r  from-purple-600 to-indigo-900"
+                      className="block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-900"
                     >
                       One inbox. Zero chaos.
                     </motion.span>
