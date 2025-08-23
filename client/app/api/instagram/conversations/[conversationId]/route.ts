@@ -4,7 +4,7 @@ import { transformInstagramData } from "@/lib/utils";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
   const supabase = await createClient();
 
@@ -20,7 +20,7 @@ export async function GET(
   }
 
   try {
-    const { conversationId } = params;
+    const { conversationId } = await params;
     
     console.log("📱 Instagram conversation API called with ID:", conversationId);
     

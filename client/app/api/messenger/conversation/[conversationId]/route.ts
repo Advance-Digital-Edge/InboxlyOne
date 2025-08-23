@@ -5,7 +5,7 @@ import { transformMessengerRawConversations } from "@/lib/utils";
 
 export async function GET(
   req: NextRequest,
-  context: { params: { conversationId: string } } // 👈 това е context, не директно { params }
+  context: { params: Promise<{ conversationId: string }> } // 👈 това е context, не директно { params }
 ) {
   const supabase = await createClient();
 
