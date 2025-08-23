@@ -1,7 +1,7 @@
 "use client";
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { useConnectSocket } from "@/hooks/useConnectSocket";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGenericMutation } from "@/hooks/useMutation";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { setHasNew } from "@/lib/features/platformStatusSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function InstagramPage() {
+function InstagramPageContent() {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [pendingMessages, setPendingMessages] = useState<Record<string, any[]>>(
@@ -429,5 +429,13 @@ export default function InstagramPage() {
         });
       }}
     />
+  );
+}
+
+export default function InstagramPage() {
+  return (
+    <Suspense fallback={<MessageListSkeleton />}>
+      <InstagramPageContent />
+    </Suspense>
   );
 }

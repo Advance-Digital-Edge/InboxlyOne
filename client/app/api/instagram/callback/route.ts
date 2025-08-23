@@ -1,6 +1,20 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 
+// Define types for Facebook API responses
+interface FacebookPage {
+  id: string;
+  name: string;
+  access_token: string;
+  instagram_business_account?: {
+    id: string;
+  };
+}
+
+interface PagesData {
+  data: FacebookPage[];
+}
+
 const IG_CLIENT_ID = process.env.NEXT_PUBLIC_MESSENGER_APP_ID!;
 const IG_CLIENT_SECRET = process.env.NEXT_PUBLIC_META_APP_SECRET!;
 const IG_REDIRECT_URI = process.env.NEXT_PUBLIC_INSTAGRAM_REDIRECT_URI!;
@@ -94,7 +108,7 @@ export async function GET(req: NextRequest) {
       JSON.stringify(businessData, null, 2)
     );
 
-    let pagesData = { data: [] };
+    let pagesData: PagesData = { data: [] };
 
     // If business manager works, extract pages
     if (businessData.data && businessData.data.length > 0) {

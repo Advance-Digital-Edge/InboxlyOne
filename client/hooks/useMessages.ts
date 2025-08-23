@@ -1,22 +1,29 @@
 import { useEffect, useState } from "react";
-import { transformInstagramData } from "../utils/transformData";
+import { transformInstagramData } from "@/lib/utils";
 
-const useMessages = (currentUserId) => {
-  const [messages, setMessages] = useState([]);
+interface Message {
+  ts: string;
+  [key: string]: any;
+}
+
+const useMessages = (currentUserId: string) => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch Gmail messages
-  const fetchGmailMessages = async () => {
+  const fetchGmailMessages = async (): Promise<Message[]> => {
     // ...existing Gmail fetching logic
+    return [];
   };
 
   // Fetch Messenger messages
-  const fetchMessengerMessages = async () => {
+  const fetchMessengerMessages = async (): Promise<Message[]> => {
     // ...existing Messenger fetching logic
+    return [];
   };
 
   // In your useMessages hook, add Instagram fetching:
-  const fetchInstagramMessages = async () => {
+  const fetchInstagramMessages = async (): Promise<Message[]> => {
     try {
       console.log("🔄 Fetching Instagram messages...");
       const response = await fetch("/api/instagram/messages");

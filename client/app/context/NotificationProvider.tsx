@@ -19,7 +19,7 @@ export const NotificationProvider = ({
 
   // --- Messenger ---
   useConnectSocket("facebook_message", async (event) => {
-    const isInMessengerPage = pathname.startsWith("/dashboard/messenger");
+    const isInMessengerPage = pathname?.startsWith("/dashboard/messenger") || false;
 
     if (!isInMessengerPage) {
       dispatch(setHasNew({ platformId: "messenger", hasNew: true }));
@@ -29,7 +29,7 @@ export const NotificationProvider = ({
 
   // --- Slack ---
   useConnectSocket("slack_event", (event) => {
-    const isInSlackPage = pathname.startsWith("/dashboard/slack");
+    const isInSlackPage = pathname?.startsWith("/dashboard/slack") || false;
 
     toast("💬 New Slack message received");
 

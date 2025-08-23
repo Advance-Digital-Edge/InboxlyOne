@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useGenericMutation } from "@/hooks/useMutation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
@@ -10,7 +10,7 @@ import { setHasNew } from "@/lib/features/platformStatusSlice";
 import { toast } from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function GmailPage() {
+function GmailPageContent() {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
@@ -146,5 +146,13 @@ export default function GmailPage() {
       rightPanelOpen={rightPanelOpen}
       closeRightPanel={closeRightPanel}
     />
+  );
+}
+
+export default function GmailPage() {
+  return (
+    <Suspense fallback={<MessageListSkeleton />}>
+      <GmailPageContent />
+    </Suspense>
   );
 }

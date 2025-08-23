@@ -2,7 +2,7 @@
 import PlatformInbox from "@/components/ui/PlatformInbox/PlatformInbox";
 import { messengerMessages } from "@/lib/constants";
 import { useConnectSocket } from "@/hooks/useConnectSocket";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGenericMutation } from "@/hooks/useMutation";
 import MessageListSkeleton from "@/components/ui/Messages/MessageListSkeleton";
@@ -14,7 +14,7 @@ import { setHasNew } from "@/lib/features/platformStatusSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import { resetFacebookUnread } from "@/app/actions";
 
-export default function MessengerPage() {
+function MessengerPageContent() {
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [pendingMessages, setPendingMessages] = useState<Record<string, any[]>>(
@@ -404,5 +404,13 @@ export default function MessengerPage() {
         });
       }}
     />
+  );
+}
+
+export default function MessengerPage() {
+  return (
+    <Suspense fallback={<MessageListSkeleton />}>
+      <MessengerPageContent />
+    </Suspense>
   );
 }

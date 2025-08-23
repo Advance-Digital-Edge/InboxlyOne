@@ -46,6 +46,7 @@ export default function Sidebar({
   const pathname = usePathname();
   // Get the active platform from the URL path
   useEffect(() => {
+    if (!pathname) return;
     const parts = pathname.split("/");
     if (parts.length > 2 && parts[2] !== activePlatform) {
       setActivePlatform(parts[2]);
