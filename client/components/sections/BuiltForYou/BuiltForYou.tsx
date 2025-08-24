@@ -47,7 +47,7 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
   const cards = [
     {
       title: "Freelancers",
-      desc: "Keep every client message in one place — no app-hopping required.",
+      desc: "Keep every client message in one place - faster replies, less friction",
       Icon: Briefcase,
       variant: "freelancer" as const,
       features: [
@@ -58,14 +58,14 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
     },
     {
       title: "Creators",
-      desc: "DMs and emails together, so you can focus on what you do best.",
+      desc: "DMs and emails together, so you can focus on what you do best",
       Icon: Sparkles,
       variant: "creator" as const,
       features: ["Brand partnerships", "Fan engagement", "Content planning"],
     },
     {
       title: "Solo Stores",
-      desc: "Never miss a customer question across Instagram, Facebook, and Gmail.",
+      desc: "Never miss a customer question across Instagram, Facebook, and Gmail",
       Icon: ShoppingBag,
       variant: "store" as const,
       features: ["Customer support", "Order management", "Social selling"],

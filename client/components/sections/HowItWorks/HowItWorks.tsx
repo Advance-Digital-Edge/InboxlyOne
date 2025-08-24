@@ -17,10 +17,10 @@ export default function HowItWorks() {
     <section className="py-12 mx-auto md:py-16 lg:py-24 px-4 bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center  uppercase mb-12 md:mb-16 lg:mb-20">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4 md:mb-6 leading-tight">
+        <div className="text-center   mb-12 md:mb-16 lg:mb-20">
+          <h2 className="text-3xl md:text-4xl  bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent lg:text-5xl font-black uppercase text-gray-900 mb-4 md:mb-6 leading-tight">
             From Messy to{" "}
-            <span className="bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent">
+            <span className=" ">
               Easy
             </span>{" "}
             in 3 Steps

@@ -50,7 +50,6 @@ export default function ScrollCTA({
       return () => window.removeEventListener("scroll", onScroll);
     }
 
-    // Hide when ANY target is in view.
     let anyInView = false;
     const io = new IntersectionObserver(
       (entries) => {
@@ -58,16 +57,14 @@ export default function ScrollCTA({
         setVisible(!anyInView && !dismissed && !isSubmitted);
       },
       {
-        // Make the hide zone larger so it hides while hero/cta are near viewport
         root: null,
-        rootMargin: "-10% 0px -70% 0px", // top and bottom margins
+        rootMargin: "-10% 0px -70% 0px",
         threshold: [0, 0.01, 0.2, 0.5, 1],
       }
     );
 
     targets.forEach((t) => io.observe(t));
 
-    // Also guard against layout shifts
     const onScroll = () => setVisible(!anyInView && !dismissed && !isSubmitted);
     window.addEventListener("scroll", onScroll, { passive: true });
 
@@ -92,6 +89,7 @@ export default function ScrollCTA({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+    // TODO: send to Supabase / API here
     localStorage.setItem("inboxlyone_joined", "1");
     setIsSubmitted(true);
   };
@@ -100,29 +98,29 @@ export default function ScrollCTA({
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ x: 300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 300, opacity: 0 }}
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -100, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 26 }}
-          className="fixed top-1/2 right-4 -translate-y-1/2 z-50 w-[320px]"
+          className="fixed top-1 inset-x-0 mx-auto z-50 w-[320px]"
           role="region"
           aria-label="Get early access"
         >
-          <div className="relative rounded-2xl shadow-xl  bg-black/95 backdrop-blur-md p-4">
+          <div className="relative rounded-2xl shadow-2xl bg-gradient-to-r from-indigo-800/90 via-purple-800/90 to-indigo-900/90 backdrop-blur-md p-4 border border-white/10">
             <button
               type="button"
               onClick={handleDismiss}
               aria-label="Dismiss"
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+              className="absolute top-2 right-2 text-white/70 hover:text-white"
             >
               ✕
             </button>
 
-            <p className="text-base  text-center font-semibold text-orange-500 mb-1">
-              Don't miss your chance
+            <p className="text-base text-center   font-black text-white mb-1">
+              Don't miss out
             </p>
-            <p className="text-sm text-white p-1 mb-3">
-              Early access is limited - secure your spot on the waitlist
+            <p className="text-sm text-center text-gray-200 mb-3">
+              Hop on and be the first one to experience Inboxlyone
             </p>
 
             {!isSubmitted ? (
@@ -133,19 +131,19 @@ export default function ScrollCTA({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-10 bg-white"
+                  className="h-10 bg-white text-gray-900 border border-gray-300 focus-visible:ring-2 focus-visible:ring-purple-500"
                   aria-label="Email address"
                 />
                 <Button
                   type="submit"
-                  className="h-10 bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+                  className="h-10 font-semibold text-white bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600"
                 >
-                  Get Early Access
+                  Join Early Access
                 </Button>
               </form>
             ) : (
-              <div className="text-sm text-green-700 font-medium">
-                You’re on the list ✔
+              <div className="text-sm text-center text-green-400 font-semibold">
+                🎉 You’re in! We’ll keep you posted.
               </div>
             )}
           </div>

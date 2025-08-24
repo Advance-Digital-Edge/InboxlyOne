@@ -30,7 +30,7 @@ export default function HomePage({ id }: { id?: string }) {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.6, duration: 0.5 }}
-                      className="block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-900"
+                      className="block whitespace-nowrap bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent"
                     >
                       One inbox. Zero chaos.
                     </motion.span>
@@ -54,7 +54,7 @@ export default function HomePage({ id }: { id?: string }) {
                 }}
                 className="space-y-4"
               >
-                <div className="flex justify-between flex-col gap-3 sm:flex-row sm:gap-2 max-w-md mx-auto lg:mx-0">
+                <div className="flex justify-between items-center flex-col gap-3 sm:flex-row sm:gap-2 max-w-md mx-auto lg:mx-0">
                   <Input
                     type="email"
                     name="email"
