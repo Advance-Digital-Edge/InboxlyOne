@@ -86,12 +86,12 @@ export default function CTA({ id }: { id?: string }) {
             </div>
 
             {/* Headlines */}
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-sans">
-              No noise. Just what matters.
+            <h2 className="text-4xl md:text-5xl uppercase font-bold bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent mb-4 font-sans">
+             No noise. Just faster replies
             </h2>
 
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Join the waitlist and never miss another opportunity
+           Hop on early and be the first to try it out
             </p>
 
             {/* Email Signup Form */}
