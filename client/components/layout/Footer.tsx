@@ -11,7 +11,7 @@ const navigationLinks = [
 
 const legalLinks = [
   { name: "Privacy Policy", href: "/privacy" },
-  { name: "Terms of Use", href: "/terms" },
+  { name: "Terms of Use", href: "/tos" },
 ];
 
 const socialLinks = [
