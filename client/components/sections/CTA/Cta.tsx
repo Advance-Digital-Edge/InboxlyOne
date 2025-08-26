@@ -6,20 +6,9 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import WaitlistForm from "@/components/ui/WaitlistForm/WaitlistForm";
 
 export default function CTA({ id }: { id?: string }) {
-  const [email, setEmail] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setIsSubmitted(true);
-      // Here you would typically send the email to your backend
-      console.log("Email submitted:", email);
-    }
-  };
-
   return (
     <section id={id} className="py-24 px-4 ">
       <div className="max-w-4xl mx-auto">
@@ -87,62 +76,14 @@ export default function CTA({ id }: { id?: string }) {
 
             {/* Headlines */}
             <h2 className="text-4xl md:text-5xl uppercase font-bold bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent mb-4 font-sans">
-             No noise. Just faster replies
+              No noise. Just faster replies
             </h2>
 
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-           Hop on early and be the first to try it out
+              Hop on early and be the first to try it out
             </p>
 
-            {/* Email Signup Form */}
-            {!isSubmitted ? (
-              <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email "
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="flex-1 h-12 px-4 shadow-purple-900 shadow-md rounded-2xl border-0 bg-white/80 backdrop-blur-sm  focus:shadow-lg transition-all duration-300 text-gray-900 placeholder:text-gray-500"
-                  />
-                  <Button
-                    type="submit"
-                    className="h-12 px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-                  >
-                    Get Early Access
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <div className="max-w-md mx-auto">
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    You're on the list!
-                  </h3>
-                  <p className="text-gray-600">
-                    We'll notify you when Inboxlyone is ready. Stay tuned!
-                  </p>
-                </div>
-              </div>
-            )}
+            <WaitlistForm source="cta" className="max-w-md mx-auto" />
 
             {/* Trust indicators */}
             <div className="mt-8 flex items-center justify-center space-x-6 text-sm text-gray-500">
