@@ -33,7 +33,7 @@ export default function Navbar(): JSX.Element {
         <Link href="/#how-it-works" className={styles.navLink}>
           How It Works
         </Link>
-        <Link href="/#pricing" className={styles.navLink}>
+        <Link href="/#built-for-you" className={styles.navLink}>
           Why us
         </Link>
         <Link href="/#faq" className={styles.navLink}>

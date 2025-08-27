@@ -77,9 +77,9 @@ export default function Features() {
   ];
 
   return (
-    <section className="py-24 px-4 relative overflow-x-clip">
+    <section id="features" className="py-24 px-4 relative overflow-x-clip  scroll-mt-24 lg:scroll-mt-32">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-100/30 via-transparent to-purple-600/5" />
+      <div className="absolute inset-0  " />
 
       <div className="max-w-7xl mx-auto relative min-w-0">
         {/* Section Header */}

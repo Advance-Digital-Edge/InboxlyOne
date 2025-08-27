@@ -6,7 +6,7 @@ import Image from "next/image";
 
 export default function HowItWorks() {
   return (
-    <section className="py-12 mx-auto md:py-16 lg:py-24 px-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-x-clip">
+    <section id="how-it-works" className="py-12 w-full mx-auto md:py-16 lg:py-24 px-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-x-clip">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16 lg:mb-20">

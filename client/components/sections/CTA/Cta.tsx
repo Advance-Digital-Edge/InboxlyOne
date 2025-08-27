@@ -5,12 +5,12 @@ import WaitlistForm from "@/components/ui/WaitlistForm/WaitlistForm";
 
 export default function CTA({ id }: { id?: string }) {
   return (
-    <section id={id} className="py-24 px-4 overflow-x-clip">
-      <div className="max-w-4xl mx-auto min-w-0">
+    <section id={id} className=" overflow-x-clip scroll-mt-24 lg:scroll-mt-32">
+      <div className="w-screen mx-auto min-w-0">
         {/* Main CTA Card */}
-        <Card className="relative overflow-hidden rounded-3xl border-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8 md:p-12">
+        <Card className="relative overflow-hidden    p-8 md:p-12">
           {/* Background decorative elements */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none" aria-hidden="true">
+          <div className="absolute w-full inset-0 opacity-10 pointer-events-none" aria-hidden="true">
             <div className="absolute top-8 left-8 w-20 h-20 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full" />
             <div className="absolute top-16 right-12 w-12 h-12 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full" />
             <div className="absolute bottom-12 left-16 w-16 h-16 bg-gradient-to-br from-pink-200 to-indigo-200 rounded-full" />
@@ -23,7 +23,7 @@ export default function CTA({ id }: { id?: string }) {
               <div className="flex flex-wrap items-center justify-center gap-6">
                 {/* Before: Chaotic state */}
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-orange-100 rounded-2xl flex items-center justify-center opacity-60">
+                  <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-orange-100  flex items-center justify-center opacity-60">
                     <div className="relative">
                       <div className="w-8 h-8 border-2 border-red-400 rounded animate-spin" />
                       <div className="absolute inset-0 flex items-center justify-center">

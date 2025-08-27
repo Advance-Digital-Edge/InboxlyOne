@@ -8,8 +8,9 @@ import WaitlistForm from "@/components/ui/WaitlistForm/WaitlistForm";
 
 export default function HomePage({ id }: { id?: string }) {
   return (
-    <div id={id} className="min-h-32 w-full">
+    <div id={id} className="min-h-32 w-full scroll-mt-24 lg:scroll-mt-32">
       {/* Hero Section */}
+      
       <section className="relative px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-screen-3xl">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 justify-between">

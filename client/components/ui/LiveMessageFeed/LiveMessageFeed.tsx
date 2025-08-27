@@ -129,7 +129,7 @@ export function LiveMessagesFeed() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-0 overflow-x-clip">
       <div className="mx-auto flex justify-center min-w-0">
-        <div className="w-full max-w-[600px] rounded-lg bg-slate-600/10 p-2 sm:p-3 h-[420px] sm:h-[420px] overflow-hidden">
+        <div className="w-full max-w-[600px] rounded-lg bg-white p-2 sm:p-3 h-[450px] sm:h-[420px] overflow-hidden">
           {/* Header */}
           <div className="flex items-baseline justify-between min-w-0">
             <h2 className="flex items-center gap-2 font-bold min-w-0">
