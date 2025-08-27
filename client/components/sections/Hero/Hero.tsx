@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { LiveMessagesFeed } from "@/components/ui/LiveMessageFeed/LiveMessageFeed";
 import { Mail, Instagram, Facebook, MessageCircle } from "lucide-react";
+import WaitlistForm from "@/components/ui/WaitlistForm/WaitlistForm";
 
 export default function HomePage({ id }: { id?: string }) {
   return (
@@ -44,35 +45,7 @@ export default function HomePage({ id }: { id?: string }) {
               </div>
 
               {/* Email Signup Form */}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const email = formData.get("email");
-                  console.log("Email submitted:", email);
-                  // TODO: send to backend / API
-                }}
-                className="space-y-4"
-              >
-                <div className="flex justify-between items-center flex-col gap-3 sm:flex-row sm:gap-2 max-w-md mx-auto lg:mx-0">
-                  <Input
-                    type="email"
-                    name="email"
-                    required
-                    placeholder="Enter your email"
-                    className="flex-1 h-12 px-4 shadow-purple-900 shadow-md rounded-2xl border-0 bg-white/80 backdrop-blur-sm  focus:shadow-lg transition-all duration-300 text-gray-900 placeholder:text-gray-500"
-                  />
-                  <Button
-                    type="submit"
-                    className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-base font-medium text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    Get Early Access
-                  </Button>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Don’t miss out — secure your spot on the waitlist
-                </p>
-              </form>
+              <WaitlistForm source="hero" />
 
               <div className="flex flex-row justify-center gap-4 text-xs  text-gray-500  md:text-sm lg:justify-start sm:gap-6">
                 <div className="flex items-center gap-2">
