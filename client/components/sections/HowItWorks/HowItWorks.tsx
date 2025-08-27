@@ -103,7 +103,7 @@ export default function HowItWorks() {
                     alt="Overwhelmed"
                     width={400}
                     height={400}
-                    className="rounded-2xl mx-auto mb-4 w-full max-w-[400px] h-auto"
+                    className="rounded-2xl  mx-auto mb-4 w-full max-w-[400px] h-auto"
                   />
                 </div>
 
@@ -113,7 +113,7 @@ export default function HowItWorks() {
 
                 {/* After */}
                 <div className="flex-1 text-center min-w-0 overflow-hidden">
-                  <OrbitingIcons className="mx-auto w-full max-w-[400px]" />
+                  <OrbitingIcons className="mx-auto w-full max-w-[600px]" />
                 </div>
               </div>
             </Card>
