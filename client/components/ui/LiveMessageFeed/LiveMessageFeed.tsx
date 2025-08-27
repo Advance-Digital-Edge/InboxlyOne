@@ -127,12 +127,12 @@ export function LiveMessagesFeed() {
   }, []);
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-0">
-      <div className="mx-auto flex justify-center">
+    <div className="w-full px-4 sm:px-6 lg:px-0 overflow-x-clip">
+      <div className="mx-auto flex justify-center min-w-0">
         <div className="w-full max-w-[600px] rounded-lg bg-slate-600/10 p-2 sm:p-3 h-[420px] sm:h-[420px] overflow-hidden">
           {/* Header */}
-          <div className="flex items-baseline justify-between">
-            <h2 className="flex items-baseline font-bold">
+          <div className="flex items-baseline justify-between min-w-0">
+            <h2 className="flex items-center gap-2 font-bold min-w-0">
               <Image
                 src="/assets/inboxlyone.png"
                 alt="Inboxlyone"
@@ -140,16 +140,16 @@ export function LiveMessagesFeed() {
                 height={30}
                 className="object-contain mb-4 mx-2"
               />
-              Inboxlyone
+              <span className="truncate">Inboxlyone</span>
             </h2>
-            <h2 className="text-xs sm:text-sm font-mono text-foreground mb-4 flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <h2 className="shrink-0 text-xs sm:text-sm font-mono text-foreground mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               Synced
             </h2>
           </div>
 
           {/* Feed */}
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             {messages.map((message, index) => {
               const PlatformIcon = platformIcons[message.platform];
               const platformColor = platformColors[message.platform];
@@ -177,8 +177,8 @@ export function LiveMessagesFeed() {
                       : undefined,
                   }}
                 >
-                  <div className="flex items-start gap-3">
-                    <Avatar className="w-8 h-8 flex-shrink-0">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <Avatar className="w-8 h-8 shrink-0">
                       <AvatarImage
                         src={message.avatar || "/placeholder.svg"}
                         alt={message.userName}
@@ -192,21 +192,21 @@ export function LiveMessagesFeed() {
                     </Avatar>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 min-w-0">
                         <span className="text-sm font-medium text-gray-600/50 truncate">
                           {message.userName}
                         </span>
                         <PlatformIcon
-                          className={`w-4 h-4 flex-shrink-0 ${platformColor}`}
+                          className={`w-4 h-4 shrink-0 ${platformColor}`}
                         />
                         {isNewest && (
-                          <span className="text-xs bg-purple-900 text-white px-1.5 py-0.5 rounded-full font-mono animate-pulse">
+                          <span className="text-xs bg-purple-900 text-white px-1.5 py-0.5 rounded-full font-mono animate-pulse shrink-0">
                             NEW
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm text-black line-clamp-2 leading-relaxed">
+                      <p className="text-sm text-black leading-relaxed line-clamp-2 break-words">
                         {message.message}
                       </p>
 
