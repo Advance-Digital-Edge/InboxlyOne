@@ -25,7 +25,6 @@ export default function Home(): JSX.Element {
       {/* <Testimonials /> */}
       {/* <Pricing /> */}
       {/* <CTA id="primary-cta-form" /> */}
-      {/* <ScrollCTA /> */}
       <ScrollCTA />
     </main>
   );

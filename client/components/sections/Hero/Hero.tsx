@@ -22,18 +22,20 @@ export default function HomePage({ id }: { id?: string }) {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="text-3xl sm:text-6xl lg:text-5xl 2xl:text-6xl font-bold tracking-wide text-gray-900 leading-tight"
+                    // Make sizes monotonic across breakpoints
+                    className="text-5xl sm:text-5xl md:text-6xl lg:text-6xl 2xl:text-7xl font-bold tracking-wide text-gray-900 leading-tight"
                   >
-                    <span className="block whitespace-nowrap">
+                    <span className="block sm:whitespace-nowrap">
                       All your messages
                     </span>
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.6, duration: 0.5 }}
-                      className="block whitespace-nowrap bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent"
+                      // Allow wrap on very small screens, keep nowrap from sm+
+                      className="block sm:whitespace-nowrap bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent"
                     >
-                      One inbox. Zero chaos.
+                      One inbox. Zero chaos
                     </motion.span>
                   </motion.h1>
 
@@ -45,7 +47,9 @@ export default function HomePage({ id }: { id?: string }) {
               </div>
 
               {/* Email Signup Form */}
-              <WaitlistForm source="hero" />
+              <div className="mx-auto max-w-md lg:mx-0">
+                <WaitlistForm source="hero" />
+              </div>
 
               <div className="flex flex-row justify-center gap-4 text-xs  text-gray-500  md:text-sm lg:justify-start sm:gap-6">
                 <div className="flex items-center gap-2">

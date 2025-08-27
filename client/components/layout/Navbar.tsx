@@ -7,7 +7,6 @@ import styles from "./navbar.module.css";
 import MobileMenu from "./NavbarMobile";
 import Image from "next/image";
 import { JSX } from "react";
-import ProfileNavbar from "../ui/Profile/ProfileNavbar";
 import { useAuth } from "@/app/context/AuthProvider";
 
 export default function Navbar(): JSX.Element {
@@ -29,13 +28,13 @@ export default function Navbar(): JSX.Element {
       </Link>
       <nav className={styles.desktopNav}>
         <Link href="/#features" className={styles.navLink}>
-          Features
+          Benefits
         </Link>
         <Link href="/#how-it-works" className={styles.navLink}>
           How It Works
         </Link>
         <Link href="/#pricing" className={styles.navLink}>
-          Pricing
+          Why us
         </Link>
         <Link href="/#faq" className={styles.navLink}>
           FAQ

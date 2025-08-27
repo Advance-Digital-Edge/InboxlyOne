@@ -41,12 +41,6 @@ const faqData = [
       "Yes. Your messages stay on their original platforms. Inboxlyone only requests the permissions needed to display and send messages in one place. We never sell or share your data.",
   },
   {
-    id: "item-7",
-    question: "Does it mix all my messages together?",
-    answer:
-      "No. Everything flows into one inbox, but it's clearly separated by platform so you always know where each message came from.",
-  },
-  {
     id: "item-8",
     question: "How much does Inboxlyone cost?",
     answer:
@@ -80,30 +74,30 @@ export default function FAQ() {
   };
 
   return (
-    <section className="w-full py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Left Column - Title and Image (locked height, no movement) */}
-          <div className="flex flex-col">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-8 text-left">
-              Got questions? We've got answers
+    <section className="w-full py-16 px-4 sm:px-6 lg:px-8 overflow-x-clip">
+      <div className="max-w-7xl mx-auto min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start min-w-0">
+          {/* Left Column */}
+          <div className="flex flex-col min-w-0">
+            <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-8 text-left break-words">
+              Got questions? We&apos;ve got answers
             </h2>
-            <div className="flex-1 flex items-center justify-center h-96 shrink-0 relative">
+            <div className="flex-1 flex items-center justify-center h-96 relative">
               <Image
                 src="/assets/faq.jpg"
                 alt="faq"
                 width={800}
                 height={800}
-                className=" rounded-3xl"
+                className="rounded-3xl max-w-full h-auto"
+                priority
               />
-
-              {/* Gradient mask overlay for fade */}
-              <div className="absolute inset-0  bg-gradient-to-b from-white/5 via-transparent to-white"></div>
+              {/* Gradient mask overlay */}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-white" />
             </div>
           </div>
 
-          {/* Right Column - FAQ (fixed height, scrolls internally) */}
-          <div className="h-[750px]  pr-2 [scrollbar-gutter:stable] space-y-1">
+          {/* Right Column */}
+          <div className="pr-2 space-y-1 min-w-0 lg:overscroll-contain [scrollbar-gutter:stable] max-h-none lg:max-h-[80vh]">
             {faqData.map((faq) => (
               <div
                 key={faq.id}
@@ -112,25 +106,37 @@ export default function FAQ() {
                 <button
                   onClick={() => toggleItem(faq.id)}
                   className="w-full text-left font-medium text-gray-900 py-4 text-base flex justify-between items-center"
+                  aria-expanded={openItem === faq.id}
+                  aria-controls={`${faq.id}-panel`}
                 >
-                  {faq.question}
+                  <span className="min-w-0 mr-3 break-words">
+                    {faq.question}
+                  </span>
                   <span
-                    className={`transition-all duration-300 ease-in-out text-xl font-bold ${
-                      openItem === faq.id ? "transform rotate-180 text-green-700" : " text-purple-900"
+                    className={`shrink-0 transition-transform duration-300 text-xl font-bold ${
+                      openItem === faq.id
+                        ? "rotate-180 text-green-700"
+                        : "text-purple-900"
                     }`}
+                    aria-hidden="true"
                   >
                     {openItem === faq.id ? "−" : "+"}
                   </span>
                 </button>
 
-                {/* Keep your expand/collapse animation; it now only affects the inner scroll, not the layout */}
+                {/* Smooth expand without clipping: grid-rows trick */}
                 <div
-                  className={`overflow-hidden transition-all duration-200 ${
-                    openItem === faq.id ? "max-h-96 pb-4" : "max-h-0"
+                  id={`${faq.id}-panel`}
+                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                    openItem === faq.id
+                      ? "grid-rows-[1fr] opacity-100"
+                      : "grid-rows-[0fr] opacity-0"
                   }`}
                 >
-                  <div className="text-white text-sm leading-relaxed rounded-lg bg-gradient-to-r from-purple-600/80 to-indigo-900/50 p-4">
-                    {faq.answer}
+                  <div className="overflow-hidden">
+                    <div className="text-white text-sm leading-relaxed rounded-lg bg-gradient-to-r from-purple-600/80 to-indigo-900/50 p-4 break-words">
+                      {faq.answer}
+                    </div>
                   </div>
                 </div>
               </div>
