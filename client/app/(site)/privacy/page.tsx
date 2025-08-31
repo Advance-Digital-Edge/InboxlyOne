@@ -134,7 +134,7 @@ export default function PrivacyPolicyPage() {
             href="mailto:support@inboxlyone.com"
             className="text-blue-600 underline"
           >
-            support@inboxlyone.com
+            support@inboxly.one
           </a>
         </p>
       </section>

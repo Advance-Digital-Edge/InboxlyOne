@@ -8,7 +8,7 @@ export default function Features() {
       description:
         "Important emails and DMs vanish in the chaos of tabs and apps. Bring them all together, so every message gets seen and answered.",
       icon: (
-        <div className="relative w-20 h-20 mx-auto mb-6 float-animation transform-gpu overflow-hidden">
+        <div className="relative rounded-full w-20 h-20 mx-auto mb-6 float-animation transform-gpu overflow-hidden">
           {/* Animated background glow */}
           <div className="absolute inset-0 rounded-full pulse-glow pointer-events-none" />
           {/* Main icon */}
@@ -35,7 +35,7 @@ export default function Features() {
       description:
         "Constant app-switching steals your focus and time. Cut the noise. Keep your Gmail, Instagram, and Facebook side by side in one clean hub.",
       icon: (
-        <div className="relative w-20 h-20 mx-auto mb-6 float-animation transform-gpu overflow-hidden">
+        <div className="relative w-20 h-20 rounded-2xl mx-auto mb-6 float-animation transform-gpu overflow-hidden">
           <div className="absolute inset-0 rounded-2xl pulse-glow pointer-events-none" />
           <div className="relative w-full h-full bg-blue-600/80 rounded-2xl flex items-center justify-center shadow-lg">
             <Image
@@ -54,7 +54,7 @@ export default function Features() {
       description:
         "Slow replies frustrate clients and make them more likely to walk away. Reply faster, stay organized, and keep clients smiling — all from one place.",
       icon: (
-        <div className="relative w-20 h-20 mx-auto mb-6 float-animation transform-gpu overflow-hidden">
+        <div className="relative w-20 h-20 rounded-xl mx-auto mb-6 float-animation transform-gpu overflow-hidden">
           <div className="absolute inset-0 rounded-xl pulse-glow pointer-events-none" />
           <div className="relative w-full h-full bg-gradient-to-r from-yellow-500/50 to-orange-900 rounded-xl flex items-center justify-center shadow-lg">
             <svg

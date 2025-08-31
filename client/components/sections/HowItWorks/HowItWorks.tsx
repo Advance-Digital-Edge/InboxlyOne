@@ -6,7 +6,10 @@ import Image from "next/image";
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-12 w-full mx-auto md:py-16 lg:py-24 px-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-x-clip">
+    <section
+      id="how-it-works"
+      className="py-12 w-full mx-auto md:py-16 lg:py-24 px-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-x-clip"
+    >
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16 lg:mb-20">
@@ -94,8 +97,8 @@ export default function HowItWorks() {
 
           {/* Visual + Stats on the Right */}
           <div className="flex-1 hidden lg:block min-w-0">
-            <Card className="w-full max-w-3xl overflow-hidden bg-gradient-to-br from-white via-purple-50 to-blue-50 border border-gray-100 rounded-3xl shadow-xl">
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-8 min-w-0">
+            <Card className=" max-w-6xl overflow-hidden border-none shadow-xl">
+              <div className="flex w-full flex-col lg:flex-row items-center justify-between gap-8 min-w-0">
                 {/* Before */}
                 <div className="flex-1 text-center min-w-0">
                   <Image
@@ -113,7 +116,12 @@ export default function HowItWorks() {
 
                 {/* After */}
                 <div className="flex-1 text-center min-w-0 overflow-hidden">
-                  <OrbitingIcons className="mx-auto w-full max-w-[600px]" />
+                  {/* was: max-w-[600px] */}
+                  <OrbitingIcons
+                    className="mx-auto w-full max-w-[800px] xl:max-w-[960px]"
+                    height={360}
+                    radius={140}
+                  />
                 </div>
               </div>
             </Card>

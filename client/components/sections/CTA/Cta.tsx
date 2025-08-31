@@ -5,7 +5,7 @@ import WaitlistForm from "@/components/ui/WaitlistForm/WaitlistForm";
 
 export default function CTA({ id }: { id?: string }) {
   return (
-    <section id={id} className=" overflow-x-clip scroll-mt-24 lg:scroll-mt-32">
+    <section id={id} className=" overflow-x-clip  scroll-mt-24 lg:scroll-mt-32">
       <div className=" mx-auto min-w-0">
         {/* Main CTA Card */}
         <Card className="relative overflow-hidden    p-8 md:p-12">
