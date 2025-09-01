@@ -74,7 +74,7 @@ export default function FAQ() {
   };
 
   return (
-    <section className="w-full py-16 px-4 sm:px-6 lg:px-8 overflow-x-clip">
+    <section id="faq" className=" py-16 px-4 sm:px-6 lg:px-8 overflow-x-clip scroll-mt-24 lg:scroll-mt-32">
       <div className="max-w-7xl mx-auto min-w-0">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start min-w-0">
           {/* Left Column */}

@@ -13,11 +13,11 @@ import BuiltForYou from "@/components/sections/BuiltForYou/BuiltForYou";
 
 export default function Home(): JSX.Element {
   return (
-    <main className="flex-1  flex flex-col ">
+    <main className="flex-1  bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex flex-col ">
       <Hero id="hero" />
-      <Features />
+      <Features  />
       <HowItWorks />
-      <BuiltForYou />
+      <BuiltForYou  id="built-for-you"/>
       {/* <Pricing />
       <Testimonials /> */}
       <CTA id="primary-cta-form" />

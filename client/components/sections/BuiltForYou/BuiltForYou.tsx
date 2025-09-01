@@ -71,7 +71,7 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
     <section
       id={id}
       className={clsx(
-        "w-full py-20 md:py-32 px-4 relative overflow-hidden overflow-x-clip",
+        "w-screen py-20 md:py-32 px-4 relative overflow-hidden overflow-x-clip scroll-mt-24 lg:scroll-mt-32",
         "bg-gradient-to-br from-slate-50 via-white to-indigo-50",
         className
       )}
@@ -92,7 +92,7 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
             </span>
           </h2>
           <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed break-words">
-            Whether you freelance, create, or run a shop — spend less time in
+            Whether you freelance, create, or run a shop - spend less time in
             messages and more time on what matters.
           </p>
         </div>

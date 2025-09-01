@@ -31,8 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={InerSans.className}>
-      <body className={styles.container}>
+    <html lang="en" className={`${InerSans.className} overflow-x-clip`}>
+      <body className={`${styles.container} overflow-x-clip`}>
         <ReduxProvider>
           <QueryProvider>
             <NotificationProvider>

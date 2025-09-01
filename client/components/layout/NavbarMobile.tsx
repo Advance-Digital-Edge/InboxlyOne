@@ -178,7 +178,7 @@ export default function MobileMenu() {
                   Privacy
                 </Link>
                 <Link
-                  href="/terms"
+                  href="/tos"
                   onClick={closeMenu}
                   className="hover:underline"
                 >

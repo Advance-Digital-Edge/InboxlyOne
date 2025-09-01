@@ -18,6 +18,9 @@ export default function OrbitingIcons({
   height = 320,
   radius: radiusProp,
 }: Props) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerSize, setContainerSize] = useState({ w: 0, h: height });
+
   const [phase, setPhase] = useState<"scatter" | "converge" | "orbit">(
     "scatter"
   );
@@ -25,9 +28,22 @@ export default function OrbitingIcons({
   const hubControls = useAnimation();
   const iconControls = [useAnimation(), useAnimation(), useAnimation()];
 
-  const radius = radiusProp ?? 120;
+  // Scale factor (1 = base, shrink on small screens)
+  const baseSize = 320;
+  const scaleFactor = Math.min(
+    1,
+    Math.min(containerSize.w, containerSize.h) / baseSize
+  );
 
-  // Track each icon’s last known end position so every new animation starts from it
+  // Dynamic radius
+  const radius =
+    radiusProp ??
+    Math.max(
+      40,
+      (Math.min(containerSize.w, containerSize.h) / 2 - 60) * scaleFactor
+    );
+
+  // Track current positions
   const currentPosRef = useRef<Pos[]>(
     Array.from({ length: 3 }, () => ({ x: 0, y: 0, rotate: 0 }))
   );
@@ -37,24 +53,27 @@ export default function OrbitingIcons({
   };
   const getCurrent = (i: number) => currentPosRef.current[i];
 
+  // make orbit tighter
+  const orbitR = radius * 0.55; // 60% of radius, tweak this number as you like
+
   const orbitAnchors: Pos[] = [
-    { x: 0, y: -radius, rotate: 0 }, // -90°
-    { x: 0.866 * radius, y: 0.5 * radius, rotate: 0 }, // 30°
-    { x: -0.866 * radius, y: 0.5 * radius, rotate: 0 }, // 150°
+    { x: 0, y: -orbitR, rotate: 0 },
+    { x: 0.866 * orbitR, y: 0.5 * orbitR, rotate: 0 },
+    { x: -0.866 * orbitR, y: 0.5 * orbitR, rotate: 0 },
   ];
 
   const getRandomScatterPositions = (count: number): Pos[] => {
     const positions: Pos[] = [];
-    const minR = radius + 40;
-    const maxR = Math.min(height / 2 - 20, radius + 160);
+    // scatter close to the tighter orbit (±20%)
+    const minR = orbitR * 0.8;
+    const maxR = orbitR * 1.2;
+
     for (let i = 0; i < count; i++) {
       const base = i * 120;
-      const jitter = Math.random() * 60 - 30; // ±30°
+      const jitter = Math.random() * 60 - 30;
       const a = ((base + jitter) * Math.PI) / 180;
-      const r = Math.max(
-        minR,
-        Math.min(maxR, minR + Math.random() * (maxR - minR || 1))
-      );
+      const r = minR + Math.random() * (maxR - minR);
+
       positions.push({
         x: Math.cos(a) * r,
         y: Math.sin(a) * r,
@@ -64,7 +83,7 @@ export default function OrbitingIcons({
     return positions;
   };
 
-  // Helper: animate from current -> ...keyframes (we prepend current to avoid jumps)
+  // Helper: animate from current → new positions
   const animateFromCurrent = async (
     idx: number,
     toXs: number[],
@@ -83,7 +102,8 @@ export default function OrbitingIcons({
           : undefined;
 
     await iconControls[idx].start({ x, y, rotate, transition });
-    // After completion, set current to the last of our keyframes
+
+    // Save last
     setCurrent(idx, {
       x: x[x.length - 1],
       y: y[y.length - 1],
@@ -95,6 +115,7 @@ export default function OrbitingIcons({
     });
   };
 
+  // 🔑 Animation loop
   useEffect(() => {
     let mounted = true;
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -102,7 +123,7 @@ export default function OrbitingIcons({
     const runOnce = async () => {
       if (!mounted) return;
 
-      // === SCATTER (from wherever we are -> new random positions) ===
+      // === Scatter ===
       setPhase("scatter");
       const scatters = getRandomScatterPositions(iconControls.length);
       await Promise.all(
@@ -117,7 +138,7 @@ export default function OrbitingIcons({
         )
       );
 
-      // === CONVERGE (hub pulse + move to each icon’s orbit anchor) ===
+      // === Converge ===
       setPhase("converge");
       await hubControls.start({
         scale: [1, 1.15, 1],
@@ -145,24 +166,26 @@ export default function OrbitingIcons({
         await wait(100);
       }
 
-      // === ORBIT (continue from the exact angle where you are now) ===
+      // === Orbit ===
+      // === Orbit ===
       setPhase("orbit");
-      const laps = 3; // 3 full circles without resetting
-      const duration = 4; // seconds per full circle
+      const laps = 3;
+      const duration = 4;
 
       await Promise.all(
         iconControls.map((_, i) => {
           const cur = getCurrent(i);
-          // compute current angle relative to center from current x/y
-          const startAngle = Math.atan2(cur.y, cur.x); // radians
-          // Build angles for smooth quarter steps over N laps * 360°
-          const steps = 4 * laps;
+          const startAngle = Math.atan2(cur.y, cur.x);
+
+          // 👉 вместо 4*laps точки, правим 120*laps за гладка орбита
+          const steps = 120 * laps;
           const angles: number[] = [];
           for (let k = 1; k <= steps; k++) {
-            angles.push(startAngle + (k * (2 * Math.PI)) / 4); // +90° per step
+            angles.push(startAngle + (k * 2 * Math.PI) / 120);
           }
-          const xs = angles.map((a) => radius * Math.cos(a));
-          const ys = angles.map((a) => radius * Math.sin(a));
+
+          const xs = angles.map((a) => orbitR * Math.cos(a));
+          const ys = angles.map((a) => orbitR * Math.sin(a));
 
           return animateFromCurrent(i, xs, ys, undefined, {
             duration: duration * laps,
@@ -171,7 +194,6 @@ export default function OrbitingIcons({
         })
       );
 
-      // loop continues; next scatter will start from the exact last orbit point
       await wait(300);
     };
 
@@ -185,49 +207,79 @@ export default function OrbitingIcons({
     return () => {
       mounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [height, radius]);
+  }, [orbitR, containerSize.h]);
 
+  // Track container size (responsive)
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setContainerSize({
+          w: entry.contentRect.width,
+          h: entry.contentRect.height,
+        });
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Icons
   const icons = [
     { Icon: Instagram, color: "text-pink-500" },
     { Icon: Mail, color: "text-red-500" },
     { Icon: Facebook, color: "text-blue-600" },
   ];
 
+  // Sizes scale with container
+  const hubSize = 112 * scaleFactor;
+  const iconWrapperSize = 48 * scaleFactor;
+  const iconSize = 30 * scaleFactor;
+
   return (
     <div
+      ref={containerRef}
       className={`relative w-full flex items-center justify-center overflow-hidden bg-transparent ${className}`}
       style={{ height }}
     >
-      {/* Central Hub */}
+      {/* Hub */}
       <motion.div
         animate={hubControls}
-        className="relative z-10 w-28 h-28 rounded-full bg-gradient-to-br from-blue-400 via-purple-900 to-purple-700 flex items-center justify-center shadow-lg"
+        className="relative z-10 rounded-full bg-gradient-to-br from-blue-400 via-purple-900 to-purple-700 flex items-center justify-center shadow-lg"
         style={{
+          width: hubSize,
+          height: hubSize,
           boxShadow:
             "0 0 20px rgba(147,51,234,.5), inset 0 0 20px rgba(255,255,255,.3)",
         }}
       >
-        <div className="text-white flex items-baseline text-sm text-center leading-tight">
+        <div
+          className="text-white flex items-baseline text-center leading-tight"
+          style={{ fontSize: `${12 * scaleFactor}px` }}
+        >
           <Image
             src="/assets/inboxlyone.png"
             alt="Inboxlyone"
-            width={20}
-            height={20}
-            className="object-contain mb-4 mx-1"
+            width={20 * scaleFactor}
+            height={20 * scaleFactor}
+            className="object-contain mb-1 mx-1"
           />
           Inboxlyone
         </div>
       </motion.div>
 
-      {/* Icons */}
+      {/* Orbiting Icons */}
       {icons.map(({ Icon, color }, index) => (
         <motion.div
           key={index}
           animate={iconControls[index]}
-          className={`absolute w-12 h-12 ${color} flex items-center justify-center rounded-full shadow-lg`}
+          className={`absolute ${color} `}
+          style={{
+            width: iconWrapperSize,
+            height: iconWrapperSize,
+          }}
         >
-          <Icon size={30} />
+          <Icon size={iconSize} />
         </motion.div>
       ))}
 
@@ -242,7 +294,7 @@ export default function OrbitingIcons({
           <circle
             cx="50%"
             cy="50%"
-            r={radius}
+            r={orbitR}
             fill="none"
             stroke="rgba(147,51,234,.4)"
             strokeWidth="2"

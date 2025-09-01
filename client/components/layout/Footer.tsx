@@ -138,49 +138,42 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Collapsible groups for smaller screens */}
-          <div className="space-y-4">
-            <details className="group rounded-xl bg-white shadow-sm p-4">
-              <summary className="flex items-center justify-between cursor-pointer list-none">
-                <span className="font-semibold text-gray-900">Navigation</span>
-                <span className="text-gray-500 group-open:rotate-180 transition-transform">
-                  ▼
-                </span>
-              </summary>
-              <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-left">
-                {navigationLinks.map((link) => (
-                  <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="block py-1 text-gray-600 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
+          {/* Navigation */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3 text-center">
+              Navigation
+            </h4>
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-center">
+              {navigationLinks.map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    className="block py-1 text-gray-600 hover:text-purple-900 focus:text-purple-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded"
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <details className="group rounded-xl bg-white shadow-sm p-4">
-              <summary className="flex items-center justify-between cursor-pointer list-none">
-                <span className="font-semibold text-gray-900">Legal</span>
-                <span className="text-gray-500 group-open:rotate-180 transition-transform">
-                  ▼
-                </span>
-              </summary>
-              <ul className="mt-3 space-y-2 text-left">
-                {legalLinks.map((link) => (
-                  <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="block py-1 text-gray-600 hover:text-blue-700 focus:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
+          {/* Legal */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3 text-center">
+              Legal
+            </h4>
+            <ul className="space-y-2 text-center">
+              {legalLinks.map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    className="block py-1 text-gray-600 hover:text-purple-900 focus:text-purple-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded"
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Social */}

@@ -97,7 +97,7 @@ export default function WaitlistForm({
     <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
       {variant === "inline" ? (
         <>
-          <div className="flex justify-between items-center flex-col gap-3 sm:flex-row sm:gap-2 max-w-md lg:mx-0">
+          <div className="flex justify-between items-center flex-col gap-6 sm:flex-row sm:gap-4 max-w-md lg:mx-0">
             <Input
               type="email"
               name="email"

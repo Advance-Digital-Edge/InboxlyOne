@@ -7,7 +7,7 @@ import styles from "./navbar.module.css";
 import MobileMenu from "./NavbarMobile";
 import Image from "next/image";
 import { JSX } from "react";
-import { useAuth } from "@/app/context/AuthProvider";
+
 
 export default function Navbar(): JSX.Element {
   return (
@@ -33,7 +33,7 @@ export default function Navbar(): JSX.Element {
         <Link href="/#how-it-works" className={styles.navLink}>
           How It Works
         </Link>
-        <Link href="/#pricing" className={styles.navLink}>
+        <Link href="/#built-for-you" className={styles.navLink}>
           Why us
         </Link>
         <Link href="/#faq" className={styles.navLink}>
