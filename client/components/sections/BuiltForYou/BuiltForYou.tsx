@@ -92,7 +92,7 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
             </span>
           </h2>
           <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed break-words">
-            Whether you freelance, create, or run a shop — spend less time in
+            Whether you freelance, create, or run a shop - spend less time in
             messages and more time on what matters.
           </p>
         </div>
