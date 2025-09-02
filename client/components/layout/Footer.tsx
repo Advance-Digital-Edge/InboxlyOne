@@ -2,10 +2,10 @@ import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import Image from "next/image";
 
 const navigationLinks = [
-  { name: "The Problem", href: "#the-problem" },
-  { name: "How It Works", href: "#how-it-works" },
-  { name: "Built For You", href: "#built-for-you" },
-  { name: "FAQ", href: "#faq" },
+  { name: "The Problem", href: "/#the-problem" },
+  { name: "How It Works", href: "/#how-it-works" },
+  { name: "Built For You", href: "/#built-for-you" },
+  { name: "FAQ", href: "/#faq" },
 ];
 
 const legalLinks = [
