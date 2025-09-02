@@ -55,7 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Fetch user integrations when the user state changes
+  // Fetch user integrations when the user state changes
   useEffect(() => {
+    if (!user) {
+      setUserIntegrations(null);
+      setLoadingIntegrations(false);
+      return;
+    }
     fetchUserIntegrations();
   }, [user]);
 
