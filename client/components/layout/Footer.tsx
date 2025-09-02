@@ -9,7 +9,7 @@ const navigationLinks = [
 ];
 
 const legalLinks = [
-  { name: "Privacy Policy", href: "/privacy" },
+  { name: "Privacy Policy", href: "/privacy-policy" },
   { name: "Terms of Use", href: "/tos" },
 ];
 
