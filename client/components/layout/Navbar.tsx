@@ -27,14 +27,14 @@ export default function Navbar(): JSX.Element {
         </div>
       </Link>
       <nav className={styles.desktopNav}>
-        <Link href="/#features" className={styles.navLink}>
-          Benefits
+        <Link href="/#the-problem" className={styles.navLink}>
+          The Problem
         </Link>
         <Link href="/#how-it-works" className={styles.navLink}>
           How It Works
         </Link>
         <Link href="/#built-for-you" className={styles.navLink}>
-          Why us
+          Built For You
         </Link>
         <Link href="/#faq" className={styles.navLink}>
           FAQ

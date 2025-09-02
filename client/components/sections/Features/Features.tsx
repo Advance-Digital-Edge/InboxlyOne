@@ -1,5 +1,7 @@
+"use client";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function Features() {
   const features = [
@@ -76,8 +78,20 @@ export default function Features() {
     },
   ];
 
+  const logoVariants = {
+    rest: { opacity: 0, x: 16, y: -16, scale: 0.9, rotate: 12 },
+    hover: { opacity: 1, x: 0, y: 0, scale: 1.0, rotate: 0 },
+  };
+
+  const trailVariants = {
+    rest: { opacity: 0, scaleX: 0 },
+    hover: { opacity: 1, scaleX: 1 },
+  };
   return (
-    <section id="features" className="py-24 px-4  relative   scroll-mt-24 lg:scroll-mt-32">
+    <section
+      id="the-problem"
+      className="py-24 px-4  relative   scroll-mt-24 lg:scroll-mt-24"
+    >
       {/* Background decoration */}
       <div className="absolute inset-0  " />
 
@@ -92,7 +106,7 @@ export default function Features() {
           </h2>
 
           <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-light break-words">
-            Every missed DM or email is a missed opportunity.
+           Every missed or slow reply is a missed opportunity.
             <span className="text-gray-900 font-medium">
               {" "}
               Stop letting chaos cost you business.
@@ -103,27 +117,53 @@ export default function Features() {
         {/* Features Grid */}
         <div className="grid lg:grid-cols-3 gap-8 md:gap-12 min-w-0">
           {features.map((feature, index) => (
-            <Card
-              key={index}
-              className="group relative p-8 md:p-10 border-none hover:shadow-xl transition-all duration-500 hover:-translate-y-2 rounded-2xl overflow-hidden backdrop-blur-sm min-w-0"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-indigo-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <motion.div initial="rest" animate="rest" whileHover="hover">
+              <Card className="group relative p-8 md:p-10 border-none hover:shadow-xl transition-all duration-500 hover:-translate-y-2 rounded-2xl overflow-hidden backdrop-blur-sm min-w-0">
+                <motion.span
+                  variants={trailVariants}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="
+            absolute -top-1 -right-1 z-20
+            h-[2px] w-10 rotate-45 origin-top-right
+           
+            pointer-events-none
+          "
+                />
 
-              <div className="relative z-10 min-w-0">
-                {feature.icon}
-                <div className="text-center min-w-0">
-                  <h3 className="text-2xl md:text-3xl font-black text-card-foreground mb-4 font-sans group-hover:text-purple-900 transition-colors duration-300 break-words">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed text-lg font-light break-words">
-                    {feature.description}
-                  </p>
+                <motion.div
+                  variants={logoVariants}
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 26,
+                    mass: 0.7,
+                  }}
+                  className="absolute top-3 right-3 z-30 pointer-events-none"
+                >
+                  <span className="relative inline-flex  items-center justify-center rounded-full p-2  ">
+                    <Image
+                      src="/assets/inboxlyone.png"
+                      alt="Inboxlyone"
+                      width={40}
+                      height={40}
+                      className="object-contain mx-1"
+                    />
+                  </span>
+                </motion.div>
+
+                <div className="relative z-10 min-w-0">
+                  {feature.icon}
+                  <div className="text-center min-w-0">
+                    <h3 className="text-2xl md:text-3xl font-black text-card-foreground mb-4 font-sans group-hover:text-purple-900 transition-colors duration-300 break-words">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed text-lg font-light break-words">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="mt-8 flex justify-center">
-                  <div className="h-1 w-16 bg-gradient-to-r from-purple-600 to-indigo-900 rounded-full group-hover:w-24 transition-all duration-300" />
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </div>
