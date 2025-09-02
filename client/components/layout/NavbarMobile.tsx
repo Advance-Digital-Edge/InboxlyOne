@@ -171,7 +171,7 @@ export default function MobileMenu() {
               {/* Secondary links (optional) */}
               <div className="flex items-center justify-between px-1 pt-2 text-sm text-gray-500">
                 <Link
-                  href="/privacy"
+                  href="/privacy-policy"
                   onClick={closeMenu}
                   className="hover:underline"
                 >
