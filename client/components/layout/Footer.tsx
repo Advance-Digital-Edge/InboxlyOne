@@ -2,11 +2,10 @@ import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import Image from "next/image";
 
 const navigationLinks = [
-  { name: "Features", href: "#features" },
+  { name: "The Problem", href: "#the-problem" },
   { name: "How It Works", href: "#how-it-works" },
-  { name: "Pricing", href: "#pricing" },
+  { name: "Built For You", href: "#built-for-you" },
   { name: "FAQ", href: "#faq" },
-  { name: "Contact", href: "#contact" },
 ];
 
 const legalLinks = [
@@ -26,12 +25,6 @@ const socialLinks = [
     href: "https://instagram.com/inboxlyone",
     icon: Instagram,
     ariaLabel: "Follow Inboxlyone on Instagram",
-  },
-  {
-    name: "LinkedIn",
-    href: "https://linkedin.com/company/inboxlyone",
-    icon: Linkedin,
-    ariaLabel: "Follow Inboxlyone on LinkedIn",
   },
   {
     name: "Twitter",

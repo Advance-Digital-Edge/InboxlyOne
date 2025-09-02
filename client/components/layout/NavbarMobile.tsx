@@ -130,11 +130,11 @@ export default function MobileMenu() {
             {/* Nav links */}
             <nav className="flex flex-col gap-2">
               <Link
-                href="/#features"
+                href="/#the-problem"
                 onClick={closeMenu}
                 className="rounded-xl px-4 py-3 text-base font-medium text-gray-900 hover:bg-gray-50"
               >
-                Features
+                The Problem
               </Link>
               <Link
                 href="/#how-it-works"

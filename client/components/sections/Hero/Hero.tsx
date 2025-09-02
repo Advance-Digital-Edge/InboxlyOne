@@ -34,7 +34,7 @@ export default function HomePage({ id }: { id?: string }) {
 
                 <p className="mt-4 text-lg sm:text-xl text-gray-600 leading-relaxed">
                   Stay calm and in control. All your conversations in one inbox
-                  — no missed messages, no lost clients.
+                  - no missed messages, no lost clients.
                 </p>
               </div>
 

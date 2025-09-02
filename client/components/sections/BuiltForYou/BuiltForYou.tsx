@@ -71,7 +71,7 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
     <section
       id={id}
       className={clsx(
-        "w-screen py-20 md:py-32 px-4 relative overflow-hidden overflow-x-clip scroll-mt-24 lg:scroll-mt-32",
+        "w-screen py-20 md:py-32 px-4 relative overflow-hidden overflow-x-clip scroll-mt-24 lg:scroll-mt-20",
         "bg-gradient-to-br from-slate-50 via-white to-indigo-50",
         className
       )}
