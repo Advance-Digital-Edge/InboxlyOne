@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Mail, Instagram, Facebook } from "lucide-react";
 import Image from "next/image";
+import Spinner from "../spinner";
 
 interface Message {
   id: string;
@@ -129,7 +130,7 @@ export function LiveMessagesFeed() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-0 overflow-x-clip">
       <div className="mx-auto flex justify-center min-w-0">
-        <div className="w-full max-w-[600px] rounded-lg  p-2 sm:p-3 h-[470px]   overflow-hidden">
+        <div className="w-full   max-w-[600px] rounded-lg  p-2 sm:p-3 h-[470px]   overflow-hidden">
           {/* Header */}
           <div className="flex items-baseline justify-between min-w-0">
             <h2 className="flex items-center gap-2 font-bold min-w-0">
@@ -227,11 +228,8 @@ export function LiveMessagesFeed() {
             })}
 
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground text-sm py-8">
-                <p>No new messages yet. Stay tuned!</p>
-                <p className="text-xs text-gray-500">
-                  Messages will appear here as they come in.
-                </p>
+              <div className="flex justify-center  items-center h-32">
+                <Spinner />
               </div>
             )}
           </div>

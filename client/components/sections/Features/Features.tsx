@@ -117,7 +117,7 @@ export default function Features() {
         {/* Features Grid */}
         <div className="grid lg:grid-cols-3 gap-8 md:gap-12 min-w-0">
           {features.map((feature, index) => (
-            <motion.div initial="rest" animate="rest" whileHover="hover">
+            <motion.div key={index} initial="rest" animate="rest" whileHover="hover">
               <Card className="group relative p-8 md:p-10 border-none hover:shadow-xl transition-all duration-500 hover:-translate-y-2 rounded-2xl overflow-hidden backdrop-blur-sm min-w-0">
                 <motion.span
                   variants={trailVariants}
