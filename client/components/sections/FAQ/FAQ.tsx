@@ -134,7 +134,7 @@ export default function FAQ() {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <div className="text-white text-sm leading-relaxed rounded-lg bg-gradient-to-r from-purple-600/80 to-indigo-900/50 p-4 break-words">
+                    <div className="text-white mb-1 text-sm leading-relaxed rounded-lg bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 p-4 break-words">
                       {faq.answer}
                     </div>
                   </div>
