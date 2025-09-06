@@ -22,7 +22,7 @@ export default function WaitlistForm({
   buttonLabel = "Get Early Access",
   inputClassName,
   buttonClassName,
-  helperText = "Don’t miss out — secure your spot on the waitlist",
+  helperText = "Don’t miss out - secure your spot on the waitlist",
   onSuccess,
 }: WaitlistFormProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">(
