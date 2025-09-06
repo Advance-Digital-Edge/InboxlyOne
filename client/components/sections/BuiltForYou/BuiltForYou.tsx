@@ -42,28 +42,36 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
   const cards = [
     {
       title: "Freelancers",
-      desc: "Keep every client message in one place — faster replies, less friction.",
+      desc: "Be the fast reply clients remember. Ship work, not apologies.",
       Icon: Briefcase,
       variant: "freelancer" as const,
       features: [
-        "Client communications",
-        "Project management",
-        "Invoice tracking",
+        "Replies in minutes, not hours",
+        "One glance, zero inbox anxiety",
+        "Projects stay on track (and so do you)",
       ],
     },
     {
       title: "Creators",
-      desc: "DMs and emails together, so you can focus on what you do best.",
+      desc: "Stay in flow. Quick answers to brands & fans without the mental clutter.",
       Icon: Sparkles,
       variant: "creator" as const,
-      features: ["Brand partnerships", "Fan engagement", "Content planning"],
+      features: [
+        "Fewer check-ins, more creating",
+        "Fast responses build momentum & trust",
+        "No “did I miss something?” stress",
+      ],
     },
     {
       title: "Solo Stores",
-      desc: "Never miss a customer question across Instagram, Facebook, and Gmail.",
+      desc: "Answer before they bounce - speed that saves the sale.",
       Icon: ShoppingBag,
       variant: "store" as const,
-      features: ["Customer support", "Order management", "Social selling"],
+      features: [
+        "Respond in minutes - keep carts warm",
+        "One place to look, clear head",
+        "Customers feel seen (and come back)",
+      ],
     },
   ];
 
@@ -88,12 +96,11 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
         <div className="text-center mb-16 md:mb-20 min-w-0">
           <h2 className="mt-4 uppercase font-mono text-4xl md:text-6xl font-black tracking-tight">
             <span className="bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent">
-              made for you
+              Built For You
             </span>
           </h2>
           <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed break-words">
-            Whether you freelance, create, or run a shop - spend less time in
-            messages and more time on what matters.
+        One inbox , Quick answers, Calm mind, No missed messages.
           </p>
         </div>
 
@@ -135,9 +142,7 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
                   {/* Header row */}
                   <div className="flex items-center justify-between mb-6 min-w-0">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span
-                        className={clsx("w-3 h-3 rounded-full shrink-0", t.dot)}
-                      />
+                      <span className={clsx("w-3 h-3 rounded-full shrink-0", t.dot)} />
                       <h3 className="text-xl font-bold text-gray-900 truncate">
                         {title}
                       </h3>
@@ -154,23 +159,15 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
                   </div>
 
                   {/* Description */}
-                  <p className="text-gray-600 leading-relaxed mb-6 break-words">
+                  <p className="text-gray-700 leading-relaxed mb-6 break-words">
                     {desc}
                   </p>
 
-                  {/* Features */}
+                  {/* Bullets */}
                   <div className="space-y-2 mb-6">
                     {features.map((feature, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 text-sm text-gray-600"
-                      >
-                        <ArrowRight
-                          className={clsx(
-                            "w-4 h-4 shrink-0",
-                            theme[variant].featureIcon
-                          )}
-                        />
+                      <div key={i} className="flex items-center gap-3 text-sm text-gray-700">
+                        <ArrowRight className={clsx("w-4 h-4 shrink-0", theme[variant].featureIcon)} />
                         <span className="break-words">{feature}</span>
                       </div>
                     ))}
