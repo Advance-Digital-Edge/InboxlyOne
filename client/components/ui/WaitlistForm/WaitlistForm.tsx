@@ -12,7 +12,7 @@ type WaitlistFormProps = {
   inputClassName?: string;
   buttonClassName?: string;
   helperText?: string;
-  onSuccess?: () => void; // 👈 нов проп
+  onSuccess?: () => void;
 };
 
 export default function WaitlistForm({
@@ -30,6 +30,7 @@ export default function WaitlistForm({
   );
   const [msg, setMsg] = useState<string | null>(null);
   const [email, setEmail] = useState("");
+  const [honeypot, setHoneypot] = useState(""); // 👈 spam trap
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,13 +38,25 @@ export default function WaitlistForm({
     setStatus("loading");
     setMsg(null);
 
-    // Чети имейла първо
-    const formEl = e.currentTarget as HTMLFormElement;
-    const formData = new FormData(formEl);
+    // honeypot check
+    if (honeypot) {
+      console.warn("Spam detected.");
+      setStatus("ok"); // silently ignore, don't show error to bot
+      return;
+    }
+
+    // email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     const emailValue =
       variant === "stacked"
         ? email.trim()
-        : String(formData.get("email") || "").trim();
+        : (e.currentTarget.email?.value || "").trim();
+    if (!emailRegex.test(emailValue)) {
+      setStatus("err");
+      setMsg("Invalid email address.");
+      return;
+    }
 
     try {
       const res = await fetch("/api/subscribe", {
@@ -58,9 +71,9 @@ export default function WaitlistForm({
         setMsg("You’re officially in 🚀");
 
         if (variant === "stacked") {
-          setEmail(""); // чисти state за stacked
+          setEmail("");
         } else {
-          formEl.reset(); // чисти form за inline
+          setEmail("");
         }
 
         localStorage.setItem("inboxlyone_joined", "1");
@@ -95,6 +108,17 @@ export default function WaitlistForm({
 
   return (
     <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
+      {/* Honeypot trap (hidden from real users) */}
+      <input
+        type="text"
+        name="company"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        className="hidden"
+        tabIndex={-1}
+        autoComplete="off"
+      />
+
       {variant === "inline" ? (
         <>
           <div className="flex justify-between items-center flex-col gap-6 sm:flex-row sm:gap-4 max-w-md lg:mx-0">
@@ -102,6 +126,8 @@ export default function WaitlistForm({
               type="email"
               name="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className={inputCls}
             />
@@ -115,7 +141,9 @@ export default function WaitlistForm({
           </div>
           {msg && (
             <p
-              className={`text-sm font-extrabold ${status === "ok" ? "text-green-600" : "text-red-600"}`}
+              className={`text-sm font-extrabold ${
+                status === "ok" ? "text-green-600" : "text-red-600"
+              }`}
             >
               {msg}
             </p>
