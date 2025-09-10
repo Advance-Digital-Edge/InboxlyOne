@@ -1,4 +1,3 @@
-// app/api/subscribe/route.ts
 export const runtime = "nodejs";
 
 import { NextRequest } from "next/server";
@@ -9,6 +8,7 @@ import { sendWelcome } from "@/utils/email";
 const BodySchema = z.object({
   email: z.string().email(),
   source: z.string().optional(), // e.g. "hero", "footer"
+  company: z.string().optional(), // 👈 honeypot field
 });
 
 function json(body: unknown, status = 200) {
@@ -25,18 +25,27 @@ export async function POST(req: NextRequest) {
   try {
     const jsonBody = await req.json().catch(() => ({}));
     const parsed = BodySchema.safeParse(jsonBody);
-    if (!parsed.success)
+    if (!parsed.success) {
       return json({ ok: false, error: "Invalid email." }, 400);
+    }
 
-    // normalize email
-    const email = parsed.data.email.trim().toLowerCase();
-    const source = parsed.data.source;
+    const { email: rawEmail, source, company } = parsed.data;
+
+    // Honeypot trap — if bots fill this, reject silently
+    if (company && company.trim() !== "") {
+      console.warn("Spam detected, honeypot filled:", company);
+      return json({ ok: true }, 200); // fake success, don’t give bots info
+    }
+
+    // Normalize email
+    const email = rawEmail.trim().toLowerCase();
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY! // server-only
     );
 
+    // Insert into Supabase
     const { error } = await supabase
       .from("subscribers")
       .insert({ email, source });
@@ -50,10 +59,11 @@ export async function POST(req: NextRequest) {
       return json({ ok: false, error: "Database error." }, 500);
     }
 
-    // Fire-and-forget welcome (don’t block success if email fails)
+    // Fire-and-forget welcome email
     try {
-      const result = await sendWelcome(email);
-      console.log("Welcome email result:", result);
+      sendWelcome(email).catch((e) =>
+        console.error("Welcome send fail:", e)
+      );
     } catch (e) {
       console.error("Welcome send fail:", e);
     }

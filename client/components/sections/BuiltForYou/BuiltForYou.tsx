@@ -42,7 +42,7 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
   const cards = [
     {
       title: "Freelancers",
-      desc: "Be the fast reply clients remember. Ship work, not apologies.",
+      desc: "Quick answers. Happy clients. Ship work - not apologies",
       Icon: Briefcase,
       variant: "freelancer" as const,
       features: [
@@ -100,7 +100,7 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
             </span>
           </h2>
           <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed break-words">
-        One inbox , Quick answers, Calm mind, No missed messages.
+            One inbox. Quick answers. Calm mind. No missed messages.
           </p>
         </div>
 
@@ -142,7 +142,9 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
                   {/* Header row */}
                   <div className="flex items-center justify-between mb-6 min-w-0">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className={clsx("w-3 h-3 rounded-full shrink-0", t.dot)} />
+                      <span
+                        className={clsx("w-3 h-3 rounded-full shrink-0", t.dot)}
+                      />
                       <h3 className="text-xl font-bold text-gray-900 truncate">
                         {title}
                       </h3>
@@ -159,15 +161,23 @@ export default function BuiltForYou({ id, className = "" }: BuiltForYouProps) {
                   </div>
 
                   {/* Description */}
-                  <p className="text-gray-700 leading-relaxed mb-6 break-words">
+                  <p className="text-gray-700  leading-relaxed mb-6 break-words whitespace-break-spaces">
                     {desc}
                   </p>
 
                   {/* Bullets */}
                   <div className="space-y-2 mb-6">
                     {features.map((feature, i) => (
-                      <div key={i} className="flex items-center gap-3 text-sm text-gray-700">
-                        <ArrowRight className={clsx("w-4 h-4 shrink-0", theme[variant].featureIcon)} />
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 text-sm text-gray-700"
+                      >
+                        <ArrowRight
+                          className={clsx(
+                            "w-4 h-4 shrink-0",
+                            theme[variant].featureIcon
+                          )}
+                        />
                         <span className="break-words">{feature}</span>
                       </div>
                     ))}

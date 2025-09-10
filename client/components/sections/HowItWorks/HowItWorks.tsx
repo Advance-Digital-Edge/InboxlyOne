@@ -14,15 +14,15 @@ export default function HowItWorks() {
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16 lg:mb-20">
           <h2 className="text-3xl md:text-4xl bg-gradient-to-r from-gray-900 via-purple-700 to-indigo-700 bg-clip-text text-transparent lg:text-5xl font-black uppercase mb-4 md:mb-6 leading-tight">
-            From Messy to <span>Easy</span> in 3 Steps
+          From Messy to <span>Calm</span> in 3 Steps
           </h2>
           <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-medium max-w-2xl mx-auto">
-            No more app-hopping. All your conversations, finally in one place.
+           Stop app-hopping. Answer faster with everything in one place.
           </p>
         </div>
 
         {/* Horizontal Layout */}
-        <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-16 min-w-0">
+        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 min-w-0">
           {/* Steps on the Left */}
           <div className="flex-1 px-2 space-y-6 md:space-y-8">
             {/* Step 1 */}
@@ -35,14 +35,14 @@ export default function HowItWorks() {
                 {/* Content */}
                 <div className="min-w-0">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Connect Once, Relax Forever
+                     Connect Once. Everything Lands Here.
                   </h3>
                   <p className="text-gray-600 font-medium leading-relaxed">
-                    Gmail, Instagram, Messenger — all linked in one place in
+                    Gmail, Instagram, Messenger - all linked in one place in
                     seconds.
                   </p>
                   <span className="inline-block mt-2 rounded-full bg-green-400 px-3 py-1 text-xs sm:text-sm font-medium text-white">
-                    No setup required
+                     Quick setup
                   </span>
                 </div>
               </div>
@@ -58,11 +58,10 @@ export default function HowItWorks() {
                 {/* Content */}
                 <div className="min-w-0">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Stay Organized Without Trying
+                    See It All at a Glance
                   </h3>
                   <p className="text-gray-600 font-medium leading-relaxed">
-                    Each platform has its own tab, so you always know where to
-                    look.
+                    Tabs by platform - no app-switching, no hunting. You always know where to look.
                   </p>
                   <span className="inline-block mt-2 rounded-full bg-green-400 px-3 py-1 text-xs sm:text-sm font-medium text-white">
                     Zero confusion
@@ -81,14 +80,13 @@ export default function HowItWorks() {
                 {/* Content */}
                 <div className="min-w-0">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Stay in Control
+                     Reply Fast. Stay in Control.
                   </h3>
                   <p className="text-gray-600 font-medium leading-relaxed">
-                    Respond on time, close deals, and keep conversations under
-                    control.
+                    Answer in minutes, keep deals moving, and never let a message slip.
                   </p>
                   <span className="inline-block mt-2 rounded-full bg-green-400 px-3 py-1 text-xs sm:text-sm font-medium text-white">
-                    Focus made easy
+                    Minutes, not hours
                   </span>
                 </div>
               </div>
