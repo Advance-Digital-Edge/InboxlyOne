@@ -37,7 +37,6 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer className="w-full bg-gray-50 border-t border-gray-300">
-      {/* Full-width container with responsive side padding */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
         {/* Desktop / Tablet (md+) */}
         <div className="hidden md:grid grid-cols-12 gap-8">
@@ -189,8 +188,19 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-200 text-center">
+        {/* Attribution + Copyright */}
+        <div className="mt-12 pt-8 border-t border-gray-200 text-center space-y-2">
+          <p className="text-gray-500 text-sm">
+            Logo and illustration from{" "}
+            <a
+              href="https://www.freepik.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-purple-700"
+            >
+              Freepik
+            </a>
+          </p>
           <p className="text-gray-600">
             © 2025 Inboxlyone. All rights reserved.
           </p>

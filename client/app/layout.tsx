@@ -10,15 +10,40 @@ import GmailListener from "@/components/listeners/GmailListener";
 import NotificationListener from "@/components/listeners/NotificationListener";
 import { NotificationProvider } from "./context/NotificationProvider";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
-
+const defaultUrl = "https://inboxly.one";
 export const metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Inboxlyone",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  description:
+    "Inboxlyone puts all your DMs, emails, and client chats in one inbox — faster replies, less chaos, and more time for what matters.",
+
+  openGraph: {
+    title: "Inboxlyone",
+    description:
+      "Whether you freelance, create, or run a shop, Inboxlyone keeps every conversation in one place. Never miss a client, fan, or customer again.",
+    url: defaultUrl,
+    siteName: "Inboxlyone",
+    images: [
+      {
+        url: `${defaultUrl}/og-image.png`, // ✅ create this image (1200x630px)
+        width: 1200,
+        height: 630,
+        alt: "Inboxlyone unified inbox preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Inboxlyone",
+    description:
+      "Inboxlyone puts all your DMs, emails, and client chats in one inbox — faster replies, less chaos, and more time for what matters.",
+    images: [`${defaultUrl}/og-image.png`],
+  },
 };
+
 
 const InerSans = Inter({
   weight: ["400", "700"],
